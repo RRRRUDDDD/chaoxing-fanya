@@ -82,7 +82,7 @@ python main.py -u 手机号 -p 密码 -l 课程ID1,课程ID2 -a [retry|ask|conti
 - **未开放任务处理 `[common]`**：`notopen_action=retry|ask|continue`（命令行可用 `-a/--notopen-action` 覆盖）
 - **通知 `[notify]`**：`provider=ServerChan|Qmsg|Bark|Telegram`，按注释填写 `url` / `token` / `chat_id` 等
 - **OCR**：
-  - 本地 PaddleOCR：安装 `paddlepaddle`、`paddlex`，并设置 `CHAOXING_ENABLE_OCR=1`
+  - 本地 PaddleOCR 3.7：安装 `paddlepaddle` 和 `paddleocr>=3.7,<3.8`，并设置 `CHAOXING_ENABLE_OCR=1`
   - 外部大模型（推荐）：
     ```bash
     export CHAOXING_VISION_OCR_PROVIDER=openai

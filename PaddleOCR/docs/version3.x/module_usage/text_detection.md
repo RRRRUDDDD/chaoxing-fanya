@@ -9,7 +9,7 @@ comments: true
 
 ## 二、支持模型列表
 
-> 推理耗时仅包含模型推理耗时，不包含前后处理耗时。
+> 推理耗时仅包含模型推理耗时，不包含前后处理耗时。表格中的“常规模式”耗时对应本地 <code>paddle_static</code> 推理引擎。
 
 <table>
 <thead>
@@ -23,6 +23,33 @@ comments: true
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>PP-OCRv6_medium_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_medium_det_infer.tar">推理模型</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_medium_det_pretrained.pdparams">训练模型</a></td>
+<td>86.2*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>59.4</td>
+<td>PP-OCRv6 的中等规模文本检测模型，基于 PPLCNetV4 + RepLKFPN，精度最高，适合服务端部署</td>
+</tr>
+<tr>
+<td>PP-OCRv6_small_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_small_det_infer.tar">推理模型</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_small_det_pretrained.pdparams">训练模型</a></td>
+<td>84.1*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>9.6</td>
+<td>PP-OCRv6 的小型文本检测模型，兼顾精度与效率，适合移动端部署</td>
+</tr>
+<tr>
+<td>PP-OCRv6_tiny_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_tiny_det_infer.tar">推理模型</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_tiny_det_pretrained.pdparams">训练模型</a></td>
+<td>80.6*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>1.9</td>
+<td>PP-OCRv6 的超轻量文本检测模型（0.43M 参数），适合端侧/IoT 场景</td>
+</tr>
 <tr>
 <td>PP-OCRv5_server_det</td>
 <td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_server_det_infer.tar">推理模型</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv5_server_det_pretrained.pdparams">训练模型</a></td>
@@ -62,6 +89,8 @@ comments: true
 </tbody>
 </table>
 
+> *注：PP-OCRv6 指标基于内部多场景评估集测得，PP-OCRv5/v4 指标基于通用评估集测得，两者评估集不同，指标不可直接对比。
+
 <strong>测试环境说明:</strong>
 
   <ul>
@@ -77,7 +106,7 @@ comments: true
               <li><strong>软件环境：</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -114,25 +143,109 @@ comments: true
 
 > ❗ 在快速开始前，请先安装 PaddleOCR 的 wheel 包，详细请参考 [安装教程](../installation.md)。
 
+### 3.1 环境准备
+
+#### 3.1.1 基础安装
+
+```bash
+# 安装基础版本（仅包含文本检测功能）
+pip install paddleocr
+
+# 安装完整版本（包含所有功能）
+pip install "paddleocr[all]"
+```
+
+#### 3.1.2 环境验证
+
+```python
+# 验证安装是否成功
+import paddleocr
+print(f"PaddleOCR版本: {paddleocr.__version__}")
+
+# 验证GPU是否可用
+import paddle
+print(f"Paddle版本: {paddle.__version__}")
+print(f"GPU可用: {paddle.is_compiled_with_cuda()}")
+print(f"GPU数量: {paddle.device.cuda.device_count()}")
+```
+
+### 3.2 命令行快速体验
+
 使用一行命令即可快速体验：
 
 ```bash
+# 使用默认模型进行文本检测
 paddleocr text_detection -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_001.png
+
+# 指定模型
+paddleocr text_detection -i general_ocr_001.png --model_name PP-OCRv6_small_det
 ```
 
+上述示例默认使用 <code>paddle_static</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
+
+如果选择 `transformers` 作为推理引擎，请确保已配置 Transformers 环境，然后执行如下命令：
+
+```bash
+# 使用 transformers 引擎进行推理
+paddleocr text_detection -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_001.png \
+    --engine transformers
+```
+
+如果选择 `onnxruntime` 作为推理引擎，请确保已配置 ONNX Runtime 环境，然后执行如下命令：
+
+```bash
+# 使用 onnxruntime 引擎进行推理
+paddleocr text_detection -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_001.png \
+    --engine onnxruntime
+```
+
+在大多数场景下，默认的 `paddle_static` 推理引擎通常具备更好的推理性能，建议优先使用。
+
 <b>注：</b>PaddleOCR 官方模型默认从 HuggingFace 获取，如运行环境访问 HuggingFace 不便，可通过环境变量修改模型源为 BOS：`PADDLE_PDX_MODEL_SOURCE="BOS"`，未来将支持更多主流模型源；
+
+### 3.3 Python API 使用
 
 您也可以将文本检测的模块中的模型推理集成到您的项目中。运行以下代码前，请您下载[示例图片](https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_001.png)到本地。
 
 ```python
 from paddleocr import TextDetection
-model = TextDetection(model_name="PP-OCRv5_server_det")
+model = TextDetection()
 output = model.predict("general_ocr_001.png", batch_size=1)
 for res in output:
     res.print()
     res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")
 ```
+
+上述示例默认使用 <code>paddle_static</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
+
+如果选择 `transformers` 作为推理引擎，请确保已配置 Transformers 环境，然后执行如下代码：
+
+```python
+from paddleocr import TextDetection
+model = TextDetection(engine="transformers")
+output = model.predict("general_ocr_001.png", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+如果选择 `onnxruntime` 作为推理引擎，请确保已配置 ONNX Runtime 环境，然后执行如下代码：
+
+```python
+from paddleocr import TextDetection
+model = TextDetection(engine="onnxruntime")
+output = model.predict("general_ocr_001.png", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+在大多数场景下，默认的 `paddle_static` 推理引擎通常具备更好的推理性能，建议优先使用。
+
+训练后的模型如果想使用 `paddle_dynamic` 或 `transformers` 引擎，请参考后文 [推理引擎](#五推理引擎) 中的 [权重转换](#52-权重转换) 部分将模型由 `pdparams` 格式通过 PaddleX 转换为 `safetensors` 格式。
 
 运行后，得到的结果为：
 
@@ -149,18 +262,19 @@ for res in output:
 ```
 
 运行结果参数含义如下：
-- `input_path`：表示输入待预测图像的路径
-- `page_index`：如果输入是PDF文件，则表示当前是PDF的第几页，否则为 `None`
-- `dt_polys`：表示预测的文本检测框，其中每个文本检测框包含一个四边形的四个顶点。其中每个顶点都是一个列表，分别表示该顶点的x坐标和y坐标
-- `dt_scores`：表示预测的文本检测框的置信度
-
+<ul>
+<li><code>input_path</code>：表示输入待预测图像的路径</li>
+<li><code>page_index</code>：如果输入是PDF文件，则表示当前是PDF的第几页，否则为 <code>None</code></li>
+<li><code>dt_polys</code>：表示预测的文本检测框，其中每个文本检测框包含一个四边形的四个顶点。其中每个顶点都是一个列表，分别表示该顶点的x坐标和y坐标</li>
+<li><code>dt_scores</code>：表示预测的文本检测框的置信度</li>
+</ul>
 可视化图片如下：
 
 <img src="https://raw.githubusercontent.com/cuicheng01/PaddleX_doc_images/refs/heads/main/images/modules/text_det/general_ocr_001_res.png"/>
 
 相关方法、参数等说明如下：
 
-* `TextDetection`实例化文本检测模型（此处以`PP-OCRv5_server_det`为例），具体说明如下：
+* <code>TextDetection</code>类实例化文本检测模型，具体说明如下：
 <table>
 <thead>
 <tr>
@@ -173,19 +287,22 @@ for res in output:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>模型名称。如果设置为<code>None</code>，则使用<code>PP-OCRv5_server_det</code>。</td>
+<td><b>含义：</b>模型名称。<br/>
+<b>说明：</b>
+如果设置为<code>None</code>，则使用<code>PP-OCRv6_medium_det</code>。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>模型存储路径。</td>
+<td><b>含义：</b>模型存储路径。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>用于推理的设备。<br/>
+<td><b>含义：</b>用于推理的设备。<br/>
+<b>说明：</b>
 <b>例如：</b><code>"cpu"</code>、<code>"gpu"</code>、<code>"npu"</code>、<code>"gpu:0"</code>、<code>"gpu:0,1"</code>。<br/>
 如指定多个设备，将进行并行推理。<br/>
 默认情况下，优先使用 GPU 0；若不可用则使用 CPU。
@@ -194,14 +311,28 @@ for res in output:
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>含义：</b>推理引擎。<br><b>说明：</b>支持 <code>None</code>（默认值）、<code>paddle</code>、<code>paddle_static</code>、<code>paddle_dynamic</code>、<code>transformers</code>、<code>onnxruntime</code>。保持为默认值 <code>None</code> 时，本地推理默认使用 <code>paddle_static</code> 引擎。详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>含义：</b>推理引擎配置。<br><b>说明：</b>推荐与 <code>engine</code> 搭配使用。详细字段、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>是否启用高性能推理。</td>
+<td><b>含义：</b>是否启用高性能推理。</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>是否启用 Paddle Inference 的 TensorRT 子图引擎。如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
+<td><b>含义：</b>是否启用 Paddle Inference 的 TensorRT 子图引擎。<br/>
+<b>说明：</b>
+如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
 对于 CUDA 11.8 版本的飞桨，兼容的 TensorRT 版本为 8.x（x>=6），建议安装 TensorRT 8.6.1.6。<br/>
 
 </td>
@@ -210,14 +341,18 @@ for res in output:
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>当使用 Paddle Inference 的 TensorRT 子图引擎时设置的计算精度。<br/><b>可选项：</b><code>"fp32"</code>、<code>"fp16"</code>。</td>
+<td><b>含义：</b>当使用 Paddle Inference 的 TensorRT 子图引擎时设置的计算精度。<br/>
+<b>说明：</b>
+<b>可选项：</b><code>"fp32"</code>、<code>"fp16"</code>。</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
 <td>
-是否启用 MKL-DNN 加速推理。如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。<br/>
+<b>含义：</b>是否启用 MKL-DNN 加速推理。<br/>
+<b>说明：</b>
+如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。<br/>
 </td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
@@ -225,63 +360,76 @@ for res in output:
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN 缓存容量。
+<b>含义：</b>MKL-DNN 缓存容量。
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>在 CPU 上推理时使用的线程数量。</td>
+<td><b>含义：</b>在 CPU 上推理时使用的线程数量。</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>limit_side_len</code></td>
-<td>检测的图像边长限制：<code>int</code> 表示边长限制数值。如果设置为<code>None</code>，将使用模型默认配置。</td>
+<td><b>含义：</b>检测的图像边长限制：<code>int</code> 表示边长限制数值。<br/>
+<b>说明：</b>
+如果设置为<code>None</code>，将使用模型默认配置。</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>limit_type</code></td>
-<td>检测的图像边长限制，检测的边长限制类型，<code>"min"</code> 表示保证图像最短边不小于det_limit_side_len，<code>"max"</code>表示保证图像最长边不大于limit_side_len。如果设置为<code>None</code>，将使用模型默认配置。</td>
+<td><b>含义：</b>检测的图像边长限制，检测的边长限制类型。<br/>
+<b>说明：</b>
+<code>"min"</code> 表示保证图像最短边不小于det_limit_side_len，<code>"max"</code>表示保证图像最长边不大于limit_side_len。如果设置为<code>None</code>，将使用模型默认配置。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>max_side_limit</code></td>
-<td>检测的图像边长最大值限制：<code>int</code> 限制输入检测模型的图片最长边。如果设置为 <code>None</code>，将使用模型默认配置。</td>
+<td><b>含义：</b>检测的图像边长最大值限制：<code>int</code> 限制输入检测模型的图片最长边。<br/>
+<b>说明：</b>
+如果设置为 <code>None</code>，将使用模型默认配置。</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>thresh</code></td>
-<td>像素得分阈值。输出概率图中得分大于该阈值的像素点被认为是文本像素。如果设置为<code>None</code>，将使用模型默认配置。</td>
+<td><b>含义：</b>像素得分阈值。输出概率图中得分大于该阈值的像素点被认为是文本像素。<br/>
+<b>说明：</b>
+如果设置为<code>None</code>，将使用模型默认配置。</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>box_thresh</code></td>
-<td>检测结果边框内，所有像素点的平均得分大于该阈值时，该结果会被认为是文字区域。如果设置为<code>None</code>，将使用模型默认配置。</td>
+<td><b>含义：</b>检测结果边框内，所有像素点的平均得分大于该阈值时，该结果会被认为是文字区域。<br/>
+<b>说明：</b>
+如果设置为<code>None</code>，将使用模型默认配置。</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>unclip_ratio</code></td>
-<td>Vatti clipping算法的扩张系数，使用该方法对文字区域进行扩张。如果设置为<code>None</code>，将使用模型默认配置。</td>
+<td><b>含义：</b>Vatti clipping算法的扩张系数，使用该方法对文字区域进行扩张。<br/>
+<b>说明：</b>
+如果设置为<code>None</code>，将使用模型默认配置。</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>input_shape</code></td>
-<td>模型输入图像尺寸，格式为 <code>(C, H, W)</code>。</td>
+<td><b>含义：</b>模型输入图像尺寸，格式为 <code>(C, H, W)</code>。</td>
 <td><code>tuple|None</code></td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 
-* 调用文本检测模型的 `predict()` 方法进行推理预测，该方法会返回一个结果列表。另外，本模块还提供了 `predict_iter()` 方法。两者在参数接受和结果返回方面是完全一致的，区别在于 `predict_iter()` 返回的是一个 `generator`，能够逐步处理和获取预测结果，适合处理大型数据集或希望节省内存的场景。可以根据实际需求选择使用这两种方法中的任意一种。`predict()` 方法参数有 `input`、 `batch_size`、 `limit_side_len`、 `limit_type`、 `thresh`、 `box_thresh`、 `max_candidates`、`unclip_ratio`，具体说明如下：
+
+* 调用文本检测模型的 <code>predict()</code> 方法进行推理预测，该方法会返回一个结果列表。另外，本模块还提供了 <code>predict_iter()</code> 方法。两者在参数接受和结果返回方面是完全一致的，区别在于 <code>predict_iter()</code> 返回的是一个 <code>generator</code>，能够逐步处理和获取预测结果，适合处理大型数据集或希望节省内存的场景。可以根据实际需求选择使用这两种方法中的任意一种。<code>predict()</code>  方法参数有 <code>input</code> 、<code>batch_size</code>、 <code>limit_side_len</code>、 <code>limit_type</code>、 <code>thresh</code>、 <code>box_thresh</code>、 <code>max_candidates</code>、<code>unclip_ratio</code>，具体说明如下：
 
 <table>
 <thead>
@@ -294,7 +442,8 @@ MKL-DNN 缓存容量。
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>待预测数据，支持多种输入类型，必填。
+<td><b>含义：</b>待预测数据，支持多种输入类型，必填。<br/>
+<b>说明：</b>
 <ul>
 <li><b>Python Var</b>：如 <code>numpy.ndarray</code> 表示的图像数据</li>
 <li><b>str</b>：如图像文件或者PDF文件的本地路径：<code>/root/data/img.jpg</code>；<b>如URL链接</b>，如图像文件或PDF文件的网络URL：<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.png">示例</a>；<b>如本地目录</b>，该目录下需包含待预测图像，如本地路径：<code>/root/data/</code>(当前不支持目录中包含PDF文件的预测，PDF文件需要指定到具体文件路径)</li>
@@ -306,44 +455,56 @@ MKL-DNN 缓存容量。
 </tr>
 <tr>
 <td><code>batch_size</code></td>
-<td>批大小，可设置为任意正整数。</td>
+<td><b>含义：</b>批大小<br/>
+<b>说明：</b>
+可设置为任意正整数。</td>
 <td><code>int</code></td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>limit_side_len</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义:</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>limit_type</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>thresh</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>box_thresh</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>unclip_ratio</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 
-* 对预测结果进行处理，每个样本的预测结果均为对应的Result对象，且支持打印、保存为图片、保存为`json`文件的操作:
+* 对预测结果进行处理，每个样本的预测结果均为对应的Result对象，且支持打印、保存为图片、保存为<code>json</code>文件的操作:
 
 <table>
 <thead>
@@ -449,7 +610,7 @@ wget https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_mode
 
 ### 4.2 模型训练
 
-PaddleOCR 对代码进行了模块化，训练 `PP-OCRv5_server_det` 识别模型时需要使用 `PP-OCRv5_server_det` 的[配置文件](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/det/PP-OCRv5/PP-OCRv5_server_det.yml)。
+PaddleOCR 对代码进行了模块化，训练 `PP-OCRv5_server_det` 识别模型时需要使用 `PP-OCRv5_server_det` 的[配置文件](https://github.com/PaddlePaddle/PaddleOCR/blob/{{PADDLEOCR_GITHUB_REF}}/configs/det/PP-OCRv5/PP-OCRv5_server_det.yml)。
 
 
 训练命令如下：
@@ -503,7 +664,273 @@ python3 tools/export_model.py -c configs/det/PP-OCRv5/PP-OCRv5_server_det.yml -o
  ```
 至此，二次开发完成，该静态图模型可以直接集成到 PaddleOCR 的 API 中。
 
-## 五、FAQ
+训练后的模型如果想使用 `paddle_dynamic` 或 `transformers` 引擎，请参考后文 [推理引擎](#五推理引擎) 中的 [权重转换](#52-权重转换) 部分将模型由 `pdparams` 格式通过 PaddleX 转换为 `safetensors` 格式。
 
-- 通过参数`limit_type`和`limit_side_len`来对图片的尺寸进行限制，`limit_type`可选参数为[`max`, `min`]，`limit_side_len` 为正整数，一般设置为 32 的倍数，比如 960。
+## 五、推理引擎 {#五推理引擎}
+
+关于推理引擎的详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。
+
+### 5.1 速度数据
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>engine</th>
+            <th>Preprocessing (ms)</th>
+            <th>Inference (ms)</th>
+            <th>PostProcessing (ms)</th>
+            <th>End-to-End (ms)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="4">PP-OCRv5_mobile_det</td>
+            <td>paddle_static</td>
+            <td>11.43</td>
+            <td>13.80</td>
+            <td>2.15</td>
+            <td>27.58</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>11.70</td>
+            <td>48.36</td>
+            <td>2.47</td>
+            <td>62.71</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>14.05</td>
+            <td>18.45</td>
+            <td>3.98</td>
+            <td>37.54</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>9.98</td>
+            <td>5.70</td>
+            <td>2.04</td>
+            <td>17.90</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv5_server_det</td>
+            <td>paddle_static</td>
+            <td>13.24</td>
+            <td>26.91</td>
+            <td>2.63</td>
+            <td>43.05</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>11.82</td>
+            <td>45.56</td>
+            <td>2.52</td>
+            <td>60.10</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>14.56</td>
+            <td>13.76</td>
+            <td>7.44</td>
+            <td>36.76</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>10.01</td>
+            <td>13.76</td>
+            <td>1.92</td>
+            <td>25.86</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv6_medium_det</td>
+            <td>paddle_static</td>
+            <td>13.89</td>
+            <td>16.02</td>
+            <td>2.49</td>
+            <td>33.14</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>11.42</td>
+            <td>26.23</td>
+            <td>2.30</td>
+            <td>40.10</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>11.40</td>
+            <td>8.57</td>
+            <td>8.35</td>
+            <td>29.57</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>10.80</td>
+            <td>13.06</td>
+            <td>2.19</td>
+            <td>26.18</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv6_small_det</td>
+            <td>paddle_static</td>
+            <td>10.91</td>
+            <td>10.97</td>
+            <td>2.41</td>
+            <td>24.45</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>11.56</td>
+            <td>22.17</td>
+            <td>2.66</td>
+            <td>36.55</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>11.70</td>
+            <td>7.34</td>
+            <td>3.87</td>
+            <td>23.89</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>11.32</td>
+            <td>7.46</td>
+            <td>2.54</td>
+            <td>21.49</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv6_tiny_det</td>
+            <td>paddle_static</td>
+            <td>11.14</td>
+            <td>10.71</td>
+            <td>2.84</td>
+            <td>24.85</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>11.52</td>
+            <td>21.70</td>
+            <td>2.94</td>
+            <td>36.31</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>10.90</td>
+            <td>6.99</td>
+            <td>4.13</td>
+            <td>23.00</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>11.19</td>
+            <td>6.35</td>
+            <td>2.79</td>
+            <td>20.49</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>测试环境说明:</strong>
+<ul>
+    <li><strong>测试数据：</strong><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_001.jpg">示例图片</a></li>
+    <li><strong>硬件配置：</strong>
+        <ul>
+            <li>GPU：NVIDIA A100 40G</li>
+            <li>CPU：Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz</li>
+        </ul>
+    </li>
+    <li><strong>软件环境：</strong>
+        <ul>
+            <li>Ubuntu 22.04 / CUDA 12.6 / cuDNN 9.5</li>
+            <li>paddlepaddle-gpu 3.2.1 / paddleocr 3.5 / transformers 5.4.0 / torch 2.10 / onnxruntime-gpu 1.23.2</li>
+        </ul>
+    </li>
+</ul>
+
+### 5.2 权重转换 {#52-权重转换}
+
+使用推理引擎时，系统会自动下载官方预训练模型。若需使用自训练模型配合 `paddle_dynamic` 或 `transformers` 引擎，请参考 [PaddleX 文本检测模块权重转换](https://paddlepaddle.github.io/PaddleX/latest/module_usage/tutorials/ocr_modules/text_detection.html#442) 部分，将 `pdparams` 格式通过 PaddleX 转换为 `safetensors` 格式，即可无缝集成到 PaddleOCR 的 API 中进行推理。若需使用自训练模型配合`onnxruntime`引擎，请参考[PaddleX 获取 ONNX 模型](https://paddlepaddle.github.io/PaddleX/latest/pipeline_deploy/paddle2onnx.html)获取onnx模型，即可无缝集成到 PaddleOCR 的 API 中进行推理。
+
+## 六、常见问题与解决方案
+
+### 6.1 性能优化问题
+
+#### Q: GPU推理速度慢怎么办？
+
+**A**: 可以通过以下方式优化：
+（1）启用高性能推理：设置`enable_hpi=True`，自动选择最优加速策略
+（2）启用TensorRT加速：设置`use_tensorrt=True`，需要CUDA 11.8+和TensorRT 8.6+
+（3）使用半精度：设置`precision="fp16"`，可以显著提升速度
+（4）调整批处理大小：根据显存大小设置合适的`batch_size`
+（5）使用轻量模型：在精度要求不高时使用 `PP-OCRv6_small`/`PP-OCRv6_tiny` 等轻量级模型
+
+#### Q: GPU内存不足（CUDA out of memory）怎么办？
+
+**A**: 可以通过以下方式解决：
+（1）减小批处理大小：将`batch_size`设置为1
+（2）减小图像尺寸：设置`det_limit_side_len=640`
+（3）启用内存优化：设置`enable_memory_optim=True`
+（4）限制GPU内存使用：设置`gpu_mem=200`
+（5）使用轻量模型：切换到 `PP-OCRv6_small`/`PP-OCRv6_tiny` 等轻量级模型
+
+### 6.2 检测精度问题
+
+#### Q: 检测框不准确或漏检怎么办？
+
+**A**: 可以通过以下方式优化：
+（1）调整检测参数：
+```python
+model = TextDetection(
+    thresh=0.3,  # 降低像素阈值
+    box_thresh=0.5,  # 降低检测框阈值
+    unclip_ratio=2.0,  # 增大扩张系数
+    limit_side_len=1216  # 增大图像尺寸
+)
+```
+（2）使用更精确的后处理模式：设置`det_db_score_mode="slow"`
+（3）启用膨胀处理：设置`use_dilation=True`
+
+### 6.3 模型选择建议
+
+#### Q: 如何选择合适的模型？
+
+**A**: 根据应用场景选择：
+- 服务器高精度场景：使用 `PP-OCRv6_medium_det`，精度最高
+- 移动端部署：使用 `PP-OCRv6_small_det`，兼顾精度与效率
+- 端侧/IoT：使用 `PP-OCRv6_tiny_det`，模型最小
+- 实时处理：使用 `PP-OCRv6_small_det` 或 `PP-OCRv6_tiny_det`，推理更快
+
+### 6.4 参数调优建议
+
+#### Q: 如何调优检测参数？
+
+**A**: 通过参数`limit_type`和`limit_side_len`来对图片的尺寸进行限制，`limit_type`可选参数为[`max`, `min`]，`limit_side_len` 为正整数，一般设置为 32 的倍数，比如 960。
+
 如果输入图形分辨率不大，建议使用`limit_type=min` 和 `limit_side_len=960` 节省计算资源的同时能获得最佳检测效果。如果输入图片的分辨率比较大，而且想使用更大的分辨率预测，可以设置 `limit_side_len` 为想要的值，比如 1216。
+
+#### Q: 不同场景的参数配置建议？
+
+**A**: 
+- **高精度配置**：`limit_side_len=1216`, `thresh=0.3`, `box_thresh=0.5`, `unclip_ratio=1.5`
+- **高速度配置**：`limit_side_len=640`, `thresh=0.5`, `box_thresh=0.7`, `unclip_ratio=1.2`
+- **平衡配置**：`limit_side_len=960`, `thresh=0.4`, `box_thresh=0.6`, `unclip_ratio=1.5`
+
+### 6.5 错误处理
+
+#### Q: 模型加载失败怎么办？
+
+**A**: 
+（1）检查模型路径是否正确
+（2）确保模型文件完整（inference.pdmodel, inference.pdiparams, inference.json）
+（3）设置模型下载源：`os.environ['PADDLE_PDX_MODEL_SOURCE'] = 'BOS'`
+（4）使用本地模型：指定`model_dir`参数
+
+#### Q: 输入数据格式错误怎么办？
+
+**A**: 
+（1）检查图像文件是否存在
+（2）确保图像格式正确（支持PNG、JPG、JPEG）
+（3）验证图像尺寸（最小10x10像素）
+（4）检查图像是否为3通道格式

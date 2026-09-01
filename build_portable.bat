@@ -88,11 +88,11 @@ if errorlevel 1 (
 ) else (
     echo    ✅ OCR 依赖 paddlepaddle 安装成功
 )
-"%PYTHON_EXE%" -m pip install --no-warn-script-location "paddlex[ocr-core]"
+"%PYTHON_EXE%" -m pip install --no-warn-script-location "paddleocr>=3.7.0,<3.8.0"
 if errorlevel 1 (
-    echo    ⚠️  OCR 依赖 paddlex 安装失败，便携版将无法使用本地 OCR
+    echo    ⚠️  OCR 依赖 paddleocr 安装失败，便携版将无法使用本地 OCR
 ) else (
-    echo    ✅ OCR 依赖 paddlex 安装成功
+    echo    ✅ OCR 依赖 paddleocr 安装成功
 )
 
 echo    ✅ 依赖安装完成

@@ -4,141 +4,64 @@ comments: true
 
 # 安装
 
-# 1. 安装飞桨框架
+## 1. 安装 PaddleOCR Python 库及可选依赖
 
-安装飞桨 PaddlePaddle 时，支持通过 Docker 安装和通过 pip 安装。
+本节说明如何按需安装`paddleocr` 分发包，按能力域启用的可选依赖组，以及安装推理引擎。这条路径适用于在本地调用预训练产线完成推理，或是使用文档格式转换等辅助功能。**模型训练与模型导出**见第 2 节，与上述安装路径相互独立。
 
-## 1.1 基于 Docker 安装飞桨
+**Python 版本要求**：`paddleocr` 本体与 `doc2md` 依赖组支持 Python 3.8 及以上；其他可选依赖组（`doc-parser`、`ie`、`trans`、`all` 等）受上游依赖限制，需要 Python 3.9 及以上。
 
-<b>若您通过 Docker 安装</b>，请参考下述命令，使用飞桨框架官方 Docker 镜像，创建一个名为 `paddleocr` 的容器，并将当前工作目录映射到容器内的 `/paddle` 目录：
+### 1.1 安装 `paddleocr` {#install-paddleocr}
 
-若您使用的 Docker 版本 >= 19.03，请执行：
-
-```bash
-# 对于 cpu 用户:
-docker run --name paddleocr -v $PWD:/paddle --shm-size=8G --network=host -it ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0 /bin/bash
-
-# 对于 gpu 用户:
-# GPU 版本，需显卡驱动程序版本 ≥450.80.02（Linux）或 ≥452.39（Windows）
-docker run --gpus all --name paddleocr -v $PWD:/paddle --shm-size=8G --network=host -it ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0-gpu-cuda11.8-cudnn8.9-trt8.6 /bin/bash
-
-# GPU 版本，需显卡驱动程序版本 ≥545.23.06（Linux）或 ≥545.84（Windows）
-docker run --gpus all --name paddleocr -v $PWD:/paddle  --shm-size=8G --network=host -it ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0-gpu-cuda12.6-cudnn9.5-trt10.5 /bin/bash
-```
-
-* 若您使用的 Docker 版本 <= 19.03 但 >= 17.06，请执行：
-
-<details><summary> 点击展开</summary>
-
-<pre><code class="language-bash"># 对于 cpu 用户:
-docker run --name paddleocr -v $PWD:/paddle --shm-size=8G --network=host -it ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0 /bin/bash
-
-# 对于 gpu 用户:
-# CUDA11.8 用户
-nvidia-docker run --name paddleocr -v $PWD:/paddle --shm-size=8G --network=host -it ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0-gpu-cuda11.8-cudnn8.9-trt8.6 /bin/bash
-
-# CUDA12.3 用户
-nvidia-docker run --name paddleocr -v $PWD:/paddle --shm-size=8G --network=host -it ccr-2vdh3abv-pub.cnc.bj.baidubce.com/paddlepaddle/paddle:3.0.0-gpu-cuda12.6-cudnn9.5-trt10.5 /bin/bash
-</code></pre></details>
-
-* 若您使用的 Docker 版本 <= 17.06，请升级 Docker 版本。
-
-* 注：更多飞桨官方 docker 镜像请参考[飞桨官网](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/install/docker/linux-docker.html)。
-
-## 1.2 基于 pip 安装飞桨
-
-<b>若您通过 pip 安装</b>，请参考下述命令，用 pip 在当前环境中安装飞桨 PaddlePaddle：
+从 PyPI 安装最新版本的 `paddleocr`：
 
 ```bash
-# CPU 版本
-python -m pip install paddlepaddle==3.2.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-
-# GPU 版本，需显卡驱动程序版本 ≥450.80.02（Linux）或 ≥452.39（Windows）
-python -m pip install paddlepaddle-gpu==3.2.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
-
-# GPU 版本，需显卡驱动程序版本 ≥550.54.14（Linux）或 ≥550.54.14（Windows）
- python -m pip install paddlepaddle-gpu==3.2.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu126/
-```
-
-> ❗ <b>注</b>：无需关注物理机上的 CUDA 版本，只需关注显卡驱动程序版本。更多飞桨 Wheel 版本请参考[飞桨官网](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/install/pip/linux-pip.html)。
-
-安装完成后，使用以下命令可以验证 PaddlePaddle 是否安装成功：
-
-```bash
-python -c "import paddle; print(paddle.__version__)"
-```
-
-如果已安装成功，将输出以下内容：
-
-```bash
-3.0.0
-```
-
-## 1.3 Windows 系统适配 NVIDIA 50 系显卡的 PaddlePaddle wheel 包安装
-
-通过以上方式安装的 PaddlePaddle 在 Windows 操作系统下无法正常支持 NVIDIA 50 系显卡。因此，我们提供了专门适配该硬件环境的 PaddlePaddle 安装包。请根据您的 Python 版本选择对应的 wheel 文件进行安装。
-
-```bash
-# python 3.9
-python -m pip install https://paddle-qa.bj.bcebos.com/paddle-pipeline/Develop-TagBuild-Training-Windows-Gpu-Cuda12.9-Cudnn9.9-Trt10.5-Mkl-Avx-VS2019-SelfBuiltPypiUse/86d658f56ebf3a5a7b2b33ace48f22d10680d311/paddlepaddle_gpu-3.0.0.dev20250717-cp39-cp39-win_amd64.whl
-
-# python 3.10
-python -m pip install https://paddle-qa.bj.bcebos.com/paddle-pipeline/Develop-TagBuild-Training-Windows-Gpu-Cuda12.9-Cudnn9.9-Trt10.5-Mkl-Avx-VS2019-SelfBuiltPypiUse/86d658f56ebf3a5a7b2b33ace48f22d10680d311/paddlepaddle_gpu-3.0.0.dev20250717-cp310-cp310-win_amd64.whl
-
-# python 3.11
-python -m pip install https://paddle-qa.bj.bcebos.com/paddle-pipeline/Develop-TagBuild-Training-Windows-Gpu-Cuda12.9-Cudnn9.9-Trt10.5-Mkl-Avx-VS2019-SelfBuiltPypiUse/86d658f56ebf3a5a7b2b33ace48f22d10680d311/paddlepaddle_gpu-3.0.0.dev20250717-cp311-cp311-win_amd64.whl
-
-# python 3.12
-python -m https://paddle-qa.bj.bcebos.com/paddle-pipeline/Develop-TagBuild-Training-Windows-Gpu-Cuda12.9-Cudnn9.9-Trt10.5-Mkl-Avx-VS2019-SelfBuiltPypiUse/86d658f56ebf3a5a7b2b33ace48f22d10680d311/paddlepaddle_gpu-3.0.0.dev20250717-cp312-cp312-win_amd64.whl
-```
-
-**注：** 当前发布的适用于 Windows 系统 50 系显卡的 PaddlePaddle wheel 包，其文本识别模型的训练存在已知问题，相关功能仍在持续适配和完善中。
-
-# 2. 安装 PaddleOCR
-
-如果只希望使用 PaddleOCR 的推理功能，请参考 [安装推理包](#21-安装推理包)；如果希望进行模型训练、导出等，请参考 [安装训练依赖](#22-安装训练依赖)。在同一环境中安装推理包和训练依赖是允许的，无需进行环境隔离。
-
-## 2.1 安装推理包
-
-从 PyPI 安装最新版本 PaddleOCR 推理包：
-
-```bash
-# 只希望使用基础文字识别功能（返回文字位置坐标和文本内容）
+# 仅需要通用 OCR 与文档图像预处理等默认能力
 python -m pip install paddleocr
-# 希望使用文档解析、文档理解、文档翻译、关键信息抽取等全部功能
+# 需要文档解析、文档理解、文档翻译、关键信息抽取等全部可选能力
 # python -m pip install "paddleocr[all]"
 ```
 
-或者从源码安装（默认为开发分支）：
+或从源码安装（默认跟踪仓库当前默认分支）：
 
 ```bash
-# 只希望使用基础文字识别功能（返回文字位置坐标和文本内容）
+# 仅需要通用 OCR 与文档图像预处理等默认能力
 python -m pip install "paddleocr@git+https://github.com/PaddlePaddle/PaddleOCR.git"
-# 希望使用文档解析、文档理解、文档翻译、关键信息抽取等全部功能
+# 需要文档解析、文档理解、文档翻译、关键信息抽取等全部可选能力
 # python -m pip install "paddleocr[all]@git+https://github.com/PaddlePaddle/PaddleOCR.git"
 ```
 
-除了上面演示的 `all` 依赖组以外，PaddleOCR 也支持通过指定其它依赖组，安装部分可选功能。PaddleOCR 提供的所有依赖组如下：
+### 1.2 按功能选择依赖组
+
+除 `all` 外，可通过指定依赖组启用部分可选能力。依赖组表示能力域（文档解析、信息抽取、文档翻译等）。各依赖组如下：
 
 | 依赖组名称 | 对应的功能 |
 | - | - |
 | `doc-parser` | 文档解析，可用于提取文档中的表格、公式、印章、图片等版面元素，包含 PP-StructureV3 等模型方案 |
 | `ie` | 信息抽取，可用于从文档中提取关键信息，如姓名、日期、地址、金额等，包含 PP-ChatOCRv4 等模型方案 |
 | `trans` | 文档翻译，可用于将文档从一种语言翻译为另一种语言，包含 PP-DocTranslation 等模型方案 |
+| `doc2md` | 文档转 MarkDown，可用于将 Word、Excel、PowerPoint 文件快速转为可读文本 |
 | `all` | 完整功能 |
 
-通用 OCR 产线（如 PP-OCRv3/v4/v5）、文档图像预处理产线的功能无需安装额外的依赖组即可使用。除了这两条产线外，每一条产线属于且仅属于一个依赖组。在各产线的使用文档中可以了解产线属于哪一依赖组。对于单功能模块，安装任意包含该模块的产线对应的依赖组后即可使用相关的基础功能。
+通用 OCR 产线与文档图像预处理产线无需额外依赖组；文档解析、信息抽取、文档翻译等按上表安装对应组。各产线所属依赖组见对应产线文档；单功能模块在任一包含该模块的依赖组安装后即可调用其基础能力。
 
-## 2.2 安装训练依赖
+### 1.3 安装推理引擎（按需）
 
-要进行模型训练、导出等，需要首先将仓库克隆到本地：
+PaddleOCR 3.5 采用统一推理引擎配置，底层可对接飞桨、Transformers 等。若要实际执行模型推理，请参考 [推理引擎与配置说明](./inference_deployment/local_inference/inference_engine.md) 安装所选推理引擎。
+
+## 2. 安装训练与导出依赖
+
+若要进行模型训练或模型导出，需另行安装训练相关依赖。该路径与第 1 节的 `paddleocr` 包及可选依赖组属于不同安装维度，同一环境中可同时存在，无需强制隔离。训练与导出依赖飞桨框架，请先参考 [飞桨框架安装](./paddlepaddle_installation.md) 安装飞桨框架。如果当前环境中已安装飞桨之外的推理引擎（如 Transformers），可能会出现依赖冲突，建议在全新的环境中进行安装。
+
+**Python 版本要求**：训练与模型导出支持 Python 3.8 及以上。
+
+将本仓库克隆到本地后安装其余依赖：
 
 ```bash
 # 推荐方式
 git clone https://github.com/PaddlePaddle/PaddleOCR
 
 # （可选）切换到指定分支
-git checkout release/3.2
+git checkout release/3.5
 
 # 如果因为网络问题无法克隆成功，也可选择使用码云上的仓库：
 git clone https://gitee.com/paddlepaddle/PaddleOCR
@@ -146,7 +69,7 @@ git clone https://gitee.com/paddlepaddle/PaddleOCR
 # 注：码云托管代码可能无法实时同步本 GitHub 项目更新，存在3~5天延时，请优先使用推荐方式。
 ```
 
-执行如下命令安装依赖：
+执行如下命令安装其余训练依赖：
 
 ```bash
 python -m pip install -r requirements.txt

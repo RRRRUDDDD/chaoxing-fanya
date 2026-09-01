@@ -58,7 +58,7 @@ hide:
   - 升级 PP-StructureV3 中的 **PP-Chart2Table 模型**，图表转表能力进一步升级，在内部自建测评集合上指标（RMS-F1）**提升 9.36 个百分点（71.24% -> 80.60%）。**
   - 新增基于 PP-StructureV3 和 ERNIE 4.5 的**文档翻译产线 PP-DocTranslation，支持翻译 Markdown 格式文档、各种复杂版式的 PDF 文档和文档图像，结果保存为 Markdown 格式文档。**[详情](https://paddlepaddle.github.io/PaddleOCR/latest/version3.x/pipeline_usage/PP-DocTranslation.html)
 
-- **新增MCP server：**[详情](https://paddlepaddle.github.io/PaddleOCR/latest/version3.x/deployment/mcp_server.html)
+- **新增MCP server：**[详情](https://paddlepaddle.github.io/PaddleOCR/latest/version3.x/integrations/mcp_server.html)
   - **支持 OCR 和 PP-StructureV3 两种工具；**
   - 支持本地Python库、星河社区云服务、自托管服务三种工作模式；
   - 支持通过 stdio 调用本地服务，通过 Streamable HTTP 调用远程服务。
@@ -79,7 +79,7 @@ hide:
     -  为MKL-DNN缓存大小设置默认上界，防止缓存无限增长。同时，支持用户配置缓存容量。@timminator 
     - 更新高性能推理默认配置，支持Paddle MKL-DNN加速。优化高性能推理自动配置逻辑，支持更智能的配置选择。
     - 调整默认设备获取逻辑，考虑环境中安装的Paddle框架对计算设备的实际支持情况，使程序行为更符合直觉。
-    - 新增PP-OCRv5的Android端示例，[详情](https://paddlepaddle.github.io/PaddleOCR/latest/version3.x/deployment/on_device_deployment.html)。
+    - 新增PP-OCRv5的Android端示例，[详情](https://paddlepaddle.github.io/PaddleOCR/latest/version3.x/inference_deployment/cross_platform/on_device_deployment.html)。
 
 - **Bug修复：**
     - 修复PP-StructureV3部分CLI参数不生效的问题。
@@ -186,7 +186,7 @@ hide:
 
 #### **2022.10 优化[JS 版 PP-OCRv3 模型](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.10/deploy/paddlejs/README_ch.md)**：模型大小仅 4.3M，预测速度提升 8 倍，配套 web demo 开箱即用
 
-- **💥 直播回放：PaddleOCR 研发团队详解 PP-StructureV2 优化策略**。微信扫描[下方二维码](#开源社区)，关注公众号并填写问卷后进入官方交流群，获取直播回放链接与 20G 重磅 OCR 学习大礼包（内含 PDF 转 Word 应用程序、10 种垂类模型、《动手学 OCR》电子书等）
+- **💥 直播回放：PaddleOCR 研发团队详解 PP-StructureV2 优化策略**。微信扫描下方二维码，关注公众号并填写问卷后进入官方交流群，获取直播回放链接与 20G 重磅 OCR 学习大礼包（内含 PDF 转 Word 应用程序、10 种垂类模型、《动手学 OCR》电子书等）
 
 #### **2022.8.24 发布 PaddleOCR [release/2.6](https://github.com/PaddlePaddle/PaddleOCR/tree/release/2.6)**
 
@@ -210,7 +210,7 @@ hide:
 
 #### 2021.12.21 发布PaddleOCR v2.4。OCR算法新增1种文本检测算法（PSENet），3种文本识别算法（NRTR、SEED、SAR）；文档结构化算法新增1种关键信息提取算法（SDMGR），3种DocVQA算法（LayoutLM、LayoutLMv2，LayoutXLM）
 
-#### 2021.9.7 发布PaddleOCR v2.3，发布[PP-OCRv2](#PP-OCRv2)，CPU推理速度相比于PP-OCR server提升220%；效果相比于PP-OCR mobile 提升7%
+#### 2021.9.7 发布PaddleOCR v2.3，发布PP-OCRv2，CPU推理速度相比于PP-OCR server提升220%；效果相比于PP-OCR mobile 提升7%
 
 #### 2021.8.3 发布PaddleOCR v2.2，新增文档结构分析[PP-Structure](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.2/ppstructure/README_ch.md)工具包，支持版面分析与表格识别（含Excel导出）
 
@@ -230,7 +230,7 @@ hide:
 
 #### 2020.9.17 更新超轻量ppocr_mobile系列和通用ppocr_server系列中英文ocr模型，媲美商业效果
 
-#### 2020.9.17 更新[英文识别模型](../version2.x/ppocr/model_list.md#english-recognition-model)和[多语种识别模型](../version2.x/ppocr/model_list.md#english-recognition-model)，已支持`德语、法语、日语、韩语`，更多语种识别模型将持续更新
+#### 2020.9.17 更新[英文识别模型](../version2.x/ppocr/model_list.md#22)和[多语种识别模型](../version2.x/ppocr/model_list.md#22)，已支持`德语、法语、日语、韩语`，更多语种识别模型将持续更新
 
 #### 2020.8.26 更新OCR相关的84个常见问题及解答，具体参考[FAQ](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.1/doc/doc_ch/FAQ.md)
 

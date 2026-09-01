@@ -10,7 +10,7 @@ comments: true
 
 ## 二、支持模型列表
 
-> 推理耗时仅包含模型推理耗时，不包含前后处理耗时。
+> 推理耗时仅包含模型推理耗时，不包含前后处理耗时。表格中的“常规模式”耗时对应本地 <code>paddle_static</code> 推理引擎。
 
 <table>
 <tr>
@@ -105,7 +105,7 @@ comments: true
               <li><strong>软件环境：</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -149,6 +149,8 @@ comments: true
 paddleocr formula_recognition -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_formula_rec_001.png
 ```
 
+上述示例默认使用 <code>paddle_static</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
+
 <b>注：</b>PaddleOCR 官方模型默认从 HuggingFace 获取，如运行环境访问 HuggingFace 不便，可通过环境变量修改模型源为 BOS：`PADDLE_PDX_MODEL_SOURCE="BOS"`，未来将支持更多主流模型源；
 
 您也可以将公式识别的模块中的模型推理集成到您的项目中。运行以下代码前，请您下载[示例图片](https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_formula_rec_001.png)到本地。
@@ -162,6 +164,8 @@ for res in output:
     res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")
 ```
+
+上述示例默认使用 <code>paddle_static</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
 
 运行后，得到的结果为：
 
@@ -215,6 +219,18 @@ sudo apt-get install texlive texlive-latex-base texlive-xetex latex-cjk-all texl
 默认情况下，优先使用 GPU 0；若不可用则使用 CPU。
 </td>
 <td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine</code></td>
+<td><b>含义：</b>推理引擎。<br><b>说明：</b>支持 <code>None</code>（默认值）、<code>paddle</code>、<code>paddle_static</code>、<code>paddle_dynamic</code>、<code>transformers</code>。保持为默认值 <code>None</code> 时，本地推理默认使用 <code>paddle_static</code> 引擎。详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>含义：</b>推理引擎配置。<br><b>说明：</b>推荐与 <code>engine</code> 搭配使用。详细字段、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>dict|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
@@ -410,7 +426,7 @@ tar -xf rec_ppformulanet_plus_m_train.tar
 
 ### 4.3 模型训练
 
-PaddleOCR对代码进行了模块化，训练 `PP-FormulaNet_plus-M` 识别模型时需要使用 `PP-FormulaNet_plus-M` 的[配置文件](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-FormuaNet/PP-FormulaNet_plus-M.yaml)。
+PaddleOCR对代码进行了模块化，训练 `PP-FormulaNet_plus-M` 识别模型时需要使用 `PP-FormulaNet_plus-M` 的[配置文件](https://github.com/PaddlePaddle/PaddleOCR/blob/{{PADDLEOCR_GITHUB_REF}}/configs/rec/PP-FormuaNet/PP-FormulaNet_plus-M.yaml)。
 
 
 训练命令如下：

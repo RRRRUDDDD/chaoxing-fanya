@@ -10,7 +10,7 @@ comments: true
 
 ## 二、支持模型列表
 
-> 推理耗时仅包含模型推理耗时，不包含前后处理耗时。
+> 推理耗时仅包含模型推理耗时，不包含前后处理耗时。表格中的“常规模式”耗时对应本地 <code>paddle_static</code> 推理引擎。
 
 * <b>版面检测模型，包含20个常见的类别：文档标题、段落标题、文本、页码、摘要、目录、参考文献、脚注、页眉、页脚、算法、公式、公式编号、图像、表格、图和表标题（图标题、表格标题和图表标题）、印章、图表、侧栏文本和参考文献内容</b>
 <table>
@@ -274,7 +274,7 @@ comments: true
               <li><strong>软件环境：</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -318,6 +318,26 @@ comments: true
 paddleocr layout_detection -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/layout.jpg
 ```
 
+上述示例默认使用 <code>paddle_static</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
+
+如果选择 `transformers` 作为推理引擎，请确保已配置 Transformers 环境，然后执行如下命令：
+
+```bash
+# 使用 transformers 引擎进行推理
+paddleocr layout_detection -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/layout.jpg \
+    --engine transformers
+```
+
+如果选择 `onnxruntime` 作为推理引擎，请确保已配置 ONNX Runtime 环境，然后执行如下命令：
+
+```bash
+# 使用 onnxruntime 引擎进行推理
+paddleocr layout_detection -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/layout.jpg \
+    --engine onnxruntime
+```
+
+在大多数场景下，默认的 `paddle_static` 推理引擎通常具备更好的推理性能，建议优先使用。
+
 <b>注：</b>PaddleOCR 官方模型默认从 HuggingFace 获取，如运行环境访问 HuggingFace 不便，可通过环境变量修改模型源为 BOS：`PADDLE_PDX_MODEL_SOURCE="BOS"`，未来将支持更多主流模型源；
 
 您也可以将版面区域检测模块中的模型推理集成到您的项目中。运行以下代码前，请您下载[示例图片](https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/layout.jpg)到本地。
@@ -333,6 +353,44 @@ for res in output:
     res.save_to_json(save_path="./output/res.json")
 ```
 
+上述示例默认使用 <code>paddle_static</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
+
+如果选择 `transformers` 作为推理引擎，请确保已配置 Transformers 环境，然后执行如下代码：
+
+```python
+from paddleocr import LayoutDetection
+
+model = LayoutDetection(
+    model_name="PP-DocLayout_plus-L",
+    engine="transformers",
+)
+output = model.predict("layout.jpg", batch_size=1, layout_nms=True)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+如果选择 `onnxruntime` 作为推理引擎，请确保已配置 ONNX Runtime 环境，然后执行如下代码：
+
+```python
+from paddleocr import LayoutDetection
+
+model = LayoutDetection(
+    model_name="PP-DocLayout_plus-L",
+    engine="onnxruntime",
+)
+output = model.predict("layout.jpg", batch_size=1, layout_nms=True)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+在大多数场景下，默认的 `paddle_static` 推理引擎通常具备更好的推理性能，建议优先使用。
+
+训练后的模型如果想使用 `paddle_dynamic` 或 `transformers` 引擎，请参考后文 [推理引擎](#五推理引擎) 中的 [权重转换](#52-权重转换) 部分将模型由 `pdparams` 格式通过 PaddleX 转换为 `safetensors` 格式。
+
 运行后，得到的结果为：
 
 ```bash
@@ -340,13 +398,18 @@ for res in output:
 ```
 
 参数含义如下：
-- `input_path`：输入的待预测图像的路径
-- `page_index`：如果输入是PDF文件，则表示当前是PDF的第几页，否则为 `None`
-- `boxes`：预测的目标框信息，一个字典列表。每个字典代表一个检出的目标，包含以下信息：
-  - `cls_id`：类别ID，一个整数
-  - `label`：类别标签，一个字符串
-  - `score`：目标框置信度，一个浮点数
-  - `coordinate`：目标框坐标，一个浮点数列表，格式为<code>[xmin, ymin, xmax, ymax]</code>
+<ul>
+<li><code>input_path</code>：输入的待预测图像的路径</li>
+<li><code>page_index</code>：如果输入是PDF文件，则表示当前是PDF的第几页，否则为 <code>None</code></li>
+<li><code>boxes</code>：预测的目标框信息，一个字典列表。每个字典代表一个检出的目标，包含以下信息：
+    <ol start="1" type="1">
+        <li><code>cls_id</code>：类别ID，一个整数</li>
+        <li><code>label</code>：类别标签，一个字符串</li>
+        <li><code>score</code>：目标框置信度，一个浮点数</li>
+        <li><code>coordinate</code>：目标框坐标，一个浮点数列表，格式为<code>[xmin, ymin, xmax, ymax]</code></li>
+    </ol>
+</li>
+</ul>
 
 可视化图片如下：
 
@@ -355,7 +418,7 @@ for res in output:
 
 相关方法、参数等说明如下：
 
-* `LayoutDetection`实例化目标检测模型（此处以`PP-DocLayout_plus-L`为例），具体说明如下：
+* <code>LayoutDetection</code>实例化目标检测模型（此处以<code>PP-DocLayout_plus-L</code>为例），具体说明如下：
 
 <table>
 <thead>
@@ -369,19 +432,22 @@ for res in output:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>模型名称。如果设置为<code>None</code>，则使用<code>PP-DocLayout-L</code></td>
+<td><b>含义：</b>模型名称。<br/>
+<b>说明：</b>
+如果设置为<code>None</code>，则使用<code>PP-DocLayout-L</code></td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>模型存储路径。</td>
+<td><b>含义：</b>模型存储路径。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>用于推理的设备。<br/>
+<td><b>含义：</b>用于推理的设备。<br/>
+<b>说明：</b>
 <b>例如：</b><code>"cpu"</code>、<code>"gpu"</code>、<code>"npu"</code>、<code>"gpu:0"</code>、<code>"gpu:0,1"</code>。<br/>
 如指定多个设备，将进行并行推理。<br/>
 默认情况下，优先使用 GPU 0；若不可用则使用 CPU。
@@ -390,14 +456,28 @@ for res in output:
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>含义：</b>推理引擎。<br><b>说明：</b>支持 <code>None</code>（默认值）、<code>paddle</code>、<code>paddle_static</code>、<code>paddle_dynamic</code>、<code>transformers</code>、<code>onnxruntime</code>。保持为默认值 <code>None</code> 时，本地推理默认使用 <code>paddle_static</code> 引擎。详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>含义：</b>推理引擎配置。<br><b>说明：</b>推荐与 <code>engine</code> 搭配使用。详细字段、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>是否启用高性能推理。</td>
+<td><b>含义：</b>是否启用高性能推理。</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>是否启用 Paddle Inference 的 TensorRT 子图引擎。如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
+<td><b>含义：</b>是否启用 Paddle Inference 的 TensorRT 子图引擎。<br/>
+<b>说明：</b>
+如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
 对于 CUDA 11.8 版本的飞桨，兼容的 TensorRT 版本为 8.x（x>=6），建议安装 TensorRT 8.6.1.6。<br/>
 
 </td>
@@ -406,14 +486,18 @@ for res in output:
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>当使用 Paddle Inference 的 TensorRT 子图引擎时设置的计算精度。<br/><b>可选项：</b><code>"fp32"</code>、<code>"fp16"</code>。</td>
+<td><b>含义：</b>当使用 Paddle Inference 的 TensorRT 子图引擎时设置的计算精度。<br/>
+<b>说明：</b>
+<b>可选项：</b><code>"fp32"</code>、<code>"fp16"</code>。</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
 <td>
-是否启用 MKL-DNN 加速推理。如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。<br/>
+<b>含义：</b>是否启用 MKL-DNN 加速推理。<br/>
+<b>说明：</b>
+如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。<br/>
 </td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
@@ -421,20 +505,21 @@ for res in output:
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN 缓存容量。
+<b>含义：</b>MKL-DNN 缓存容量。
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>在 CPU 上推理时使用的线程数量。</td>
+<td><b>含义：</b>在 CPU 上推理时使用的线程数量。</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>img_size</code></td>
-<td>输入图像大小。
+<td><b>含义：</b>输入图像大小。<br/>
+<b>说明：</b>
 <ul>
 <li><b>int</b>：如<code>640</code>，表示将输入图像resize到640x640大小。</li>
 <li><b>list</b>：如<code>[640, 512]</code>，表示将输入图像resize到宽为640、高为512。</li>
@@ -445,7 +530,8 @@ MKL-DNN 缓存容量。
 </tr>
 <tr>
 <td><code>threshold</code></td>
-<td>用于过滤掉低置信度预测结果的阈值。
+<td><b>含义：</b>用于过滤掉低置信度预测结果的阈值。<br/>
+<b>说明：</b>
 <ul>
 <li><b>float</b>：如<code>0.2</code>，表示过滤掉所有阈值小于0.2的目标框。</li>
 <li><b>dict</b>：字典的键为<code>int</code>类型，代表类别ID；值为<code>float</code>类型阈值。如<code>{0: 0.45, 2: 0.48, 7: 0.4}</code>，表示对ID为0的类别应用阈值0.45、ID为1的类别应用阈值0.48、ID为7的类别应用阈值0.4。</li>
@@ -457,7 +543,8 @@ MKL-DNN 缓存容量。
 </tr>
 <tr>
 <td><code>layout_nms</code></td>
-<td>是否使用NMS后处理，过滤重叠框。
+<td><b>含义：</b>是否使用NMS后处理，过滤重叠框。<br/>
+<b>说明：</b>
 <ul>
 <li><b>bool</b>表示使用/不使用NMS进行检测框的后处理过滤重叠框。</li>
 <li><b>None</b>使用模型默认的配置。</li>
@@ -468,7 +555,8 @@ MKL-DNN 缓存容量。
 </tr>
 <tr>
 <td><code>layout_unclip_ratio</code></td>
-<td>检测框的边长缩放倍数。</b>
+<td><b>含义：</b>检测框的边长缩放倍数。<br/>
+<b>说明：</b>
 <ul>
 <li><b>float</b>：大于0的浮点数，如<code>1.1</code>，表示将模型输出的检测框中心不变，宽和高都扩张1.1倍。</li>
 <li><b>list</b>：如<code>[1.2, 1.5]</code>，表示将模型输出的检测框中心不变，宽度扩张1.2倍，高度扩张1.5倍。</li>
@@ -481,7 +569,8 @@ MKL-DNN 缓存容量。
 </tr>
 <tr>
 <td><code>layout_merge_bboxes_mode</code></td>
-<td>模型输出的检测框的合并处理模式。
+<td><b>含义：</b>模型输出的检测框的合并处理模式。<br/>
+<b>说明：</b>
 <ul>
 <li><b>"large"</b>：设置为<code>"large"</code>，表示在模型输出的检测框中，对于互相重叠包含的检测框，只保留外部最大的框，删除重叠的内部框。</li>
 <li><b>"small"</b>：设置为<code>"small"</code>，表示在模型输出的检测框中，对于互相重叠包含的检测框，只保留内部被包含的小框，删除重叠的外部框。</li>
@@ -497,7 +586,7 @@ MKL-DNN 缓存容量。
 </table>
 
 
-* 调用目标检测模型的 `predict()` 方法进行推理预测，该方法会返回一个结果列表。另外，本模块还提供了 `predict_iter()` 方法。两者在参数接受和结果返回方面是完全一致的，区别在于 `predict_iter()` 返回的是一个 `generator`，能够逐步处理和获取预测结果，适合处理大型数据集或希望节省内存的场景。可以根据实际需求选择使用这两种方法中的任意一种。`predict()` 方法参数有 `input`、`batch_size`和`threshold`，具体说明如下：
+* 调用目标检测模型的 <code>predict()</code> 方法进行推理预测，该方法会返回一个结果列表。另外，本模块还提供了 <code>predict_iter()</code> 方法。两者在参数接受和结果返回方面是完全一致的，区别在于 <code>predict_iter()</code> 返回的是一个 <code>generator</code>，能够逐步处理和获取预测结果，适合处理大型数据集或希望节省内存的场景。可以根据实际需求选择使用这两种方法中的任意一种。<code>predict()</code> 方法参数有 <code>input</code> 、<code>batch_size</code>和<code>threshold</code>，具体说明如下：
 <table>
 <thead>
 <tr>
@@ -509,7 +598,8 @@ MKL-DNN 缓存容量。
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>待预测数据，支持多种输入类型，必填。
+<td><b>含义：</b>待预测数据，支持多种输入类型，必填。<br/>
+<b>说明：</b>
 <ul>
 <li><b>Python Var</b>：如 <code>numpy.ndarray</code> 表示的图像数据</li>
 <li><b>str</b>：如图像文件或者PDF文件的本地路径：<code>/root/data/img.jpg</code>；<b>如URL链接</b>，如图像文件或PDF文件的网络URL：<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/img_rot180_demo.jpg">示例</a>；<b>如本地目录</b>，该目录下需包含待预测图像，如本地路径：<code>/root/data/</code>(当前不支持目录中包含PDF文件的预测，PDF文件需要指定到具体文件路径)</li>
@@ -521,31 +611,41 @@ MKL-DNN 缓存容量。
 </tr>
 <tr>
 <td><code>batch_size</code></td>
-<td>批大小，可设置为任意正整数。</td>
+<td><b>含义：</b>批大小。<br/>
+<b>说明：</b>
+可设置为任意正整数。</td>
 <td><code>int</code></td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>threshold</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>float|dict|None</code></td>
 <td>None</td>
 </tr>
 <tr>
 <td><code>layout_nms</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</b>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>bool|None</code></td>
 <td>None</td>
 </tr>
 <tr>
 <td><code>layout_unclip_ratio</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>float|list|dict|None</code></td>
 <td>None</td>
 </tr>
 <tr>
 <td><code>layout_merge_bboxes_mode</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>
+设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。
 </td>
 <td><code>str|dict|None</code></td>
 <td>None</td>
@@ -553,7 +653,7 @@ MKL-DNN 缓存容量。
 </tbody>
 </table>
 
-* 对预测结果进行处理，每个样本的预测结果均为对应的Result对象，且支持打印、保存为图片、保存为`json`文件的操作:
+* 对预测结果进行处理，每个样本的预测结果均为对应的Result对象，且支持打印、保存为图片、保存为<code>json</code>文件的操作:
 
 <table>
 <thead>
@@ -640,4 +740,106 @@ MKL-DNN 缓存容量。
 
 由于 PaddleOCR 并不直接提供版面区域检测模块的训练，因此，如果需要训练版面区域测模型，可以参考 [PaddleX 版面区域检测模块二次开发](https://paddlepaddle.github.io/PaddleX/latest/module_usage/tutorials/ocr_modules/layout_detection.html#_5)部分进行训练。训练后的模型可以无缝集成到 PaddleOCR 的 API 中进行推理。
 
-## 五、FAQ
+训练后的模型如果想使用 `paddle_dynamic` 或 `transformers` 引擎，请参考后文 [推理引擎](#五推理引擎) 中的 [权重转换](#52-权重转换) 部分将模型由 `pdparams` 格式通过 PaddleX 转换为 `safetensors` 格式。
+
+## 五、推理引擎 {#五推理引擎}
+
+关于推理引擎的详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。
+
+### 5.1 速度数据
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>engine</th>
+            <th>Preprocessing (ms)</th>
+            <th>Inference (ms)</th>
+            <th>PostProcessing (ms)</th>
+            <th>End-to-End (ms)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="4">PP-DocLayout_plus-L</td>
+            <td>paddle_static</td>
+            <td>10.92</td>
+            <td>26.11</td>
+            <td>0.16</td>
+            <td>37.38</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>11.09</td>
+            <td>72.91</td>
+            <td>0.16</td>
+            <td>85.10</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>12.65</td>
+            <td>37.91</td>
+            <td>0.75</td>
+            <td>52.24</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>9.14</td>
+            <td>12.35</td>
+            <td>0.14</td>
+            <td>21.81</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-DocBlockLayout</td>
+            <td>paddle_static</td>
+            <td>9.51</td>
+            <td>27.59</td>
+            <td>0.08</td>
+            <td>37.41</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>8.94</td>
+            <td>70.77</td>
+            <td>0.07</td>
+            <td>80.73</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>11.37</td>
+            <td>37.95</td>
+            <td>0.75</td>
+            <td>50.96</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>7.53</td>
+            <td>9.22</td>
+            <td>0.06</td>
+            <td>16.97</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>测试环境说明:</strong>
+<ul>
+    <li><strong>测试数据：</strong><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/layout.jpg">示例图片</a></li>
+    <li><strong>硬件配置：</strong>
+        <ul>
+            <li>GPU：NVIDIA A100 40G</li>
+            <li>CPU：Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz</li>
+        </ul>
+    </li>
+    <li><strong>软件环境：</strong>
+        <ul>
+            <li>Ubuntu 22.04 / CUDA 12.6 / cuDNN 9.5</li>
+            <li>paddlepaddle-gpu 3.2.1 / paddleocr 3.5 / transformers 5.4.0 / torch 2.10 / onnxruntime-gpu 1.23.2</li>
+        </ul>
+    </li>
+</ul>
+
+### 5.2 权重转换 {#52-权重转换}
+
+使用推理引擎时，系统会自动下载官方预训练模型。若需使用自训练模型配合 `paddle_dynamic` 或 `transformers` 引擎，请参考 [PaddleX 版面区域检测模块权重转换](https://paddlepaddle.github.io/PaddleX/latest/module_usage/tutorials/ocr_modules/layout_detection.html#442) 部分，将 `pdparams` 格式通过 PaddleX 转换为 `safetensors` 格式，即可无缝集成到 PaddleOCR 的 API 中进行推理。若需使用自训练模型配合`onnxruntime`引擎，请参考[PaddleX 获取 ONNX 模型](https://paddlepaddle.github.io/PaddleX/latest/pipeline_deploy/paddle2onnx.html)获取onnx模型，即可无缝集成到 PaddleOCR 的 API 中进行推理。
+
+## 六、FAQ

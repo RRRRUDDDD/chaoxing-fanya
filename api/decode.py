@@ -12,6 +12,7 @@ import sys
 import tempfile
 import threading
 import io
+from collections.abc import Mapping
 from typing import List, Dict, Tuple, Any, Optional, Union
 
 from bs4 import BeautifulSoup, NavigableString
@@ -36,11 +37,107 @@ _PADDLE_OCR_DEVICE = None  # 记录当前 OCR 引擎运行的设备（gpu / cpu�
 _PADDLE_OCR_LOCK = threading.RLock()
 
 
+def _import_paddle_ocr_class():
+    """导入 PaddleOCR，优先使用环境中安装的版本。
+
+    便携版会携带一个 PaddleOCR 源码副本作为兜底，但不应覆盖用户安装的
+    最新版本，否则 PaddleOCR 与 PaddleX 的版本可能不匹配。
+    """
+    try:
+        from paddleocr import PaddleOCR  # type: ignore
+
+        return PaddleOCR
+    except (ImportError, ModuleNotFoundError) as installed_exc:
+        project_root = os.path.dirname(os.path.dirname(__file__))
+        paddle_root = os.path.join(project_root, "PaddleOCR")
+        if not os.path.isdir(paddle_root):
+            raise installed_exc
+        if paddle_root not in sys.path:
+            sys.path.insert(0, paddle_root)
+        try:
+            from paddleocr import PaddleOCR  # type: ignore
+
+            return PaddleOCR
+        except (ImportError, ModuleNotFoundError):
+            raise installed_exc
+
+
+def _parse_paddle_ocr_result(ocr_result: Any) -> List[str]:
+    """从 PaddleOCR 2.x/3.x 返回值中提取识别文本。
+
+    PaddleOCR 3.x 返回 ``OCRResult``（可按字典访问 ``rec_texts``），而 2.x
+    返回嵌套列表。结果对象在不同 PaddleX 版本中可能只实现 ``__getitem__``
+    或属性访问，因此这里按这三种方式依次读取。
+    """
+    if ocr_result is None:
+        return []
+
+    def _get_field(value: Any, name: str) -> Any:
+        if isinstance(value, Mapping):
+            return value.get(name)
+        try:
+            return value[name]
+        except (KeyError, IndexError, TypeError, AttributeError):
+            return getattr(value, name, None)
+
+    def _append_texts(value: Any, output: List[str]) -> None:
+        if isinstance(value, str):
+            if value.strip():
+                output.append(value.strip())
+            return
+        if value is None:
+            return
+        try:
+            iterator = iter(value)
+        except TypeError:
+            return
+        for item in iterator:
+            if isinstance(item, str) and item.strip():
+                output.append(item.strip())
+
+    parsed_texts: List[str] = []
+    pages: List[Any]
+    if isinstance(ocr_result, Mapping) or not isinstance(ocr_result, (list, tuple)):
+        pages = [ocr_result]
+    else:
+        pages = list(ocr_result)
+
+    # 3.x: one result object per input image, with a rec_texts field.
+    for page in pages:
+        rec_texts = _get_field(page, "rec_texts")
+        if rec_texts is not None:
+            _append_texts(rec_texts, parsed_texts)
+
+    if parsed_texts:
+        return parsed_texts
+
+    # 2.x: [[box, (text, score)], ...], optionally wrapped by a page list.
+    def _walk_legacy(value: Any) -> None:
+        if isinstance(value, (str, bytes)):
+            return
+        try:
+            items = list(value)
+        except (TypeError, ValueError):
+            return
+        if len(items) >= 2 and isinstance(items[1], (list, tuple)):
+            text = items[1][0] if items[1] else None
+            if isinstance(text, str) and text.strip():
+                parsed_texts.append(text.strip())
+                return
+        for item in items:
+            if isinstance(item, (list, tuple)):
+                _walk_legacy(item)
+
+    _walk_legacy(ocr_result)
+    return parsed_texts
+
+
 def _init_paddle_ocr(preferred_device: Optional[str] = None):
     """延迟初始化 PaddleOCR 引擎。
 
-    - 优先使用项目根目录下的 PaddleOCR 仓库（克隆后的代码）；
-    - 失败时记录日志并返回 None，不影响主流程。
+    - 优先使用环境中安装的 PaddleOCR 3.x（与 PaddleX 版本保持一致）；
+    - 未安装时回退到项目根目录下的源码副本；
+    - 初始化失败时记录日志并返回 None，不影响主流程。
     """
     global _PADDLE_OCR_ENGINE, _PADDLE_OCR_INITIALIZED, _PADDLE_OCR_DEVICE
 
@@ -55,12 +152,7 @@ def _init_paddle_ocr(preferred_device: Optional[str] = None):
 
         _PADDLE_OCR_INITIALIZED = True
         try:
-            project_root = os.path.dirname(os.path.dirname(__file__))
-            paddle_root = os.path.join(project_root, "PaddleOCR")
-            if os.path.isdir(paddle_root) and paddle_root not in sys.path:
-                sys.path.append(paddle_root)
-
-            from paddleocr import PaddleOCR  # type: ignore
+            PaddleOCR = _import_paddle_ocr_class()
 
             devices_to_try: List[str] = []
             if preferred_device:
@@ -73,19 +165,32 @@ def _init_paddle_ocr(preferred_device: Optional[str] = None):
             last_exc: Optional[Exception] = None
             for device in devices_to_try:
                 try:
-                    # 优化参数以提高公式/文字识别率：
-                    # - det_db_thresh: 降低检测阈值，更容易检测到浅色文字
-                    # - det_db_box_thresh: 降低框检测阈值，保留更多候选区域
-                    # - det_db_unclip_ratio: 增大文本框扩展比例，避免裁切边缘
-                    # - use_angle_cls: 启用方向分类，处理倾斜文字
-                    engine = PaddleOCR(
-                        lang="ch",
-                        device=device,
-                        det_db_thresh=0.2,
-                        det_db_box_thresh=0.4,
-                        det_db_unclip_ratio=1.8,
-                        use_angle_cls=True,
-                    )
+                    # 使用 PaddleOCR 3.x 参数，关闭不需要的文档预处理以降低开销。
+                    modern_kwargs = {
+                        "lang": "ch",
+                        "device": device,
+                        "text_det_thresh": 0.2,
+                        "text_det_box_thresh": 0.4,
+                        "text_det_unclip_ratio": 1.8,
+                        "use_textline_orientation": True,
+                        "use_doc_orientation_classify": False,
+                        "use_doc_unwarping": False,
+                    }
+                    try:
+                        engine = PaddleOCR(**modern_kwargs)
+                    except TypeError as modern_exc:
+                        # 仅兼容仍在使用 PaddleOCR 2.x 的环境；3.x 不会走此分支。
+                        try:
+                            engine = PaddleOCR(
+                                lang="ch",
+                                use_gpu=device.lower().startswith("gpu"),
+                                det_db_thresh=0.2,
+                                det_db_box_thresh=0.4,
+                                det_db_unclip_ratio=1.8,
+                                use_angle_cls=True,
+                            )
+                        except TypeError:
+                            raise modern_exc
                     _PADDLE_OCR_ENGINE = engine
                     _PADDLE_OCR_DEVICE = device
                     logger.info(f"PaddleOCR 初始化成功 ({device.upper()})，将用于题目图片 OCR")
@@ -286,36 +391,6 @@ def _ocr_image_to_text(img_url: str) -> str:
             # 模式 2: 二值化模式
             preprocessing_modes = [0, 1, 2]
             
-            def _parse_ocr_result(ocr_result) -> List[str]:
-                """解析 OCR 结果，返回识别的文本列表"""
-                parsed_texts: List[str] = []
-                if not ocr_result:
-                    return parsed_texts
-                try:
-                    if isinstance(ocr_result, list) and ocr_result and isinstance(ocr_result[0], dict):
-                        # 新结构：list[dict]，每个 dict 内包含 rec_texts / rec_scores 等字段
-                        for page in ocr_result:
-                            if not isinstance(page, dict):
-                                continue
-                            rec_texts = page.get("rec_texts") or []
-                            for t in rec_texts:
-                                if isinstance(t, str) and t.strip():
-                                    parsed_texts.append(t.strip())
-                    else:
-                        # 旧结构：类似 [[box, (text, score)], ...]
-                        for page in ocr_result:
-                            for line in page:
-                                if len(line) >= 2 and isinstance(line[1], (list, tuple)):
-                                    text = line[1][0]
-                                    if isinstance(text, str) and text.strip():
-                                        parsed_texts.append(text.strip())
-                except Exception:
-                    # 最后的回退：直接把结果转成字符串
-                    result_str = str(ocr_result).strip()
-                    if result_str and result_str not in ('[]', 'None', '[[]]'):
-                        parsed_texts.append(result_str)
-                return parsed_texts
-            
             final_texts: List[str] = []
             for preprocess_mode in preprocessing_modes:
                 # 预处理图片
@@ -335,12 +410,21 @@ def _ocr_image_to_text(img_url: str) -> str:
                 for device_attempt in range(2):
                     try:
                         with _PADDLE_OCR_LOCK:
-                            ocr_result = engine.ocr(tmp_path)
-                        final_texts = _parse_ocr_result(ocr_result)
+                            predict = getattr(engine, "predict", None)
+                            if callable(predict):
+                                ocr_result = predict(tmp_path)
+                            else:
+                                # PaddleOCR 2.x fallback; 3.x exposes predict().
+                                ocr_result = engine.ocr(tmp_path)
+                        final_texts = _parse_paddle_ocr_result(ocr_result)
                         break
                     except Exception as exc:
                         global _PADDLE_OCR_DEVICE
-                        if device_attempt == 0 and _PADDLE_OCR_DEVICE == "gpu":
+                        if (
+                            device_attempt == 0
+                            and isinstance(_PADDLE_OCR_DEVICE, str)
+                            and _PADDLE_OCR_DEVICE.lower().startswith("gpu")
+                        ):
                             logger.debug(f"PaddleOCR GPU 推理失败，切换到 CPU: {exc}")
                             engine = _init_paddle_ocr(preferred_device="cpu")
                             if engine is None:

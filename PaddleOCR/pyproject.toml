@@ -25,6 +25,8 @@ keywords = [
     "pp-structure",
     "document-parsing",
     "pdf2markdown",
+    "doc2markdown",
+    "docx2markdown",
     "kie",
     "pp-chatocr",
     "document-translation",
@@ -36,12 +38,19 @@ classifiers = [
     "Operating System :: OS Independent",
     "Natural Language :: Chinese (Simplified)",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Utilities",
 ]
 dependencies = [
-    "paddlex[ocr-core]>=3.3.0,<3.4.0",
+    "paddlex[ocr-core]>=3.7.0,<3.8.0",
     "PyYAML>=6",
     "requests",
+    "aiohttp>=3.8.0",
     "typing-extensions>=4.12",
 ]
 
@@ -55,10 +64,11 @@ issues = "https://github.com/PaddlePaddle/PaddleOCR/issues"
 paddleocr = "paddleocr.__main__:console_entry"
 
 [project.optional-dependencies]
-doc-parser = ["paddlex[ocr,genai-client]>=3.3.0,<3.4.0"]
-ie = ["paddlex[ie]>=3.3.0,<3.4.0"]
-trans = ["paddlex[trans]>=3.3.0,<3.4.0"]
-all = ["paddlex[ocr,genai-client,ie,trans]>=3.3.0,<3.4.0"]
+doc-parser = ["paddlex[ocr,genai-client]>=3.7.0,<3.8.0"]
+ie = ["paddlex[ie]>=3.7.0,<3.8.0"]
+trans = ["paddlex[trans]>=3.7.0,<3.8.0"]
+doc2md = ["python-docx>=0.8.11", "python-pptx>=0.6.21", "openpyxl>=3.0.0", "pylatexenc>=2.10,<3"]
+all = ["paddlex[ocr,genai-client,ie,trans]>=3.7.0,<3.8.0", "python-docx>=0.8.11", "python-pptx>=0.6.21", "openpyxl>=3.0.0"]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -67,9 +77,11 @@ namespaces = false
 
 [tool.setuptools_scm]
 version_scheme = 'release-branch-semver'
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "v[0-9]*"]
 
 [tool.pytest.ini_options]
 markers = [
-    "resource_intensive: mark a test as resource intensive"
+    "resource_intensive: mark a test as resource intensive",
+    "py38_incompatible: test requires extras or deps that need Python 3.9+"
 ]
 addopts = "-m 'not resource_intensive'"

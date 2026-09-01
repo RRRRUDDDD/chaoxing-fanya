@@ -42,6 +42,26 @@ comments: true
 paddleocr chart_parsing -i "{'image': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/chart_parsing_02.png'}"
 ```
 
+上述示例默认使用 <code>paddle_dynamic</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
+
+如果选择 `transformers` 作为推理引擎，请确保已配置 Transformers 环境，然后执行如下命令：
+
+```bash
+# 使用 transformers 引擎进行推理
+paddleocr chart_parsing -i "{'image': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/chart_parsing_02.png'}" \
+    --engine transformers
+```
+
+如果选择 `onnxruntime` 作为推理引擎，请确保已配置 ONNX Runtime 环境，然后执行如下命令：
+
+```bash
+# 使用 onnxruntime 引擎进行推理
+paddleocr chart_parsing -i "{'image': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/chart_parsing_02.png'}" \
+    --engine onnxruntime
+```
+
+在大多数场景下，默认的 `paddle_dynamic` 推理引擎通常具备更好的推理性能，建议优先使用。
+
 <b>注：</b>PaddleOCR 官方模型默认从 HuggingFace 获取，如运行环境访问 HuggingFace 不便，可通过环境变量修改模型源为 BOS：`PADDLE_PDX_MODEL_SOURCE="BOS"`，未来将支持更多主流模型源；
 
 您也可以将开放文档类视觉语言模型模块中的模型推理集成到您的项目中。运行以下代码前，请您下载[示例图片](https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/chart_parsing_02.png)到本地。
@@ -58,6 +78,44 @@ for res in results:
     res.save_to_json(f"./output/res.json")
 ```
 
+上述示例默认使用 <code>paddle_dynamic</code> 推理引擎，请先按照[飞桨框架安装](../paddlepaddle_installation.md)完成 PaddlePaddle 安装。
+
+如果选择 `transformers` 作为推理引擎，请确保已配置 Transformers 环境，然后执行如下代码：
+
+```python
+from paddleocr import ChartParsing
+model = ChartParsing(
+    model_name="PP-Chart2Table",
+    engine="transformers",
+)
+results = model.predict(
+    input={"image": "chart_parsing_02.png"},
+    batch_size=1
+)
+for res in results:
+    res.print()
+    res.save_to_json(f"./output/res.json")
+```
+
+如果选择 `onnxruntime` 作为推理引擎，请确保已配置 ONNX Runtime 环境，然后执行如下代码：
+
+```python
+from paddleocr import ChartParsing
+model = ChartParsing(
+    model_name="PP-Chart2Table",
+    engine="onnxruntime",
+)
+results = model.predict(
+    input={"image": "chart_parsing_02.png"},
+    batch_size=1
+)
+for res in results:
+    res.print()
+    res.save_to_json(f"./output/res.json")
+```
+
+在大多数场景下，默认的 `paddle_dynamic` 推理引擎通常具备更好的推理性能，建议优先使用。
+
 运行后，得到的结果为：
 
 ```bash
@@ -65,10 +123,10 @@ for res in results:
 ```
 
 运行结果参数含义如下：
-
-- `image`: 表示输入待预测图像的路径
-- `result`: 模型预测的结果信息
-
+<ul>
+<li><code>image</code>: 表示输入待预测图像的路径</li>
+<li><code>result</code>: 模型预测的结果信息</li>
+</ul>
 预测结果打印可视化如下：
 
 ```bash
@@ -83,7 +141,7 @@ for res in results:
 
 相关方法、参数等说明如下：
 
-* `ChartParsing`实例化文档类视觉语言模型，具体说明如下：
+* <code>ChartParsing</code>实例化文档类视觉语言模型，具体说明如下：
 <table>
 <thead>
 <tr>
@@ -96,29 +154,44 @@ for res in results:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>>模型名称。如果设置为<code>None</code>，则使用<code>PP-Chart2Table</code>。</td>
+<td><b>含义：</b>模型名称。<br/>
+<b>说明：</b>
+如果设置为<code>None</code>，则使用<code>PP-Chart2Table</code>。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>模型存储路径。</td>
+<td><b>含义：</b>模型存储路径。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>用于推理的设备。<br/>
+<td><b>含义：</b>用于推理的设备。<br/>
+<b>说明：</b>
 <b>例如：</b><code>"cpu"</code>、<code>"gpu"</code>、<code>"npu"</code>、<code>"gpu:0"</code></code>。
 默认情况下，优先使用 GPU 0；若不可用则使用 CPU。
 </td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
+<tr>
+<td><code>engine</code></td>
+<td><b>含义：</b>推理引擎。<br><b>说明：</b>支持 <code>None</code>（默认值）、<code>paddle</code>、<code>paddle_dynamic</code>、<code>transformers</code>、<code>onnxruntime</code>。保持为默认值 <code>None</code> 时，本地推理默认使用 <code>paddle_dynamic</code> 引擎。详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>含义：</b>推理引擎配置。<br><b>说明：</b>推荐与 <code>engine</code> 搭配使用。详细字段、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
 </tbody>
 </table>
 
-* 调用图表解析模型的 `predict()` 方法进行推理预测，该方法会返回一个结果列表。另外，本模块还提供了 `predict_iter()` 方法。两者在参数接受和结果返回方面是完全一致的，区别在于 `predict_iter()` 返回的是一个 `generator`，能够逐步处理和获取预测结果，适合处理大型数据集或希望节省内存的场景。可以根据实际需求选择使用这两种方法中的任意一种。`predict()` 方法参数有 `input` 、 `batch_size`，具体说明如下：
+* 调用图表解析模型的 <code>predict()</code> 方法进行推理预测，该方法会返回一个结果列表。另外，本模块还提供了 <code>predict_iter()</code> 方法。两者在参数接受和结果返回方面是完全一致的，区别在于 <code>predict_iter()</code> 返回的是一个 <code>generator</code>，能够逐步处理和获取预测结果，适合处理大型数据集或希望节省内存的场景。可以根据实际需求选择使用这两种方法中的任意一种。<code>predict()</code> 方法参数有 <code>input</code> 、 <code>batch_size</code>，具体说明如下：
 
 <table>
 <thead>
@@ -131,21 +204,27 @@ for res in results:
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>待预测数据，必填。由于多模态模型对输入要求不同，请根据具体模型设定输入格式。<br/>
+<td><b>含义：</b>待预测数据，必填。<br/>
+<b>说明：</b>
+由于多模态模型对输入要求不同，请根据具体模型设定输入格式。<br/>
+<ul>
 <li>PP-Chart2Table的输入形式为<code>{'image': image_path}</code></li>
+</ul>
 </td>
 <td><code>dict</code></td>
 <td>无</td>
 </tr>
 <tr>
 <td><code>batch_size</code></td>
-<td>批大小，可设置为任意正整数。</td>
+<td><b>含义：</b>批大小<br/>
+<b>说明：</b>
+可设置为任意正整数。</td>
 <td><code>int</code></td>
 <td>1</td>
 </tr>
 </table>
 
-* 对预测结果进行处理，每个样本的预测结果均为对应的Result对象，且支持打印、保存为`json`文件的操作:
+* 对预测结果进行处理，每个样本的预测结果均为对应的Result对象，且支持打印、保存为<code>json</code>文件的操作:
 
 <table>
 <thead>
@@ -219,4 +298,57 @@ for res in results:
 
 当前模块暂时不支持微调训练，仅支持推理集成。关于该模块的微调训练，计划在未来支持。
 
-## 五、FAQ
+## 五、推理引擎
+
+关于推理引擎的详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。
+
+### 5.1 速度数据
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>engine</th>
+            <th>Preprocessing (ms)</th>
+            <th>Inference (ms)</th>
+            <th>PostProcessing (ms)</th>
+            <th>End-to-End (ms)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="2">PP-Chart2Table</td>
+            <td>paddle_dynamic</td>
+            <td>53.00</td>
+            <td>17863.95</td>
+            <td>0.30</td>
+            <td>17917.78</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>23.95</td>
+            <td>12217.37</td>
+            <td>0.47</td>
+            <td>12269.98</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>测试环境说明:</strong>
+<ul>
+    <li><strong>测试数据：</strong><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/medal_table.jpg">示例图片</a></li>
+    <li><strong>硬件配置：</strong>
+        <ul>
+            <li>GPU：NVIDIA A100 40G</li>
+            <li>CPU：Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz</li>
+        </ul>
+    </li>
+    <li><strong>软件环境：</strong>
+        <ul>
+            <li>Ubuntu 22.04 / CUDA 12.6 / cuDNN 9.5</li>
+            <li>paddlepaddle-gpu 3.2.1 / paddleocr 3.5 / transformers 5.4.0 / torch 2.10 / onnxruntime-gpu 1.23.2</li>
+        </ul>
+    </li>
+</ul>
+
+## 六、FAQ

@@ -9,7 +9,7 @@ The seal text detection module typically outputs multi-point bounding boxes arou
 
 ## II. Supported Model List
 
-> The inference time only includes the model inference time and does not include the time for pre- or post-processing.
+> The inference time only includes the model inference time and does not include the time for pre- or post-processing. The "Normal Mode" values correspond to the local <code>paddle_static</code> inference engine.
 
 <table>
 <thead>
@@ -59,7 +59,7 @@ The seal text detection module typically outputs multi-point bounding boxes arou
               <li><strong>Software Environment:</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -101,7 +101,10 @@ Quickly experience with just one command:
 
 ```bash
 paddleocr seal_text_detection -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/seal_text_det.png
+
 ```
+
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
 
 <b>Note: </b>The official models would be download from HuggingFace by default. If can't access to HuggingFace, please set the environment variable `PADDLE_PDX_MODEL_SOURCE="BOS"` to change the model source to BOS. In the future, more model sources will be supported.
 
@@ -116,6 +119,8 @@ for res in output:
     res.save_to_img(save_path="./output/")
     res.save_to_json(save_path="./output/res.json")
 ```
+
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
 
 After running, the result is:
 
@@ -132,9 +137,11 @@ After running, the result is:
 ```
 
 The meanings of the parameters are as follows:
-- `input_path`: represents the path of the input image to be predicted
-- `dt_polys`: represents the predicted text detection boxes, where each text detection box contains multiple vertices of a polygon. Each vertex is a list of two elements, representing the x and y coordinates of the vertex respectively
-- `dt_scores`: represents the confidence scores of the predicted text detection boxes
+<ul>
+<li> <code>input_path</code>：represents the path of the input image to be predicted</li>
+<li> <code>dt_polys</code>：represents the predicted text detection boxes, where each text detection box contains multiple vertices of a polygon. Each vertex is a list of two elements, representing the x and y coordinates of the vertex respectively</li>
+<li> <code>dt_scores</code>：represents the confidence scores of the predicted text detection boxes</li>
+</ul>
 
 The visualization image is as follows:
 
@@ -142,7 +149,7 @@ The visualization image is as follows:
 
 The explanations of related methods and parameters are as follows:
 
-* `SealTextDetection` instantiates a text detection model (here we take `PP-OCRv4_server_seal_det` as an example), and the specific explanations are as follows:
+* <code>SealTextDetection</code> instantiates a text detection model (here we take <code>PP-OCRv4_server_seal_det</code> as an example), and the specific explanations are as follows:
 <table>
 <thead>
 <tr>
@@ -155,19 +162,22 @@ The explanations of related methods and parameters are as follows:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>Model name. If set to <code>None</code>, <code>PP-OCRv4_mobile_seal_det</code> will be used.</td>
+<td><b>Meaning:</b>Model name. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, <code>PP-OCRv4_mobile_seal_det</code> will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>Model storage path.</td>
+<td><b>Meaning:</b>Model storage path.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>Device for inference.<br/>
+<td><b>Meaning:</b>Device for inference.<br/>
+<b>Description:</b>
 <b>For example:</b> <code>"cpu"</code>, <code>"gpu"</code>, <code>"npu"</code>, <code>"gpu:0"</code>, <code>"gpu:0,1"</code>.<br/>
 If multiple devices are specified, parallel inference will be performed.<br/>
 By default, GPU 0 is used if available; otherwise, CPU is used.
@@ -176,14 +186,28 @@ By default, GPU 0 is used if available; otherwise, CPU is used.
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_static</code>, <code>paddle_dynamic</code>, and <code>transformers</code>. When left as <code>None</code>, local inference uses the <code>paddle_static</code> engine by default. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>Meaning:</b> Inference-engine configuration.<br/><b>Description:</b> Recommended together with <code>engine</code>. For supported fields, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>Whether to enable high-performance inference.</td>
+<td><b>Meaning:</b>Whether to enable high-performance inference.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<td><b>Meaning:</b>Whether to use the Paddle Inference TensorRT subgraph engine. <br/>
+<b>Description:</b>
+If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
 For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6), and it is recommended to install TensorRT 8.6.1.6.<br/>
 
 </td>
@@ -192,14 +216,18 @@ For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6)
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>Computation precision when using the TensorRT subgraph engine in Paddle Inference.<br/><b>Options:</b> <code>"fp32"</code>, <code>"fp16"</code>.</td>
+<td><b>Meaning:</b>Computation precision when using the TensorRT subgraph engine in Paddle Inference.<br/>
+<b>Description:</b>
+<b>Options:</b> <code>"fp32"</code>, <code>"fp16"</code>.</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
 <td>
-Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.
+<b>Meaning:</b>Whether to enable MKL-DNN acceleration for inference. <br/>
+<b>Description:</b>
+If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.
 </td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
@@ -207,57 +235,68 @@ Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable 
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN cache capacity.
+<b>Meaning:</b>MKL-DNN cache capacity.
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>Number of threads to use for inference on CPUs.</td>
+<td><b>Meaning:</b>Number of threads to use for inference on CPUs.</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>limit_side_len</code></td>
-<td>Limit on the side length of the input image for detection. <code>int</code> specifies the value. If set to <code>None</code>, the model's default configuration will be used.</td>
+<td><b>Meaning:</b>Limit on the side length of the input image for detection. <br/>
+<b>Description:</b>
+<code>int</code> specifies the value. If set to <code>None</code>, the model's default configuration will be used.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>limit_type</code></td>
-<td>Type of image side length limitation. <code>"min"</code> ensures the shortest side of the image is no less than <code>det_limit_side_len</code>; <code>"max"</code> ensures the longest side is no greater than <code>limit_side_len</code>. If set to <code>None</code>, the model's default configuration will be used.</td>
+<td><b>Meaning:</b>Type of image side length limitation. <br/>
+<b>Description:</b>
+<code>"min"</code> ensures the shortest side of the image is no less than <code>det_limit_side_len</code>; <code>"max"</code> ensures the longest side is no greater than <code>limit_side_len</code>. If set to <code>None</code>, the model's default configuration will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>thresh</code></td>
-<td>Pixel score threshold. Pixels in the output probability map with scores greater than this threshold are considered text pixels. Accepts any float value greater than 0. If set to <code>None</code>, the model's default configuration will be used.</td>
+<td><b>Meaning:</b>Pixel score threshold. <br/>
+<b>Description:</b>
+Pixels in the output probability map with scores greater than this threshold are considered text pixels. Accepts any float value greater than 0. If set to <code>None</code>, the model's default configuration will be used.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>box_thresh</code></td>
-<td>If the average score of all pixels inside the bounding box is greater than this threshold, the result is considered a text region. Accepts any float value greater than 0. If set to <code>None</code>, the model's default configuration will be used.</td>
+<td><b>Meaning:</b>If the average score of all pixels inside the bounding box is greater than this threshold, the result is considered a text region. <br/>
+<b>Description:</b>
+Accepts any float value greater than 0. If set to <code>None</code>, the model's default configuration will be used.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>unclip_ratio</code></td>
-<td>Expansion ratio for the Vatti clipping algorithm, used to expand the text region. Accepts any float value greater than 0. If set to <code>None</code>, the model's default configuration will be used.</td>
+<td><b>Meaning:</b>Expansion ratio for the Vatti clipping algorithm, used to expand the text region. <br/>
+<b>Description:</b>Accepts any float value greater than 0. If set to <code>None</code>, the model's default configuration will be used.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>input_shape</code></td>
-<td>Input image size for the model in the format <code>(C, H, W)</code>. If set to <code>None</code>, the model's default size will be used.</td>
+<td><b>Meaning:</b>Input image size for the model in the format <code>(C, H, W)</code>. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the model's default size will be used.</td>
 <td><code>tuple|None</code></td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 
-* The `predict()` method of the seal text detection model is called for inference prediction. The parameters of the `predict()` method include `input`, `batch_size`, `limit_side_len`, `limit_type`, `thresh`, `box_thresh`, `max_candidates`, `unclip_ratio`. The specific descriptions are as follows:
+* The  <code>predict()</code>  method of the seal text detection model is called for inference prediction. The parameters of the  <code>predict()</code>  method include <code>input</code> 、<code>batch_size</code>、 <code>limit_side_len</code>、 <code>limit_type</code>、 <code>thresh</code>、 <code>box_thresh</code>、 <code>max_candidates</code>、<code>unclip_ratio</code>. The specific descriptions are as follows:
 <table>
 <thead>
 <tr>
@@ -269,12 +308,17 @@ MKL-DNN cache capacity.
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>Input data to be predicted. Required. Supports multiple input types:<ul>
+<td><b>Meaning:</b>Input data to be predicted. Required. <br/>
+<b>Description:</b>
+Supports multiple input types:<ul>
 <li><b>Python Var</b>: e.g., <code>numpy.ndarray</code> representing image data</li>
 <li><b>str</b>: 
-  - Local image or PDF file path: <code>/root/data/img.jpg</code>;
-  - <b>URL</b> of image or PDF file: e.g., <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/img_rot180_demo.jpg">example</a>;
-  - <b>Local directory</b>: directory containing images for prediction, e.g., <code>/root/data/</code> (Note: directories containing PDF files are not supported; PDFs must be specified by exact file path)</li>
+    <ul>
+  <li>Local image or PDF file path: <code>/root/data/img.jpg</code>;</li>
+  <li><b>URL</b> of image or PDF file: e.g., <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/img_rot180_demo.jpg">example</a>;</li>
+  <li><b>Local directory</b>: directory containing images for prediction, e.g., <code>/root/data/</code> (Note: directories containing PDF files are not supported; PDFs must be specified by exact file path)</li>
+  </li>
+    </ul>
 <li><b>list</b>: Elements must be of the above types, e.g., <code>[numpy.ndarray, numpy.ndarray]</code>, <code>["/root/data/img1.jpg", "/root/data/img2.jpg"]</code>, <code>["/root/data1", "/root/data2"]</code></li>
 </ul>
 </td>
@@ -283,37 +327,49 @@ MKL-DNN cache capacity.
 </tr>
 <tr>
 <td><code>batch_size</code></td>
-<td>Batch size, can be set to any positive integer.</td>
+<td><b>Meaning:</b>Batch size. <br/>
+<b>Description:</b>
+Can be set to any positive integer.</td>
 <td><code>int</code></td>
 <td>1</td>
 </tr>
 <tr>
 <td><code>limit_side_len</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>limit_type</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+ If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>box_thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>unclip_ratio</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
@@ -321,7 +377,7 @@ MKL-DNN cache capacity.
 </table>
 
 
-* Process the prediction results. Each sample's prediction result is a corresponding Result object, and it supports operations such as printing, saving as an image, and saving as a `json` file:
+* Process the prediction results. Each sample's prediction result is a corresponding Result object, and it supports operations such as printing, saving as an image, and saving as a <code>json</code> file:
 
 <table>
 <thead>
@@ -425,7 +481,7 @@ wget https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_mode
 
 ### 4.2 Model Training
 
-PaddleOCR has modularized the code, and when training the `PP-OCRv4_server_seal_det` model, you need to use the [configuration file](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/det/PP-OCRv4/PP-OCRv4_server_seal_det.yml) for `PP-OCRv4_server_seal_det`.
+PaddleOCR has modularized the code, and when training the `PP-OCRv4_server_seal_det` model, you need to use the [configuration file](https://github.com/PaddlePaddle/PaddleOCR/blob/{{PADDLEOCR_GITHUB_REF}}/configs/det/PP-OCRv4/PP-OCRv4_server_seal_det.yml) for `PP-OCRv4_server_seal_det`.
 
 The training commands are as follows:
 

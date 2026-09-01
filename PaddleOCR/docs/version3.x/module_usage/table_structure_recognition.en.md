@@ -10,7 +10,7 @@ Table structure recognition is an important component of table recognition syste
 
 ## 2. Supported Model List
 
-> The inference time only includes the model inference time and does not include the time for pre- or post-processing.
+> The inference time only includes the model inference time and does not include the time for pre- or post-processing. The "Normal Mode" values correspond to the local <code>paddle_static</code> inference engine.
 
 <table>
 <tr>
@@ -70,7 +70,7 @@ Table structure recognition is an important component of table recognition syste
               <li><strong>Software Environment:</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -114,6 +114,26 @@ Quickly experience with a single command:
 paddleocr table_structure_recognition -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition.jpg
 ```
 
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following command:
+
+```bash
+# Use the transformers engine for inference
+paddleocr table_structure_recognition -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition.jpg \
+    --engine transformers
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following command:
+
+```bash
+# Use the onnxruntime engine for inference
+paddleocr table_structure_recognition -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition.jpg \
+    --engine onnxruntime
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
 <b>Note: </b>The official models would be download from HuggingFace by default. If can't access to HuggingFace, please set the environment variable `PADDLE_PDX_MODEL_SOURCE="BOS"` to change the model source to BOS. In the future, more model sources will be supported.
 
 You can also integrate the model inference of the table structure recognition module into your own project. Before running the code below, please download the [sample image](https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition.jpg) to your local machine.
@@ -127,6 +147,40 @@ for res in output:
     res.save_to_json("./output/res.json")
 ```
 
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following code:
+
+```python
+from paddleocr import TableStructureRecognition
+model = TableStructureRecognition(
+    model_name="SLANet",
+    engine="transformers",
+)
+output = model.predict(input="table_recognition.jpg", batch_size=1)
+for res in output:
+    res.print(json_format=False)
+    res.save_to_json("./output/res.json")
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following code:
+
+```python
+from paddleocr import TableStructureRecognition
+model = TableStructureRecognition(
+    model_name="SLANet",
+    engine="onnxruntime",
+)
+output = model.predict(input="table_recognition.jpg", batch_size=1)
+for res in output:
+    res.print(json_format=False)
+    res.save_to_json("./output/res.json")
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
+If you want to use the trained model with the `paddle_dynamic` or `transformers` engine, refer to the [Weight Conversion](#52-weight-conversion) section in the [Inference Engine](#5-inference-engine) section below to convert the model from the `pdparams` format to the `safetensors` format using PaddleX.
+
 After running, the result is:
 
 ```
@@ -134,16 +188,17 @@ After running, the result is:
 ```
 
 Parameter meanings are as follows:
-
-- `input_path`: The path of the input table image to be predicted
-- `page_index`: If the input is a PDF file, indicates the page number of the PDF; otherwise, it is `None`
-- `boxes`: Predicted table cell information, a list consisting of the coordinates of predicted table cells. Notably, table cell predictions for the SLANeXt series models are invalid
-- `structure`: Predicted table structure HTML expressions, a list consisting of predicted HTML keywords in order
-- `structure_score`: Confidence of the predicted table structure
+<ul>
+<li><code>input_path</code>：The path of the input table image to be predicted</li>
+<li><code>page_index</code>：If the input is a PDF file, indicates the page number of the PDF; otherwise, it is  <code>None</code></li>
+<li><code>boxes</code>： Predicted table cell information, a list consisting of the coordinates of predicted table cells. Notably, table cell predictions for the SLANeXt series models are invalid</li>
+<li><code>structure</code>：Predicted table structure HTML expressions, a list consisting of predicted HTML keywords in order</li>
+<li><code>structure_score</code>：Confidence of the predicted table structure</li>
+</ul>
 
 Descriptions of related methods and parameters are as follows:
 
-* `TableStructureRecognition` instantiates a table structure recognition model (using `SLANet` as an example). Details are as follows:
+* <code>TableStructureRecognition</code> instantiates a table structure recognition model (using <code>SLANet</code> as an example). Details are as follows:
 <table>
 <thead>
 <tr>
@@ -156,19 +211,22 @@ Descriptions of related methods and parameters are as follows:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>Model name. If set to <code>None</code>, <code>PP-LCNet_x1_0_table_cls</code> will be used.</td>
+<td><b>Meaning:</b> Model name.<br/>
+<b>Description:</b> 
+If set to <code>None</code>, <code>PP-LCNet_x1_0_table_cls</code> will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>Model storage path.</td>
+<td><b>Meaning:</b>Model storage path.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>Device for inference.<br/>
+<td><b>Meaning:</b>Device for inference.<br/>
+<b>Description:</b>
 <b>For example:</b> <code>"cpu"</code>, <code>"gpu"</code>, <code>"npu"</code>, <code>"gpu:0"</code>, <code>"gpu:0,1"</code>.<br/>
 If multiple devices are specified, parallel inference will be performed.<br/>
 By default, GPU 0 is used if available; otherwise, CPU is used.</td>
@@ -176,14 +234,28 @@ By default, GPU 0 is used if available; otherwise, CPU is used.</td>
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_static</code>, <code>paddle_dynamic</code>, <code>transformers</code>, and <code>onnxruntime</code>. When left as <code>None</code>, local inference uses the <code>paddle_static</code> engine by default. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>Meaning:</b> Inference-engine configuration.<br/><b>Description:</b> Recommended together with <code>engine</code>. For supported fields, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>Whether to enable high-performance inference.</td>
+<td><b>Meaning:</b>Whether to enable high-performance inference.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<td><b>Meaning:</b>Whether to use the Paddle Inference TensorRT subgraph engine.<br/> 
+<b>Description:</b>
+If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
 For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6), and it is recommended to install TensorRT 8.6.1.6.<br/>
 </td>
 <td><code>bool</code></td>
@@ -191,32 +263,36 @@ For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6)
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>Computation precision when using the Paddle Inference TensorRT subgraph engine.<br/><b>Options:</b> <code>"fp32"</code>, <code>"fp16"</code>.</td>
+<td><b>Meaning:</b>Computation precision when using the Paddle Inference TensorRT subgraph engine.<br/>
+<b>Description:</b>
+<b>Options:</b> <code>"fp32"</code>, <code>"fp16"</code>.</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
-<td>Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
+<td><b>Meaning:</b>Whether to enable MKL-DNN acceleration for inference. <br/>
+<b>Description:</b>
+If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 </tr>
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
-<td>MKL-DNN cache capacity.</td>
+<td><b>Meaning:</b>MKL-DNN cache capacity.</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>Number of threads to use for inference on CPUs.</td>
+<td><b>Meaning:</b>Number of threads to use for inference on CPUs.</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 </tbody>
 </table>
 
-* Call the `predict()` method of the table structure recognition model for inference prediction, which returns a result list. In addition, this module also provides the `predict_iter()` method. The two are completely consistent in parameter acceptance and result return. The difference is that `predict_iter()` returns a `generator`, which can process and obtain prediction results step by step, suitable for handling large datasets or scenarios where you want to save memory. You can choose to use either method according to your actual needs. The `predict()` method has parameters `input` and `batch_size`, described as follows:
+* Call the <code>predict()</code> method of the table structure recognition model for inference prediction, which returns a result list. In addition, this module also provides the <code>predict_iter()</code> method. The two are completely consistent in parameter acceptance and result return. The difference is that <code>predict_iter()</code> returns a <code>generator</code>, which can process and obtain prediction results step by step, suitable for handling large datasets or scenarios where you want to save memory. You can choose to use either method according to your actual needs. The <code>predict()</code> method has parameters <code>input</code> and <code>batch_size</code>, described as follows:
 
 <table>
 <thead>
@@ -230,7 +306,9 @@ For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6)
 <tr>
 <td><code>input</code></td>
 <td>
-Data to be predicted. Required. Supports multiple input types:
+<b>Meaning:</b>Data to be predicted. Required. <br/>
+<b>Description:</b>
+Supports multiple input types:
 <ul>
   <li><b>Python Var</b>: e.g., <code>numpy.ndarray</code> representing image data</li>
   <li><b>str</b>: Local path to an image or PDF file, e.g., <code>/root/data/img.jpg</code>; <b>URL</b>: Network URL to an image or PDF file, e.g., <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/img_rot180_demo.jpg">Example</a>; <b>Directory</b>: A local directory containing images for prediction, e.g., <code>/root/data/</code> (Note: PDF files in directories are not supported; to predict a PDF, specify its file path directly)</li>
@@ -242,12 +320,14 @@ Data to be predicted. Required. Supports multiple input types:
 </tr>
 <tr>
 <td><code>batch_size</code></td>
-<td>Batch size, can be set to any positive integer.</td>
+<td><b>Meaning:</b>Batch size. <br/>
+<b>Description:</b>
+Can be set to any positive integer.</td>
 <td><code>int</code></td>
 <td>1</td>
 </tr>
 </table>
-* For processing prediction results, the prediction result of each sample is the corresponding Result object, and supports printing and saving as a `json` file:
+* For processing prediction results, the prediction result of each sample is the corresponding Result object, and supports printing and saving as a <code>json</code> file:
 
 <table>
 <thead>
@@ -341,7 +421,7 @@ wget https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_mode
 
 ### 4.2 Model Training
 
-PaddleOCR is modularized. When training the `SLANet_plus` recognition model, you need to use the [configuration file](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/table/SLANet_plus.yml) of `SLANet_plus`.
+PaddleOCR is modularized. When training the `SLANet_plus` recognition model, you need to use the [configuration file](https://github.com/PaddlePaddle/PaddleOCR/blob/{{PADDLEOCR_GITHUB_REF}}/configs/table/SLANet_plus.yml) of `SLANet_plus`.
 
 
 The training commands are as follows:
@@ -397,4 +477,122 @@ You can evaluate the trained weights, such as `output/xxx/xxx.pdparams`, using t
  ```
 At this point, secondary development is complete, and this static graph model can be directly integrated into the PaddleOCR API.
 
-## 5. FAQ
+If you want to use the `paddle_dynamic` or `transformers` engine with the trained model, please refer to the [Weight Conversion](#52-weight-conversion) section in [Inference Engine](#5-inference-engine) later in this document to convert the model from the `pdparams` format to the `safetensors` format using PaddleX.
+
+## 5. Inference Engine
+
+For detailed descriptions, values, compatibility rules, and examples of the inference engine, please refer to <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration Description</a>.
+
+### 5.1 Speed Data
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>engine</th>
+            <th>Preprocessing (ms)</th>
+            <th>Inference (ms)</th>
+            <th>PostProcessing (ms)</th>
+            <th>End-to-End (ms)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="1">SLANet</td>
+            <td>onnxruntime</td>
+            <td>1.42</td>
+            <td>22.02</td>
+            <td>0.22</td>
+            <td>23.81</td>
+        </tr>
+        <tr>
+            <td rowspan="1">SLANet_plus</td>
+            <td>onnxruntime</td>
+            <td>1.40</td>
+            <td>21.64</td>
+            <td>0.22</td>
+            <td>23.42</td>
+        </tr>
+        <tr>
+            <td rowspan="4">SLANeXt_wired</td>
+            <td>paddle_static</td>
+            <td>1.50</td>
+            <td>30.91</td>
+            <td>0.23</td>
+            <td>32.77</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>1.71</td>
+            <td>57.44</td>
+            <td>0.91</td>
+            <td>60.23</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>4.03</td>
+            <td>45.14</td>
+            <td>0.74</td>
+            <td>51.12</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>1.60</td>
+            <td>30.96</td>
+            <td>0.25</td>
+            <td>32.99</td>
+        </tr>
+        <tr>
+            <td rowspan="4">SLANeXt_wireless</td>
+            <td>paddle_static</td>
+            <td>1.67</td>
+            <td>30.49</td>
+            <td>0.22</td>
+            <td>32.51</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>1.68</td>
+            <td>57.24</td>
+            <td>0.96</td>
+            <td>60.05</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>4.30</td>
+            <td>45.51</td>
+            <td>0.75</td>
+            <td>51.76</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>1.62</td>
+            <td>31.01</td>
+            <td>0.26</td>
+            <td>33.06</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>Test Environment Description:</strong>
+<ul>
+    <li><strong>Test Data:</strong> <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition.jpg">Sample Image</a></li>
+    <li><strong>Hardware Configuration:</strong>
+        <ul>
+            <li>GPU: NVIDIA A100 40G</li>
+            <li>CPU: Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz</li>
+        </ul>
+    </li>
+    <li><strong>Software Environment:</strong>
+        <ul>
+            <li>Ubuntu 22.04 / CUDA 12.6 / cuDNN 9.5</li>
+            <li>paddlepaddle-gpu 3.2.1 / paddleocr 3.5 / transformers 5.4.0 / torch 2.10 / onnxruntime-gpu 1.23.2</li>
+        </ul>
+    </li>
+</ul>
+
+### 5.2 Weight Conversion
+
+When using the inference engine, the system will automatically download the official pre-trained model. If you need to use a self-trained model with the `paddle_dynamic` or `transformers` engine, please refer to the [PaddleX Table Structure Recognition Module Weight Conversion](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/table_structure_recognition.html#442) section to convert the model from the `pdparams` format to the `safetensors` format using PaddleX. This allows seamless integration into the PaddleOCR API for inference. If you need to use a self-trained model with the `onnxruntime` engine, refer to [PaddleX Obtain ONNX Models](https://paddlepaddle.github.io/PaddleX/latest/pipeline_deploy/paddle2onnx.html) to obtain the ONNX model, so it can be seamlessly integrated into the PaddleOCR API for inference.
+
+## 6. FAQ

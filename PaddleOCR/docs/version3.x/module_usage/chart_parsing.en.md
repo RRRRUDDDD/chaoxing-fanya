@@ -40,7 +40,27 @@ Run the following command to get started instantly:
 
 ```bash
 paddleocr chart_parsing -i "{'image': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/chart_parsing_02.png'}"
-````
+```
+
+The example above uses the <code>paddle_dynamic</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following command:
+
+```bash
+# Use the transformers engine for inference
+paddleocr chart_parsing -i "{'image': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/chart_parsing_02.png'}" \
+    --engine transformers
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following command:
+
+```bash
+# Use the onnxruntime engine for inference
+paddleocr chart_parsing -i "{'image': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/chart_parsing_02.png'}" \
+    --engine onnxruntime
+```
+
+In most scenarios, the default `paddle_dynamic` inference engine delivers better inference performance and is the recommended first choice.
 
 **Note:** By default, PaddleOCR retrieves models from HuggingFace. If HuggingFace access is restricted in your environment, you can switch the model source to BOS by setting the environment variable: `PADDLE_PDX_MODEL_SOURCE="BOS"`. Support for more mainstream sources is planned.
 
@@ -58,6 +78,44 @@ for res in results:
     res.save_to_json(f"./output/res.json")
 ```
 
+The example above uses the <code>paddle_dynamic</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following code:
+
+```python
+from paddleocr import ChartParsing
+model = ChartParsing(
+    model_name="PP-Chart2Table",
+    engine="transformers",
+)
+results = model.predict(
+    input={"image": "chart_parsing_02.png"},
+    batch_size=1
+)
+for res in results:
+    res.print()
+    res.save_to_json(f"./output/res.json")
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following code:
+
+```python
+from paddleocr import ChartParsing
+model = ChartParsing(
+    model_name="PP-Chart2Table",
+    engine="onnxruntime",
+)
+results = model.predict(
+    input={"image": "chart_parsing_02.png"},
+    batch_size=1
+)
+for res in results:
+    res.print()
+    res.save_to_json(f"./output/res.json")
+```
+
+In most scenarios, the default `paddle_dynamic` inference engine delivers better inference performance and is the recommended first choice.
+
 The output result will be:
 
 ```bash
@@ -65,9 +123,10 @@ The output result will be:
 ```
 
 Explanation of output parameters:
-
-* `image`: The path to the input image
-* `result`: The model's prediction output
+<ul>
+<li><code>image</code>: The path to the input image</li>
+<li><code>result</code>:  The model's prediction output</li>
+</ul>
 
 The visualized result is:
 
@@ -83,7 +142,7 @@ Year | Avg Revenue per 5-star Hotel (Million CNY) | Avg Profit per 5-star Hotel 
 
 Detailed explanation of related methods and parameters:
 
-* Instantiate a vision-language model with `ChartParsing`. Parameters:
+* Instantiate a vision-language model with <code>ChartParsing</code>. Parameters:
 
 <table>
 <thead>
@@ -97,31 +156,46 @@ Detailed explanation of related methods and parameters:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>Model name. If set to <code>None</code>, defaults to <code>PP-Chart2Table</code>.</td>
+<td><b>Meaning:</b> Model name.<br/>
+<b>Description:</b> 
+If set to <code>None</code>, defaults to <code>PP-Chart2Table</code>.</td>
 <td><code>str | None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>Model storage path.</td>
+<td><b>Meaning</b>Model storage path.</td>
 <td><code>str | None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>Inference device.<br/>
+<td><b>Meaning:</b> Inference device.<br/>
+<b>Description:</b>
 <b>Examples:</b> <code>"cpu"</code>, <code>"gpu"</code>, <code>"npu"</code>, <code>"gpu:0"</code><br/>
 Defaults to GPU 0 if available; otherwise falls back to CPU.
 </td>
 <td><code>str | None</code></td>
 <td><code>None</code></td>
 </tr>
+<tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_dynamic</code>, <code>transformers</code>, and <code>onnxruntime</code>. When left as <code>None</code>, local inference uses the <code>paddle_dynamic</code> engine by default. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>Meaning:</b> Inference-engine configuration.<br/><b>Description:</b> Recommended together with <code>engine</code>. For supported fields, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
 </tbody>
 </table>
 
-* Use the model's `predict()` method for inference. This returns a list of results. The module also offers a `predict_iter()` method, which behaves identically in terms of inputs and outputs but returns a generator—ideal for large datasets or memory-sensitive scenarios. Choose based on your needs.
+* Use the model's <code>predict()</code>  method for inference. This returns a list of results. The module also offers a <code>predict_iter()</code> method, which behaves identically in terms of inputs and outputs but returns a generator—ideal for large datasets or memory-sensitive scenarios. Choose based on your needs.
 
-`predict()` method parameters:
+<code>predict()</code> method parameters:
 
 <table>
 <thead>
@@ -134,21 +208,27 @@ Defaults to GPU 0 if available; otherwise falls back to CPU.
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>Input data (required). Input formats vary by model.<br/>
-For PP-Chart2Table: <code>{'image': image_path}</code>
+<td><b>Meaning:</b> Input data (required). <br/>
+<b>Description:</b>
+Input formats vary by model.<br/>
+<ul>
+<li>For PP-Chart2Table: <code>{'image': image_path}</code></li>
+</ul>
 </td>
 <td><code>dict</code></td>
 <td>N/A</td>
 </tr>
 <tr>
 <td><code>batch_size</code></td>
-<td>Batch size. Any positive integer.</td>
+<td><b>Meaning:</b> Batch size. <br/>
+<b>Description:</b>
+Any positive integer.</td>
 <td><code>int</code></td>
 <td>1</td>
 </tr>
 </table>
 
-* Prediction results are returned as `Result` objects for each sample, with support for printing and saving to JSON:
+* Prediction results are returned as <code>Result</code> objects for each sample, with support for printing and saving to JSON:
 
 <table>
 <thead>
@@ -192,13 +272,13 @@ For PP-Chart2Table: <code>{'image': image_path}</code>
 <tr>
 <td><code>indent</code></td>
 <td><code>int</code></td>
-<td>Same as in `print()`</td>
+<td>Same as in <code>print()</code></td>
 <td>4</td>
 </tr>
 <tr>
 <td><code>ensure_ascii</code></td>
 <td><code>bool</code></td>
-<td>Same as in `print()`</td>
+<td>Same as in <code>print()</code></td>
 <td><code>False</code></td>
 </tr>
 </table>
@@ -222,4 +302,57 @@ For PP-Chart2Table: <code>{'image': image_path}</code>
 
 Currently, this module supports inference only and does not yet support fine-tuning. Fine-tuning capabilities are planned for future releases.
 
-## 5. FAQ
+## 5. Inference Engine
+
+For detailed descriptions, values, compatibility rules, and examples of the inference engine, please refer to <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration Description</a>.
+
+### 5.1 Speed Data
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>engine</th>
+            <th>Preprocessing (ms)</th>
+            <th>Inference (ms)</th>
+            <th>PostProcessing (ms)</th>
+            <th>End-to-End (ms)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="2">PP-Chart2Table</td>
+            <td>paddle_dynamic</td>
+            <td>53.00</td>
+            <td>17863.95</td>
+            <td>0.30</td>
+            <td>17917.78</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>23.95</td>
+            <td>12217.37</td>
+            <td>0.47</td>
+            <td>12269.98</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>Test Environment Description:</strong>
+<ul>
+    <li><strong>Test Data:</strong> <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/medal_table.jpg">Sample Image</a></li>
+    <li><strong>Hardware Configuration:</strong>
+        <ul>
+            <li>GPU: NVIDIA A100 40G</li>
+            <li>CPU: Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz</li>
+        </ul>
+    </li>
+    <li><strong>Software Environment:</strong>
+        <ul>
+            <li>Ubuntu 22.04 / CUDA 12.6 / cuDNN 9.5</li>
+            <li>paddlepaddle-gpu 3.2.1 / paddleocr 3.5 / transformers 5.4.0 / torch 2.10 / onnxruntime-gpu 1.23.2</li>
+        </ul>
+    </li>
+</ul>
+
+## 6. FAQ

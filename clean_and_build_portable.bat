@@ -218,13 +218,13 @@ if errorlevel 1 (
     set "SKIP_OCR=1"
 ) else (
     echo    ✅ paddlepaddle 安装成功
-    echo    安装 OCR 依赖 paddlex...
-    "%PYTHON_EXE%" -m pip install --no-warn-script-location "paddlex[ocr-core]"
+    echo    安装 OCR 依赖 paddleocr 3.7...
+    "%PYTHON_EXE%" -m pip install --no-warn-script-location "paddleocr>=3.7.0,<3.8.0"
     if errorlevel 1 (
-        echo    ⚠️  paddlex 安装失败
+        echo    ⚠️  paddleocr 安装失败
         set "SKIP_OCR=1"
     ) else (
-        echo    ✅ paddlex 安装成功
+        echo    ✅ paddleocr 安装成功
     )
 )
 

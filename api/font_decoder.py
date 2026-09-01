@@ -37,7 +37,11 @@ class FontDecoder:
             html_content: 包含加密字体信息的HTML内容
         """
         try:
-            soup = BeautifulSoup(html_content, "lxml")
+            try:
+                soup = BeautifulSoup(html_content, "lxml")
+            except (ImportError, LookupError, ValueError) as e:
+                logger.trace(f"lxml parser not available, falling back to html.parser: {e}")
+                soup = BeautifulSoup(html_content, "html.parser")
             style_tag = soup.find("style", id="cxSecretStyle")
             
             if not style_tag or not style_tag.text:

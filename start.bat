@@ -27,7 +27,7 @@ if errorlevel 1 (
 echo.
 
 REM 检查 OCR 依赖
-echo [2/5] 检查 OCR 依赖 (paddlepaddle / paddlex)...
+echo [2/5] 检查 OCR 依赖 (paddlepaddle / paddleocr)...
 python -c "import paddle" 2>nul
 if errorlevel 1 (
     echo    ⚠️  OCR 依赖 paddlepaddle 未安装，正在安装...
@@ -42,18 +42,18 @@ if errorlevel 1 (
     echo    ✅ OCR 依赖 paddlepaddle 已安装
 )
 
-python -c "import paddlex" 2>nul
+python -c "import paddleocr" 2>nul
 if errorlevel 1 (
-    echo    ⚠️  OCR 依赖 paddlex 未安装，正在安装 paddlex[ocr-core]...
-    pip install "paddlex[ocr-core]"
+    echo    ⚠️  OCR 依赖 paddleocr 未安装，正在安装 PaddleOCR 3.7...
+    pip install "paddleocr>=3.7.0,<3.8.0"
     if errorlevel 1 (
-        echo    ❌ OCR 依赖 paddlex 安装失败！
+        echo    ❌ OCR 依赖 paddleocr 安装失败！
         pause
         exit /b 1
     )
-    echo    ✅ OCR 依赖 paddlex 安装成功！
+    echo    ✅ OCR 依赖 paddleocr 安装成功！
 ) else (
-    echo    ✅ OCR 依赖 paddlex 已安装
+    echo    ✅ OCR 依赖 paddleocr 已安装
 )
 echo.
 

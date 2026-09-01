@@ -20,7 +20,7 @@ PaddleOCR 在推理部署环节充分复用了 PaddleX 的能力，具体包括�
 - PaddleOCR 的高性能推理能力通过 PaddleX 的 Paddle2ONNX 插件及高性能推理插件实现。
 - PaddleOCR 的服务化部署方案基于 PaddleX 的实现。
 
-需要特别说明的是，尽管 PaddleOCR 在底层使用了 PaddleX，但得益于 PaddleX 的可选依赖安装功能，**安装 PaddleOCR 推理包时并不会安装 PaddleX 的全部依赖，而只会安装 OCR 类任务需要使用到的依赖**，用户通常无需关心依赖体积的过度膨胀问题。2025 年 5 月测试，在 x86-64 + Linux + Python 3.10 环境中，需要安装的依赖总体积仅仅从 717 MB 增加到 738 MB。
+需要特别说明的是，尽管 PaddleOCR 在底层使用了 PaddleX，但得益于 PaddleX 的可选依赖安装功能，**安装 `paddleocr` Python 分发包时并不会安装 PaddleX 的全部依赖，而只会安装 OCR 类任务需要使用到的依赖**，用户通常无需关心依赖体积的过度膨胀问题。2025 年 5 月测试，在 x86-64 + Linux + Python 3.10 环境中，需要安装的依赖总体积仅仅从 717 MB 增加到 738 MB。
 
 PaddleOCR、PaddleX 和飞桨框架的版本存在如下对应关系：
 
@@ -33,6 +33,10 @@ PaddleOCR、PaddleX 和飞桨框架的版本存在如下对应关系：
 | `3.1.x` | `>= 3.1.0, < 3.2.0` | `>= 3.0.0` |
 | `3.2.x` | `>= 3.2.0, < 3.3.0` | `>= 3.0.0` |
 | `3.3.x` | `>= 3.3.0, < 3.4.0` | `>= 3.0.0` |
+| `3.4.x` | `>= 3.4.0, < 3.5.0` | `>= 3.0.0` |
+| `3.5.x` | `>= 3.5.0, < 3.6.0` | `>= 3.0.0` |
+| `3.6.x` | `>= 3.6.0, < 3.7.0` | `>= 3.0.0` |
+| `3.7.x` | `>= 3.7.0, < 3.8.0` | `>= 3.0.0` |
 
 ## 2. PaddleOCR 产线与 PaddleX 产线注册名的对应关系
 
@@ -47,6 +51,9 @@ PaddleOCR、PaddleX 和飞桨框架的版本存在如下对应关系：
 | 文档图像预处理 | `doc_preprocessor` |
 | 文档理解 | `doc_understanding` |
 | PP-DocTranslation | `PP-DocTranslation` |
+| PaddleOCR-VL | `PaddleOCR-VL` |
+| PaddleOCR-VL-1.5 | `PaddleOCR-VL-1.5` |
+| PaddleOCR-VL-1.6 | `PaddleOCR-VL-1.6` |
 
 ## 3. 使用 PaddleX 产线配置文件
 

@@ -8,7 +8,7 @@ comments: true
 
 OCR is a technology that converts text from images into editable text. It is widely used in fields such as document digitization, information extraction, and data processing. OCR can recognize printed text, handwritten text, and even certain types of fonts and symbols.
 
-The general OCR pipeline is used to solve text recognition tasks by extracting text information from images and outputting it in text form. This pipeline supports the use of PP-OCRv3, PP-OCRv4, and PP-OCRv5 models, with the default model being the PP-OCRv5_server model released by PaddleOCR 3.0, which improves by 13 percentage points over PP-OCRv4_server in various scenarios.
+The general OCR pipeline is used to solve text recognition tasks by extracting text information from images and outputting it in text form. This pipeline supports PP-OCRv3, PP-OCRv4, PP-OCRv5, and PP-OCRv6 models, with the default model being **PP-OCRv6_medium** released with PaddleOCR 3.7. PP-OCRv6, built on the newly designed PPLCNetV4 unified backbone, offers tiny/small/medium tiers. The medium tier achieves +5.1% (recognition) and +4.6% (detection) over PP-OCRv5_server with faster inference; a single model supports 50 languages including Chinese, English, Japanese, and 46 Latin-script languages.
 
 <img src="https://raw.githubusercontent.com/cuicheng01/PaddleX_doc_images/main/images/pipelines/ocr/01.png"/>
 
@@ -23,6 +23,7 @@ The general OCR pipeline is used to solve text recognition tasks by extracting t
 In this pipeline, you can select models based on the benchmark test data provided below.
 
 > The inference time only includes the model inference time and does not include the time for pre- or post-processing.
+> In the inference time columns labeled [Standard Mode / High-Performance Mode], the Standard Mode values correspond to the local `paddle_static` inference engine.
 
 <details>
 <summary><b>Document Image Orientation Classification Module (Optional):</b></summary>
@@ -129,6 +130,33 @@ In this pipeline, you can select models based on the benchmark test data provide
 </thead>
 <tbody>
 <tr>
+<td>PP-OCRv6_medium_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_medium_det_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_medium_det_pretrained.pdparams">Training Model</a></td>
+<td>86.2*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>59.4</td>
+<td>PP-OCRv6 medium-scale text detection model based on PPLCNetV4 + RepLKFPN, highest accuracy, suitable for server deployment</td>
+</tr>
+<tr>
+<td>PP-OCRv6_small_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_small_det_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_small_det_pretrained.pdparams">Training Model</a></td>
+<td>84.1*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>9.6</td>
+<td>PP-OCRv6 small text detection model, balancing accuracy and efficiency, suitable for mobile deployment</td>
+</tr>
+<tr>
+<td>PP-OCRv6_tiny_det</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_tiny_det_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_tiny_det_pretrained.pdparams">Training Model</a></td>
+<td>80.6*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>1.9</td>
+<td>PP-OCRv6 ultra-lightweight text detection model (0.43M params), suitable for edge/IoT scenarios</td>
+</tr>
+<tr>
 <td>PP-OCRv5_server_det</td>
 <td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv5_server_det_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv5_server_det_pretrained.pdparams">Training Model</a></td>
 <td>83.8</td>
@@ -166,6 +194,9 @@ In this pipeline, you can select models based on the benchmark test data provide
 </tr>
 </tbody>
 </table>
+
+> *Note: PP-OCRv6 metrics are evaluated on an internal multi-scenario evaluation set, while PP-OCRv5/v4 metrics are based on a general evaluation set. As the evaluation sets differ, the metrics are not directly comparable.
+
 </details>
 
 <details>
@@ -178,6 +209,31 @@ In this pipeline, you can select models based on the benchmark test data provide
 <th>CPU Inference Time (ms)<br/>[Normal Mode / High-Performance Mode]</th>
 <th>Model Storage Size (MB)</th>
 <th>Introduction</th>
+</tr>
+<tr>
+<td>PP-OCRv6_medium_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_medium_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_medium_rec_pretrained.pdparams">Training Model</a></td>
+<td>83.2*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>73.3</td>
+<td rowspan="3">PP-OCRv6 text recognition models based on PPLCNetV4 + LightSVTR + CTC/NRTR multi-head decoder, single model supports 50 languages (tiny: 49)</td>
+</tr>
+<tr>
+<td>PP-OCRv6_small_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_small_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_small_rec_pretrained.pdparams">Training Model</a></td>
+<td>81.3*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>20.4</td>
+</tr>
+<tr>
+<td>PP-OCRv6_tiny_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_tiny_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_tiny_rec_pretrained.pdparams">Training Model</a></td>
+<td>73.5*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>4.4</td>
 </tr>
 <tr>
 <td>PP-OCRv5_server_rec</td>
@@ -237,6 +293,8 @@ en_PP-OCRv4_mobile_rec_infer.tar">Inference Model</a>/<a href="https://paddle-mo
 <td>An ultra-lightweight English recognition model trained based on the PP-OCRv4 recognition model, supporting English and numeric character recognition.</td>
 </tr>
 </table>
+
+> *Note: PP-OCRv6 metrics are evaluated on an internal multi-scenario evaluation set, while PP-OCRv5/v4 metrics are based on a general evaluation set. As the evaluation sets differ, the metrics are not directly comparable.
 
 > ❗ The above section lists the <b>6 core models</b> that are primarily supported by the text recognition module. In total, the module supports <b>20 comprehensive models</b>, including multiple multilingual text recognition models. Below is the complete list of models:
 
@@ -656,7 +714,7 @@ devanagari_PP-OCRv3_mobile_rec_infer.tar">Inference Model</a>/<a href="https://p
               <li><strong>Software Environment:</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -678,7 +736,7 @@ devanagari_PP-OCRv3_mobile_rec_infer.tar">Inference Model</a>/<a href="https://p
            <td>Standard Mode</td>
            <td>FP32 Precision / No TRT Acceleration</td>
            <td>FP32 Precision / 8 Threads</td>
-           <td>PaddleInference</td>
+           <td><code>paddle_static</code></td>
        </tr>
        <tr>
            <td>High-Performance Mode</td>
@@ -696,26 +754,93 @@ devanagari_PP-OCRv3_mobile_rec_infer.tar">Inference Model</a>/<a href="https://p
 
 ## 2. Quick Start  
 
-Before using the general OCR pipeline locally, ensure you have installed the wheel package by following the [Installation Guide](../installation.en.md). Once installed, you can experience OCR via the command line or Python integration.  
+Before using the general OCR pipeline locally, install the dependencies for your chosen inference engine first, then install the `paddleocr` package. See the [Installation Guide](../installation.en.md) for the full procedure. After installation, you can use the command line or Python integration.
 
+### 2.0 Environment Preparation
+
+#### 2.0.1 Install the inference engine
+
+- If you use the local `paddle_static` inference engine, install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+- If you use the `transformers` inference engine, install the required dependencies by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md).
+- If you use the `onnxruntime` inference engine, install the required dependencies by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md).
+
+#### 2.0.2 Install paddleocr
+
+```bash
+# Install the basic package (OCR only)
+pip install paddleocr
+
+# Install the full package (all features)
+pip install "paddleocr[all]"
+```
+
+#### 2.0.3 Environment Verification
+
+```python
+# Verify that PaddleOCR is installed successfully
+import paddleocr
+print(f"PaddleOCR version: {paddleocr.__version__}")
+
+# If you use the local paddle_static inference engine, you can further verify PaddlePaddle and GPU availability
+import paddle
+print(f"Paddle version: {paddle.__version__}")
+print(f"GPU available: {paddle.is_compiled_with_cuda()}")
+print(f"GPU count: {paddle.device.cuda.device_count()}")
+
+# If you use the transformers inference engine, you can further verify the transformers dependency
+import transformers
+print(f"Transformers version: {transformers.__version__}")
+```
+
+#### 2.0.4 Common Installation Issues
 Please note: If you encounter issues such as the program becoming unresponsive, unexpected program termination, running out of memory resources, or extremely slow inference during execution, please try adjusting the configuration according to the documentation, such as disabling unnecessary features or using lighter-weight models.
 
 ### 2.1 Command Line  
 
 Run a single command to quickly test the OCR pipeline.  Before running the code below, please download the [example image](https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/pipelines/general_formula_recognition_001.png) locally:  
 
-```bash  
-# Default: Uses PP-OCRv5 model  
+```bash
 paddleocr ocr -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png \
     --use_doc_orientation_classify False \
     --use_doc_unwarping False \
     --use_textline_orientation False \
     --save_path ./output \
-    --device gpu:0 
+    --device gpu:0
 
 # Use PP-OCRv4 model by --ocr_version PP-OCRv4
 paddleocr ocr -i ./general_ocr_002.png --ocr_version PP-OCRv4
-```  
+
+```
+
+The examples above use the local `paddle_static` inference engine by default. To run them, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md), and then run the following command:
+
+```bash
+# Use the transformers engine for inference
+paddleocr ocr -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png \
+    --use_doc_orientation_classify False \
+    --use_doc_unwarping False \
+    --use_textline_orientation False \
+    --save_path ./output \
+    --device gpu:0 \
+    --engine transformers
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md), and then run the following command:
+
+```bash
+# Use the onnxruntime engine for inference
+paddleocr ocr -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png \
+    --use_doc_orientation_classify False \
+    --use_doc_unwarping False \
+    --use_textline_orientation False \
+    --save_path ./output \
+    --device gpu:0 \
+    --engine onnxruntime
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
 
 <details><summary><b>Command line supports more parameter settings. Click to expand for detailed instructions on command line parameters.</b></summary>
 <table>
@@ -730,110 +855,145 @@ paddleocr ocr -i ./general_ocr_002.png --ocr_version PP-OCRv4
 <tbody>
 <tr>
 <td><code>input</code></td>
-<td>Data to be predicted, required. Local path of an image file or PDF file: <code>/root/data/img.jpg</code>; <b>URL link</b>, such as the network URL of an image file or PDF file: <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png">Example</a>; <b>Local directory</b>, which must contain images to be predicted, such as the local path: <code>/root/data/</code> (currently, predicting PDFs in a directory is not supported; PDFs need to specify the exact file path).
+<td><b>Meaning:</b>Data to be predicted, required.<br/>
+<b>Description:</b> 
+Local path of an image file or PDF file: <code>/root/data/img.jpg</code>; <b>URL link</b>, such as the network URL of an image file or PDF file: <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png">Example</a>; <b>Local directory</b>, which must contain images to be predicted, such as the local path: <code>/root/data/</code> (currently, predicting PDFs in a directory is not supported; PDFs need to specify the exact file path).
 </td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>save_path</code></td>
-<td>Path to save inference result files. If not set, inference results will not be saved locally.</td>
+<td><b>Meaning:</b>Path to save inference result files. <br/>
+<b>Description:</b>
+If not set, inference results will not be saved locally.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_name</code></td>
-<td>Name of the document orientation classification model. If not set, the pipeline default model will be used.</td>
+<td><b>Meaning:</b>Name of the document orientation classification model.<br/>
+<b>Description:</b> 
+If not set, the pipeline default model will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_dir</code></td>
-<td>Directory path of the document orientation classification model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the document orientation classification model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_name</code></td>
-<td>Name of the text image unwarping model. If not set, the pipeline default model will be used.</td>
+<td><b>Meaning:</b>Name of the text image unwarping model. <br/>
+<b>Description:</b> 
+If not set, the pipeline default model will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_dir</code></td>
-<td>Directory path of the text image unwarping model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text image unwarping model.<br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_detection_model_name</code></td>
-<td>Name of the text detection model. If not set, the pipeline default model will be used.</td>
+<td><b>Meaning:</b>Name of the text detection model.<br/>
+<b>Description:</b> 
+If not set, the pipeline default model will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_detection_model_dir</code></td>
-<td>Directory path of the text detection model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text detection model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>textline_orientation_model_name</code></td>
-<td>Name of the text line orientation model. If not set, the pipeline default model will be used.</td>
+<td><b>Meaning:</b>Name of the text line orientation model. <br/>
+<b>Description:</b> 
+If not set, the pipeline default model will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>textline_orientation_model_dir</code></td>
-<td>Directory path of the text line orientation model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text line orientation model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>textline_orientation_batch_size</code></td>
-<td>Batch size for the text line orientation model. If not set, the default batch size will be <code>1</code>.</td>
+<td><b>Meaning:</b>Batch size for the text line orientation model. <br/>
+<b>Description:</b> 
+If not set, the default batch size will be <code>1</code>.</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_recognition_model_name</code></td>
-<td>Name of the text recognition model. If not set, the pipeline default model will be used.</td>
+<td><b>Meaning:</b>Name of the text recognition model. <br/>
+<b>Description:</b> 
+If not set, the pipeline default model will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_recognition_model_dir</code></td>
-<td>Directory path of the text recognition model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text recognition model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_recognition_batch_size</code></td>
-<td>Batch size for the text recognition model. If not set, the default batch size will be <code>1</code>.</td>
+<td><b>Meaning:</b>Batch size for the text recognition model. <br/>
+<b>Description:</b> 
+If not set, the default batch size will be <code>1</code>.</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>Whether to load and use the document orientation classification module. If not set, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
+<td><b>Meaning:</b>Whether to load and use the document orientation classification module. <br/>
+<b>Description:</b> 
+If not set, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>Whether to load and use the text image unwarping module. If not set, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
+<td><b>Meaning:</b>Whether to load and use the text image unwarping module. <br/>
+<b>Description:</b> 
+If not set, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_textline_orientation</code></td>
-<td>Whether to load and use the text line orientation module. If not set, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
+<td><b>Meaning:</b>Whether to load and use the text line orientation module. <br/>
+<b>Description:</b> 
+If not set, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_det_limit_side_len</code></td>
-<td>Image side length limitation for text detection.
+<td><b>Meaning:</b>Image side length limitation for text detection. <br/>
+<b>Description:</b> 
 Any integer greater than <code>0</code>. If not set, the pipeline's initialized value for this parameter (defaults to <code>64</code>) will be used.
 </td>
 <td><code>int</code></td>
@@ -841,7 +1001,8 @@ Any integer greater than <code>0</code>. If not set, the pipeline's initialized 
 </tr>
 <tr>
 <td><code>text_det_limit_type</code></td>
-<td>Type of side length limit for text detection.
+<td><b>Meaning:</b>Type of side length limit for text detection. <br/>
+<b>Description:</b> 
 Supports <code>min</code> and <code>max</code>. <code>min</code> means ensuring the shortest side of the image is not smaller than <code>det_limit_side_len</code>, and <code>max</code> means ensuring the longest side of the image is not larger than <code>limit_side_len</code>. If not set, the pipeline's initialized value for this parameter (defaults to <code>min</code>) will be used.
 </td>
 <td><code>str</code></td>
@@ -849,14 +1010,18 @@ Supports <code>min</code> and <code>max</code>. <code>min</code> means ensuring 
 </tr>
 <tr>
 <td><code>text_det_thresh</code></td>
-<td>Pixel threshold for text detection. In the output probability map, pixels with scores higher than this threshold will be considered text pixels.Any floating-point number greater than <code>0</code>. If not set, the pipeline's initialized value for this parameter (defaults to <code>0.3</code>) will be used.
+<td><b>Meaning:</b>Pixel threshold for text detection. In the output probability map, pixels with scores higher than this threshold will be considered text pixels.<br/>
+<b>Description:</b>
+Any floating-point number greater than <code>0</code>. If not set, the pipeline's initialized value for this parameter (defaults to <code>0.3</code>) will be used.
 </td>
 <td><code>float</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_det_box_thresh</code></td>
-<td>Text detection box threshold. If the average score of all pixels within the detected result boundary is higher than this threshold, the result will be considered a text region.
+<td><b>Meaning:</b>Text detection box threshold.<br/>
+<b>Description:</b> 
+If the average score of all pixels within the detected result boundary is higher than this threshold, the result will be considered a text region.
 Any floating-point number greater than <code>0</code>. If not set, the pipeline's initialized value for this parameter (defaults to <code>0.6</code>) will be used.
 </td>
 <td><code>float</code></td>
@@ -864,7 +1029,8 @@ Any floating-point number greater than <code>0</code>. If not set, the pipeline'
 </tr>
 <tr>
 <td><code>text_det_unclip_ratio</code></td>
-<td>Text detection expansion coefficient. This method is used to expand the text region—the larger the value, the larger the expanded area.
+<td><b>Meaning:</b>Text detection expansion coefficient. This method is used to expand the text region—the larger the value, the larger the expanded area. <br/>
+<b>Description:</b>
 Any floating-point number greater than <code>0</code>. If not set, the pipeline's initialized value for this parameter (defaults to <code>2.0</code>) will be used.
 </td>
 <td><code>float</code></td>
@@ -872,13 +1038,15 @@ Any floating-point number greater than <code>0</code>. If not set, the pipeline'
 </tr>
 <tr>
 <td><code>text_det_input_shape</code></td>
-<td>Input shape for text detection, you can set three values to represent C, H, and W.</td>
+<td><b>Meaning:</b>Input shape for text detection, you can set three values to represent C, H, and W.</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_rec_score_thresh</code></td>
-<td>Text recognition threshold. Text results with scores higher than this threshold will be retained.Any floating-point number greater than <code>0</code>
+<td><b>Meaning:</b>Text recognition threshold. Text results with scores higher than this threshold will be retained.<br/>
+<b>Description:</b>
+Any floating-point number greater than <code>0</code>
 . If not set, the pipeline's initialized value for this parameter (defaults to <code>0.0</code>, i.e., no threshold) will be used.
 </td>
 <td><code>float</code></td>
@@ -886,19 +1054,22 @@ Any floating-point number greater than <code>0</code>. If not set, the pipeline'
 </tr>
 <tr>
 <td><code>return_word_box</code></td>
-<td>Whether to return word-level boxes. If not set, the pipeline's initialized value for this parameter (defaults to <code>False</code>) will be used.</td>
+<td><b>Meaning:</b>Whether to return word-level boxes.<br/>
+<b>Description:</b> 
+If not set, the pipeline's initialized value for this parameter (defaults to <code>False</code>) will be used.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_rec_input_shape</code></td>
-<td>Input shape for text recognition.</td>
+<td><b>Meaning:</b>Input shape for text recognition.</td>
 <td><code>tuple</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>lang</code></td>
-<td>OCR model language to use.
+<td><b>Meaning:</b>OCR model language to use.<br/>
+<b>Description:</b>
 The table in the appendix lists all the supported languages.
 </td>
 <td><code>str</code></td>
@@ -906,8 +1077,10 @@ The table in the appendix lists all the supported languages.
 </tr>
 <tr>
 <td><code>ocr_version</code></td>
-<td>Version of OCR models.
+<td><b>Meaning:</b>Version of OCR models.<br/>
+<b>Description:</b>
 <ul>
+<li><b>PP-OCRv6</b>: Use PP-OCRv6 series models;
 <li><b>PP-OCRv5</b>: Use PP-OCRv5 series models;
 <li><b>PP-OCRv4</b>: Use PP-OCRv4 series models;
 <li><b>PP-OCRv3</b>: Use PP-OCRv3 series models.</li>
@@ -917,35 +1090,125 @@ Please note that not every <code>ocr_version</code> supports all <code>lang</cod
 <td><code>str</code></td>
 <td></td>
 </tr>
+
+<td><code>device</code></td>
+<td><b>Meaning:</b>Device for inference. <br/>
+<b>Description:</b>
+Supports specifying a specific card number:
+<ul>
+<li><b>CPU</b>: <code>cpu</code> indicates using CPU for inference;</li>
+<li><b>GPU</b>: <code>gpu:0</code> indicates using the 1st GPU for inference;</li>
+<li><b>NPU</b>: <code>npu:0</code> indicates using the 1st NPU for inference;</li>
+<li><b>XPU</b>: <code>xpu:0</code> indicates using the 1st XPU for inference;</li>
+<li><b>MLU</b>: <code>mlu:0</code> indicates using the 1st MLU for inference;</li>
+<li><b>DCU</b>: <code>dcu:0</code> indicates using the 1st DCU for inference;</li>
+<li><b>MetaX GPU</b>: <code>metax_gpu:0</code> indicates using the 1st MetaX GPU for inference;</li>
+<li><b>Iluvatar GPU</b>: <code>iluvatar_gpu:0</code> indicates using the 1st Iluvatar GPU for inference;</li>
+</ul>If not set, the pipeline initialized value for this parameter will be used. During initialization, the local GPU device 0 will be preferred; if unavailable, the CPU device will be used.
+</td>
+<td><code>str</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_static</code>, <code>paddle_dynamic</code>, and <code>transformers</code>. When left as <code>None</code>, PaddleOCR preserves the behavior of earlier versions, which in most configurations is equivalent to <code>paddle</code>. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>enable_hpi</code></td>
+<td><b>Meaning:</b> Whether to enable high-performance inference.</td>
+<td><code>bool</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>use_tensorrt</code></td>
+<td><b>Meaning:</b> Whether to enable the TensorRT subgraph engine of Paddle Inference.<br/>
+<b>Description:</b>
+If the model does not support TensorRT acceleration, acceleration will not be used even if this flag is set.<br/>
+For CUDA 11.8 versions of PaddlePaddle, the compatible TensorRT version is 8.x (x>=6). TensorRT 8.6.1.6 is recommended.<br/>
+</td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>precision</code></td>
+<td><b>Meaning:</b> Computation precision, such as <code>fp32</code> or <code>fp16</code>.</td>
+<td><code>str</code></td>
+<td><code>fp32</code></td>
+</tr>
+<tr>
+<td><code>enable_mkldnn</code></td>
+<td><b>Meaning:</b> Whether to enable MKL-DNN accelerated inference.<br/>
+<b>Description:</b>
+If MKL-DNN is unavailable or the model does not support MKL-DNN acceleration, acceleration will not be used even if this flag is set.
+</td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>mkldnn_cache_capacity</code></td>
+<td>
+<b>Meaning:</b> MKL-DNN cache capacity.
+</td>
+<td><code>int</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>cpu_threads</code></td>
+<td><b>Meaning:</b> Number of threads used for inference on CPU.</td>
+<td><code>int</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>paddlex_config</code></td>
+<td><b>Meaning:</b> Path to the PaddleX pipeline configuration file.</td>
+<td><code>str</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+<b>The following parameters have been deprecated in version 2.x and are listed here for the convenience of users of previous versions.</b>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Parameter Description</th>
+<th>Parameter Type</th>
+<th>Default Value</th>
+</tr>
+</thead>
+<tbody>
 <tr>
 <td><code>det_model_dir</code></td>
-<td>Deprecated. Please refer <code>text_detection_model_dir</code> , they cannot be specified simultaneously with the new parameters.</td>
+<td><b>Description:</b>Deprecated. Please refer <code>text_detection_model_dir</code> , they cannot be specified simultaneously with the new parameters.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>det_limit_side_len</code></td>
-<td>Deprecated. Please refer <code>text_det_limit_side_len</code> , they cannot be specified simultaneously with the new parameters.</td>
+<td><b>Description:</b>Deprecated. Please refer <code>text_det_limit_side_len</code> , they cannot be specified simultaneously with the new parameters.</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>det_limit_type</code></td>
-<td>Deprecated. Please refer <code>text_det_limit_type</code> , they cannot be specified simultaneously with the new parameters.
+<td><b>Description:</b>Deprecated. Please refer <code>text_det_limit_type</code> , they cannot be specified simultaneously with the new parameters.
 </td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>det_db_thresh</code></td>
-<td>Deprecated. Please refer <code>text_det_thresh</code> , they cannot be specified simultaneously with the new parameters.
+<td><b>Description:</b>Deprecated. Please refer <code>text_det_thresh</code> , they cannot be specified simultaneously with the new parameters.
 </td>
 <td><code>float</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>det_db_box_thresh</code></td>
-<td>Deprecated. Please refer <code>text_det_box_thresh</code> , they cannot be specified simultaneously with the new parameters.
+<td><b>Description:</b>Deprecated. Please refer <code>text_det_box_thresh</code> , they cannot be specified simultaneously with the new parameters.
 </td>
 <td><code>float</code></td>
 <td></td>
@@ -959,101 +1222,38 @@ Please note that not every <code>ocr_version</code> supports all <code>lang</cod
 </tr>
 <tr>
 <td><code>rec_model_dir</code></td>
-<td>Deprecated. Please refer <code>text_recognition_model_dir</code> , they cannot be specified simultaneously with the new parameters.</td>
+<td><b>Description:</b>Deprecated. Please refer <code>text_recognition_model_dir</code> , they cannot be specified simultaneously with the new parameters.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>rec_batch_num</code></td>
-<td>Deprecated. Please refer <code>text_recognition_batch_size</code> , they cannot be specified simultaneously with the new parameters.</td>
+<td><b>Description:</b>Deprecated. Please refer <code>text_recognition_batch_size</code> , they cannot be specified simultaneously with the new parameters.</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_angle_cls</code></td>
-<td>Deprecated. Please refer <code>use_textline_orientation</code> , they cannot be specified simultaneously with the new parameters.</td>
+<td><b>Description:</b>Deprecated. Please refer <code>use_textline_orientation</code> , they cannot be specified simultaneously with the new parameters.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>cls_model_dir</code></td>
-<td>Deprecated. Please refer <code>textline_orientation_model_dir</code> , they cannot be specified simultaneously with the new parameters.</td>
+<td><b>Description:</b>Deprecated. Please refer <code>textline_orientation_model_dir</code> , they cannot be specified simultaneously with the new parameters.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>cls_batch_num</code></td>
-<td>Deprecated. Please refer <code>textline_orientation_batch_size</code> , they cannot be specified simultaneously with the new parameters.</td>
+<td><b>Description:</b>Deprecated. Please refer <code>textline_orientation_batch_size</code> , they cannot be specified simultaneously with the new parameters.</td>
 <td><code>int</code></td>
-<td></td>
-</tr>
-<tr>
-<td><code>device</code></td>
-<td>Device for inference. Supports specifying a specific card number:
-<ul>
-<li><b>CPU</b>: <code>cpu</code> indicates using CPU for inference;</li>
-<li><b>GPU</b>: <code>gpu:0</code> indicates using the 1st GPU for inference;</li>
-<li><b>NPU</b>: <code>npu:0</code> indicates using the 1st NPU for inference;</li>
-<li><b>XPU</b>: <code>xpu:0</code> indicates using the 1st XPU for inference;</li>
-<li><b>MLU</b>: <code>mlu:0</code> indicates using the 1st MLU for inference;</li>
-<li><b>DCU</b>: <code>dcu:0</code> indicates using the 1st DCU for inference;</li>
-</ul>If not set, the pipeline initialized value for this parameter will be used. During initialization, the local GPU device 0 will be preferred; if unavailable, the CPU device will be used.
-</td>
-<td><code>str</code></td>
-<td></td>
-</tr>
-<tr>
-<td><code>enable_hpi</code></td>
-<td>Whether to enable high-performance inference.</td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>use_tensorrt</code></td>
-<td>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
-For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6), and it is recommended to install TensorRT 8.6.1.6.<br/>
-
-</td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>precision</code></td>
-<td>Computational precision, such as fp32, fp16.</td>
-<td><code>str</code></td>
-<td><code>fp32</code></td>
-</tr>
-<tr>
-<td><code>enable_mkldnn</code></td>
-<td>Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.
-</td>
-<td><code>bool</code></td>
-<td><code>True</code></td>
-</tr>
-<tr>
-<td><code>mkldnn_cache_capacity</code></td>
-<td>
-MKL-DNN cache capacity.
-</td>
-<td><code>int</code></td>
-<td><code>10</code></td>
-</tr>
-<tr>
-<td><code>cpu_threads</code></td>
-<td>Number of threads used for inference on CPU.</td>
-<td><code>int</code></td>
-<td><code>8</code></td>
-</tr>
-<tr>
-<td><code>paddlex_config</code></td>
-<td>Path to the PaddleX pipeline configuration file.</td>
-<td><code>str</code></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 </details>
-<br />
+<br/>
 
 Results are printed to the terminal:  
 
@@ -1087,16 +1287,18 @@ If `save_path` is specified, the visualization results will be saved under `save
 
 The command-line method is for quick testing. For project integration, you can achieve OCR inference with just a few lines of code:  
 
-```python  
-from paddleocr import PaddleOCR  
+```python
+from paddleocr import PaddleOCR
 
+# Uses PP-OCRv6 models by default
 ocr = PaddleOCR(
     use_doc_orientation_classify=False, # Disables document orientation classification model via this parameter
     use_doc_unwarping=False, # Disables text image rectification model via this parameter
     use_textline_orientation=False, # Disables text line orientation classification model via this parameter
 )
 # ocr = PaddleOCR(lang="en") # Uses English model by specifying language parameter
-# ocr = PaddleOCR(ocr_version="PP-OCRv4") # Uses other PP-OCR versions via version parameter
+# ocr = PaddleOCR(ocr_version="PP-OCRv5") # Switches to PP-OCRv5 version via ocr_version parameter
+# ocr = PaddleOCR(ocr_version="PP-OCRv4") # Switches to PP-OCRv4 version via ocr_version parameter
 # ocr = PaddleOCR(device="gpu") # Enables GPU acceleration for model inference via device parameter
 # ocr = PaddleOCR(
 #     text_detection_model_name="PP-OCRv5_mobile_det",
@@ -1104,7 +1306,7 @@ ocr = PaddleOCR(
 #     use_doc_orientation_classify=False,
 #     use_doc_unwarping=False,
 #     use_textline_orientation=False,
-# ) # Switch to PP-OCRv5_mobile models
+# ) # Switch to PP-OCRv5 mobile models
 result = ocr.predict("./general_ocr_002.png")  
 for res in result:  
     res.print()  
@@ -1128,97 +1330,152 @@ In the above Python script, the following steps are performed:
   <tbody>
 <tr>
 <td><code>doc_orientation_classify_model_name</code></td>
-<td>Name of the document orientation classification model. If set to <code>None</code>, the pipeline's default model will be used.</td>
+<td><b>Meaning:</b>Name of the document orientation classification model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's default model will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_dir</code></td>
-<td>Directory path of the document orientation classification model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the document orientation classification model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_name</code></td>
-<td>Name of the text image unwarping model. If set to <code>None</code>, the pipeline's default model will be used.</td>
+<td><b>Meaning:</b>Name of the text image unwarping model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's default model will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_dir</code></td>
-<td>Directory path of the text image unwarping model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text image unwarping model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_detection_model_name</code></td>
-<td>Name of the text detection model. If set to <code>None</code>, the pipeline's default model will be used.</td>
+<td><b>Meaning:</b>Name of the text detection model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's default model will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_detection_model_dir</code></td>
-<td>Directory path of the text detection model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text detection model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>textline_orientation_model_name</code></td>
-<td>Name of the text line orientation model. If set to <code>None</code>, the pipeline's default model will be used.</td>
+<td><b>Meaning:</b>Name of the text line orientation model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's default model will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>textline_orientation_model_dir</code></td>
-<td>Directory path of the text line orientation model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text line orientation model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>textline_orientation_batch_size</code></td>
-<td>Batch size for the text line orientation model. If set to <code>None</code>, the default batch size will be <code>1</code>.</td>
+<td><b>Meaning:</b>Batch size for the text line orientation model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the default batch size will be <code>1</code>.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_recognition_model_name</code></td>
-<td>Name of the text recognition model. If set to <code>None</code>, the pipeline's default model will be used.</td>
+<td><b>Meaning:</b>Name of the text recognition model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's default model will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_recognition_model_dir</code></td>
-<td>Directory path of the text recognition model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text recognition model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_recognition_batch_size</code></td>
-<td>Batch size for the text recognition model. If set to <code>None</code>, the default batch size will be <code>1</code>.</td>
+<td><b>Meaning:</b>Batch size for the text recognition model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the default batch size will be <code>1</code>.</td>
+<td><code>int|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>text_recognition_model_name</code></td>
+<td><b>Meaning:</b>Name of the text recognition model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's default model will be used.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>text_recognition_model_dir</code></td>
+<td><b>Meaning:</b>Directory path of the text recognition model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the official model will be downloaded.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>text_recognition_batch_size</code></td>
+<td><b>Meaning:</b>Batch size for the text recognition model. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the default batch size will be <code>1</code>.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>Whether to load and use the document orientation classification module. If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
+<td><b>Meaning:</b>Whether to load and use the document orientation classification module. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>Whether to load and use the text image unwarping module. If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
+<td><b>Meaning:</b>Whether to load and use the text image unwarping module. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_textline_orientation</code></td>
-<td>Whether to load and use the text line orientation module. If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
+<td><b>Meaning:</b>Whether to load and use the text line orientation module. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>True</code>) will be used.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_det_limit_side_len</code></td>
-<td>Image side length limitation for text detection.
+<td><b>Meaning:</b>Image side length limitation for text detection. <br/>
+<b>Description:</b>
  <ul>
  <li><b>int</b>: Any integer greater than <code>0</code>;</li>
  <li><b>None</b>: If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>64</code>) will be used.</li>
@@ -1229,7 +1486,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_limit_type</code></td>
-<td>Type of side length limit for text detection.
+<td><b>Meaning:</b>Type of side length limit for text detection. <br/>
+<b>Description:</b>
  <ul>
  <li><b>str</b>: Supports <code>min</code> and <code>max</code>, where <code>min</code> means ensuring the shortest side of the image is not smaller than <code>det_limit_side_len</code>, and <code>max</code> means ensuring the longest side of the image is not larger than <code>limit_side_len</code>;</li>
  <li><b>None</b>: If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>min</code>) will be used.</li>
@@ -1240,7 +1498,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_thresh</code></td>
-<td>Pixel threshold for text detection. Pixels with scores higher than this threshold in the output probability map will be considered text pixels.
+<td><b>Meaning:</b>Pixel threshold for text detection. Pixels with scores higher than this threshold in the output probability map will be considered text pixels. <br/>
+<b>Description:</b>
  <ul>
  <li><b>float</b>: Any floating-point number greater than <code>0</code>;
 <li><b>None</b>: If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>0.3</code>) will be used.</li></li></ul>
@@ -1250,7 +1509,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_box_thresh</code></td>
-<td>Box threshold for text detection. A detection result will be considered a text region if the average score of all pixels within the bounding box is higher than this threshold.
+<td><b>Meaning:</b>Box threshold for text detection. A detection result will be considered a text region if the average score of all pixels within the bounding box is higher than this threshold. <br/>
+<b>Description:</b>
  <ul>
  <li><b>float</b>: Any floating-point number greater than <code>0</code>;
  <li><b>None</b>: If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>0.6</code>) will be used.</li></li></ul>
@@ -1260,7 +1520,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_unclip_ratio</code></td>
-<td>Dilation coefficient for text detection. This method is used to dilate the text region, and the larger this value, the larger the dilated area.
+<td><b>Meaning:</b>Dilation coefficient for text detection. This method is used to dilate the text region, and the larger this value, the larger the dilated area. <br/>
+<b>Description:</b>
  <ul>
  <li><b>float</b>: Any floating-point number greater than <code>0</code>;
 <li><b>None</b>: If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>2.0</code>) will be used.</li></li></ul>
@@ -1270,13 +1531,14 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_input_shape</code></td>
-<td>Input shape for text detection.</td>
+<td><b>Meaning:</b>Input shape for text detection.</td>
 <td><code>tuple</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_rec_score_thresh</code></td>
-<td>Recognition score threshold for text. Text results with scores higher than this threshold will be retained.
+<td><b>Meaning:</b>Recognition score threshold for text. Text results with scores higher than this threshold will be retained. <br/>
+<b>Description:</b>
  <ul>
 <li><b>float</b>: Any floating-point number greater than <code>0</code>;
     <li><b>None</b>: If set to <code>None</code>, the pipeline's initialized value for this parameter (defaults to <code>0.0</code>, i.e., no threshold) will be used.</li></li></ul>
@@ -1286,13 +1548,14 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_rec_input_shape</code></td>
-<td>Input shape for text recognition.</td>
+<td><b>Meaning:</b>Input shape for text recognition.</td>
 <td><code>tuple</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>lang</code></td>
-<td>OCR model language to use.
+<td><b>Meaning:</b>OCR model language to use.<br/>
+<b>Description:</b>
 The table in the appendix lists all the supported languages.
 </td>
 <td><code>str|None</code></td>
@@ -1300,8 +1563,10 @@ The table in the appendix lists all the supported languages.
 </tr>
 <tr>
 <td><code>ocr_version</code></td>
-<td>Version of OCR models.
+<td><b>Meaning:</b>Version of OCR models. <br/>
+<b>Description:</b>
 <ul>
+<li><b>PP-OCRv6</b>: Use PP-OCRv6 series models;</li>
 <li><b>PP-OCRv5</b>: Use PP-OCRv5 series models;</li>
 <li><b>PP-OCRv4</b>: Use PP-OCRv4 series models;</li>
 <li><b>PP-OCRv3</b>: Use PP-OCRv3 series models.</li>
@@ -1313,7 +1578,9 @@ Please note that not every <code>ocr_version</code> supports all <code>lang</cod
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>Device for inference. Supports specifying a specific card number:
+<td><b>Meaning:</b>Device for inference. <br/>
+<b>Description:</b>
+Supports specifying a specific card number:
 <ul>
 <li><b>CPU</b>: e.g., <code>cpu</code> for CPU inference;</li>
 <li><b>GPU</b>: e.g., <code>gpu:0</code> for inference on the 1st GPU;</li>
@@ -1321,6 +1588,8 @@ Please note that not every <code>ocr_version</code> supports all <code>lang</cod
 <li><b>XPU</b>: e.g., <code>xpu:0</code> for inference on the 1st XPU;</li>
 <li><b>MLU</b>: e.g., <code>mlu:0</code> for inference on the 1st MLU;</li>
 <li><b>DCU</b>: e.g., <code>dcu:0</code> for inference on the 1st DCU;</li>
+<li><b>MetaX GPU</b>: e.g., <code>metax_gpu:0</code> for inference on the 1st MetaX GPU;</li>
+<li><b>Iluvatar GPU</b>: e.g., <code>iluvatar_gpu:0</code> for inference on the 1st Iluvatar GPU;</li>
 <li><b>None</b>: If set to <code>None</code>, the pipeline initialized value for this parameter will be used. During initialization, the local GPU device 0 will be preferred; if unavailable, the CPU device will be used.</li>
 </ul>
 </td>
@@ -1328,14 +1597,27 @@ Please note that not every <code>ocr_version</code> supports all <code>lang</cod
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_static</code>, <code>paddle_dynamic</code>, and <code>transformers</code>. When left as <code>None</code>, PaddleOCR preserves the behavior of earlier versions, which in most configurations is equivalent to <code>paddle</code>. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>Meaning:</b> Inference-engine configuration.<br/><b>Description:</b> Recommended together with <code>engine</code>. For supported fields, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>Whether to enable high-performance inference.</td>
+<td><b>Meaning:</b>Whether to enable high-performance inference.</td>
 <td><code>bool</code></td>
-<td><code>False</code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<td><b>Meaning:</b>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<b>Description:</b>
 For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6), and it is recommended to install TensorRT 8.6.1.6.<br/>
 
 </td>
@@ -1344,33 +1626,35 @@ For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6)
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>Computational precision, such as fp32, fp16.</td>
+<td><b>Meaning:</b>Computational precision, such as <code>"fp32"</code>, <code>"fp16"</code>.</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
-<td>Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
+<td><b>Meaning:</b>Whether to enable MKL-DNN acceleration for inference.<br/>
+<b>Description:</b> 
+If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 </tr>
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN cache capacity.
+<b>Meaning:</b>MKL-DNN cache capacity.
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>Number of threads used for CPU inference.</td>
+<td><b>Meaning:</b>Number of threads used for CPU inference.</td>
 <td><code>int</code></td>
-<td><code>8</code></td>
+<td><code>10</code></td>
 </tr>
 <tr>
 <td><code>paddlex_config</code></td>
-<td>Path to the PaddleX pipeline configuration file.</td>
+<td><b>Meaning:</b>Path to the PaddleX pipeline configuration file.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
@@ -1391,7 +1675,8 @@ MKL-DNN cache capacity.
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>Data to be predicted, supporting multiple input types, required.
+<td><b>Meaning:</b>Data to be predicted, supporting multiple input types, required.<br/>
+<b>Description:</b>
 <ul>
 <li><b>Python Var</b>: Image data represented by <code>numpy.ndarray</code>;</li>
 <li><b>str</b>: Local path of an image file or PDF file: <code>/root/data/img.jpg</code>; <b>URL link</b>, such as the network URL of an image file or PDF file: <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_002.png">example</a>; <b>local directory</b>, which needs to contain images to be predicted, such as the local path: <code>/root/data/</code> (currently, predicting PDF files in the directory is not supported; PDF files need to specify the specific file path);</li>
@@ -1403,48 +1688,60 @@ MKL-DNN cache capacity.
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>Whether to use the document orientation classification module during inference.</td>
+<td><b>Meaning:</b>Whether to use the document orientation classification module during inference.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>Whether to use the text image unwarping module during inference.</td>
+<td><b>Meaning:</b>Whether to use the text image unwarping module during inference.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <td><code>use_textline_orientation</code></td>
-<td>Whether to use the text line orientation classification module during inference.</td>
+<td><b>Meaning:</b>Whether to use the text line orientation classification module during inference.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <td><code>text_det_limit_side_len</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters.<br/> 
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <td><code>text_det_limit_type</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <td><code>text_det_thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <td><code>text_det_box_thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <td><code>text_det_unclip_ratio</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <td><code>text_rec_score_thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </table>
@@ -1594,9 +1891,9 @@ If you need to apply the general OCR pipeline directly in your Python project, y
 
 Additionally, PaddleOCR provides two other deployment methods, detailed as follows:
 
-🚀 **High-Performance Inference**: In real-world production environments, many applications have stringent performance requirements (especially for response speed) to ensure system efficiency and smooth user experience. To address this, PaddleOCR offers high-performance inference capabilities, which deeply optimize model inference and pre/post-processing to achieve significant end-to-end speed improvements. For detailed high-performance inference workflows, refer to the [High-Performance Inference Guide](../deployment/high_performance_inference.en.md).
+🚀 **High-Performance Inference**: In real-world production environments, many applications have stringent performance requirements (especially for response speed) to ensure system efficiency and smooth user experience. To address this, PaddleOCR offers high-performance inference capabilities, which deeply optimize model inference and pre/post-processing to achieve significant end-to-end speed improvements. For detailed high-performance inference workflows, refer to the [High-Performance Inference Guide](../inference_deployment/local_inference/high_performance_inference.en.md).
 
-☁️ **Service Deployment**: Service deployment is a common form of deployment in production environments. By encapsulating inference functionality as a service, clients can access these services via network requests to obtain inference results. For detailed pipeline service deployment workflows, refer to the [Service Deployment Guide](../deployment/serving.en.md).
+☁️ **Service Deployment**: Service deployment is a common form of deployment in production environments. By encapsulating inference functionality as a service, clients can access these services via network requests to obtain inference results. For detailed pipeline service deployment workflows, refer to the [Service Deployment Guide](../inference_deployment/serving/serving.en.md).
 
 Below are the API reference for basic service deployment and examples of multi-language service calls:
 
@@ -1689,7 +1986,7 @@ Below are the API reference for basic service deployment and examples of multi-l
 <tr>
 <td><code>file</code></td>
 <td><code>string</code></td>
-<td>A server-accessible URL to an image or PDF file, or the Base64-encoded content of such a file. By default, for PDF files with more than 10 pages, only the first 10 pages are processed.<br /> To remove the page limit, add the following configuration to the pipeline config file:
+<td>A server-accessible URL to image files (including TIFF; multi-page TIFF is processed page by page) or PDF file, or the Base64-encoded content of such a file. By default, for PDF or multi-page TIFF files with more than 10 pages, only the first 10 pages are processed.<br /> To remove the page limit, add the following configuration to the pipeline config file:
 <pre><code>Serving:
   extra:
     max_num_input_imgs: null
@@ -1700,7 +1997,7 @@ Below are the API reference for basic service deployment and examples of multi-l
 <tr>
 <td><code>fileType</code></td>
 <td><code>integer</code> | <code>null</code></td>
-<td>File type. <code>0</code> for PDF, <code>1</code> for image. If omitted, the type is inferred from the URL.</td>
+<td>File type. <code>0</code> for PDF, <code>1</code> for image (including TIFF). If omitted, the type is inferred from the URL.</td>
 <td>No</td>
 </tr>
 <tr>
@@ -1804,6 +2101,7 @@ If neither the request body nor the configuration file is set (If <code>visualiz
 </tr>
 </tbody>
 </table>
+<p>Image fields in the element schema below (e.g. <code>ocrImage</code>, <code>docPreprocessingImage</code>, <code>inputImage</code>) are returned inline as Base64 strings by default; when the server is configured to return URLs, those values become pre-signed URLs while the field types remain unchanged. See the "Returning Binary Content as URLs" section of the <a href="../inference_deployment/serving/serving.en.md">Serving Deployment Guide</a> for configuration.</p>
 <p>Each element in <code>ocrResults</code> is an <code>object</code> with the following attributes:</p>
 <table>
 <thead>
@@ -1822,17 +2120,17 @@ If neither the request body nor the configuration file is set (If <code>visualiz
 <tr>
 <td><code>ocrImage</code></td>
 <td><code>string</code> | <code>null</code></td>
-<td>OCR result image with detected text regions highlighted. JPEG format, Base64-encoded.</td>
+<td>OCR result image with detected text regions highlighted. JPEG format, Base64-encoded by default; returned as a pre-signed URL when URL-return mode is enabled.</td>
 </tr>
 <tr>
 <td><code>docPreprocessingImage</code></td>
 <td><code>string</code> | <code>null</code></td>
-<td>Visualization of preprocessing results. JPEG format, Base64-encoded.</td>
+<td>Visualization of preprocessing results. JPEG format, Base64-encoded by default; returned as a pre-signed URL when URL-return mode is enabled.</td>
 </tr>
 <tr>
 <td><code>inputImage</code></td>
 <td><code>string</code> | <code>null</code></td>
-<td>Input image. JPEG format, Base64-encoded.</td>
+<td>Input image. JPEG format, Base64-encoded by default; returned as a pre-signed URL when URL-return mode is enabled.</td>
 </tr>
 </tbody>
 </table>
@@ -2304,7 +2602,7 @@ Command line mode:
 # Specify the local model path via --text_detection_model_dir
 paddleocr ocr -i ./general_ocr_002.png --text_detection_model_dir your_det_model_path
 
-# PP-OCRv5_server_det model is used as the default text detection model. If you do not fine-tune this model, modify the model name by using --text_detection_model_name
+# Modify the model name via --text_detection_model_name
 paddleocr ocr -i ./general_ocr_002.png --text_detection_model_name PP-OCRv5_mobile_det --text_detection_model_dir your_v5_mobile_det_model_path
 ```
 
@@ -2317,10 +2615,76 @@ from paddleocr import PaddleOCR
 #  Specify the local model path via text_detection_model_dir
 pipeline = PaddleOCR(text_detection_model_dir="./your_det_model_path")
 
-# PP-OCRv5_server_det model is used as the default text detection model. If you do not fine-tune this model, modify the model name by using text_detection_model_name
+# Modify the model name via text_detection_model_name
 # pipeline = PaddleOCR(text_detection_model_name="PP-OCRv5_mobile_det", text_detection_model_dir="./your_v5_mobile_det_model_path")
 
 ```
+
+The example above uses the local `paddle_static` inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md), and then run the following code:
+
+```python
+from paddleocr import PaddleOCR
+
+# Uses PP-OCRv6 models by default
+ocr = PaddleOCR(
+    use_doc_orientation_classify=False, # Disable document orientation classification
+    use_doc_unwarping=False, # Disable document unwarping
+    use_textline_orientation=False, # Disable textline orientation classification
+    engine="transformers",
+)
+# ocr = PaddleOCR(lang="en", engine="transformers") # Use the English model
+# ocr = PaddleOCR(ocr_version="PP-OCRv5", engine="transformers") # Switch to PP-OCRv5 version
+# ocr = PaddleOCR(ocr_version="PP-OCRv4", engine="transformers") # Switch to PP-OCRv4 version
+# ocr = PaddleOCR(device="gpu", engine="transformers") # Use GPU for inference
+# ocr = PaddleOCR(
+#     text_detection_model_name="PP-OCRv5_server_det",
+#     text_recognition_model_name="PP-OCRv5_server_rec",
+#     use_doc_orientation_classify=False,
+#     use_doc_unwarping=False,
+#     use_textline_orientation=False,
+#     engine="transformers",
+# ) # Switch to PP-OCRv5 server models
+result = ocr.predict("./general_ocr_002.png")
+for res in result:
+    res.print()
+    res.save_to_img("output")
+    res.save_to_json("output")
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md), and then run the following code:
+
+```python
+from paddleocr import PaddleOCR
+
+# Uses PP-OCRv6 models by default
+ocr = PaddleOCR(
+    use_doc_orientation_classify=False, # Disable document orientation classification
+    use_doc_unwarping=False, # Disable document unwarping
+    use_textline_orientation=False, # Disable textline orientation classification
+    engine="onnxruntime",
+)
+# ocr = PaddleOCR(lang="en", engine="onnxruntime") # Use the English model
+# ocr = PaddleOCR(ocr_version="PP-OCRv5", engine="onnxruntime") # Switch to PP-OCRv5 version
+# ocr = PaddleOCR(ocr_version="PP-OCRv4", engine="onnxruntime") # Switch to PP-OCRv4 version
+# ocr = PaddleOCR(device="gpu", engine="onnxruntime") # Use GPU for inference
+# ocr = PaddleOCR(
+#     text_detection_model_name="PP-OCRv5_server_det",
+#     text_recognition_model_name="PP-OCRv5_server_rec",
+#     use_doc_orientation_classify=False,
+#     use_doc_unwarping=False,
+#     use_textline_orientation=False,
+#     engine="onnxruntime",
+# ) # Switch to PP-OCRv5 server models
+result = ocr.predict("./general_ocr_002.png")
+for res in result:
+    res.print()
+    res.save_to_img("output")
+    res.save_to_json("output")
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
 
 #### 4.2.2 Specify the local model path through the configuration file
 
@@ -2348,7 +2712,7 @@ SubModules:
     limit_type: min
     max_side_limit: 4000  
     model_dir: null # Replace with the path to your fine-tuned text detection model weights  
-    model_name: PP-OCRv5_server_det  # If the name of the fine-tuned model is different from the default model name, please modify it here as well
+    model_name: PP-OCRv6_medium_det  # If the name of the fine-tuned model is different from the default model name, please modify it here as well
     module_name: text_detection  
     thresh: 0.3  
     unclip_ratio: 1.5  
@@ -2360,7 +2724,7 @@ SubModules:
   TextRecognition:  
     batch_size: 6  
     model_dir: null # Replace with the path to your fine-tuned text recognition model weights  
-    model_name: PP-OCRv5_server_rec  # If the name of the fine-tuned model is different from the default model name, please modify it here as well
+    model_name: PP-OCRv6_medium_rec  # If the name of the fine-tuned model is different from the default model name, please modify it here as well
     module_name: text_recognition  
     score_thresh: 0.0  
 ......  
@@ -2493,10 +2857,14 @@ pipeline = PaddleOCR(paddlex_config="PaddleOCR.yaml")
    </tr>
   </thead>
   <tbody>
-   <tr>
-     <td><code>PP-OCRv5</code></td>
-     <td><code>ch</code>, <code>en</code>, <code>fr</code>, <code>de</code>, <code>japan</code>, <code>korean</code>, <code>chinese_cht</code>, <code>af</code>, <code>it</code>, <code>es</code>, <code>bs</code>, <code>pt</code>, <code>cs</code>, <code>cy</code>, <code>da</code>, <code>et</code>, <code>ga</code>, <code>hr</code>, <code>hu</code>, <code>rslatin</code>, <code>id</code>, <code>oc</code>, <code>is</code>, <code>lt</code>, <code>mi</code>, <code>ms</code>, <code>nl</code>, <code>no</code>, <code>pl</code>, <code>sk</code>, <code>sl</code>, <code>sq</code>, <code>sv</code>, <code>sw</code>, <code>tl</code>, <code>tr</code>, <code>uz</code>, <code>la</code>, <code>ru</code>, <code>be</code>, <code>uk</code></td>
-   </tr>
+    <tr>
+      <td><code>PP-OCRv6</code></td>
+      <td><code>ch</code>, <code>chinese_cht</code>, <code>en</code>, <code>japan</code>, <code>af</code>, <code>az</code>, <code>bs</code>, <code>ca</code>, <code>cs</code>, <code>cy</code>, <code>da</code>, <code>de</code>, <code>es</code>, <code>et</code>, <code>eu</code>, <code>fi</code>, <code>fr</code>, <code>ga</code>, <code>gl</code>, <code>hr</code>, <code>hu</code>, <code>id</code>, <code>is</code>, <code>it</code>, <code>ku</code>, <code>la</code>, <code>lb</code>, <code>lt</code>, <code>lv</code>, <code>mi</code>, <code>ms</code>, <code>mt</code>, <code>nl</code>, <code>no</code>, <code>oc</code>, <code>pl</code>, <code>pt</code>, <code>qu</code>, <code>rm</code>, <code>ro</code>, <code>rs_latin</code>, <code>sk</code>, <code>sl</code>, <code>sq</code>, <code>sv</code>, <code>sw</code>, <code>tl</code>, <code>tr</code>, <code>uz</code>, <code>vi</code>, <code>french</code>, <code>german</code>. <code>PP-OCRv6_tiny</code> does not support <code>japan</code>; set <code>PP-OCRv6_tiny_det</code>/<code>PP-OCRv6_tiny_rec</code> explicitly.</td>
+    </tr>
+    <tr>
+      <td><code>PP-OCRv5</code></td>
+      <td><code>ch</code>, <code>en</code>, <code>fr</code>, <code>de</code>, <code>japan</code>, <code>korean</code>, <code>chinese_cht</code>, <code>af</code>, <code>it</code>, <code>es</code>, <code>bs</code>, <code>pt</code>, <code>cs</code>, <code>cy</code>, <code>da</code>, <code>et</code>, <code>ga</code>, <code>hr</code>, <code>hu</code>, <code>rslatin</code>, <code>id</code>, <code>oc</code>, <code>is</code>, <code>lt</code>, <code>mi</code>, <code>ms</code>, <code>nl</code>, <code>no</code>, <code>pl</code>, <code>sk</code>, <code>sl</code>, <code>sq</code>, <code>sv</code>, <code>sw</code>, <code>tl</code>, <code>tr</code>, <code>uz</code>, <code>la</code>, <code>ru</code>, <code>be</code>, <code>uk</code>, <code>th</code>, <code>el</code>, <code>az</code>, <code>ku</code>, <code>lv</code>, <code>mt</code>, <code>pi</code>, <code>ro</code>, <code>vi</code>, <code>fi</code>, <code>eu</code>, <code>gl</code>, <code>lb</code>, <code>rm</code>, <code>ca</code>, <code>qu</code>, <code>te</code>, <code>sr</code>, <code>bg</code>, <code>mn</code>, <code>ab</code>, <code>ady</code>, <code>kbd</code>, <code>av</code>, <code>dar</code>, <code>inh</code>, <code>ce</code>, <code>lki</code>, <code>lez</code>, <code>tab</code>, <code>kk</code>, <code>ky</code>, <code>tg</code>, <code>mk</code>, <code>tt</code>, <code>cv</code>, <code>ba</code>, <code>mhr</code>, <code>mo</code>, <code>udm</code>, <code>kv</code>, <code>os</code>, <code>bua</code>, <code>xal</code>, <code>tyv</code>, <code>sah</code>, <code>kaa</code>, <code>ar</code>, <code>fa</code>, <code>ug</code>, <code>ur</code>, <code>ps</code>, <code>ku</code>, <code>sd</code>, <code>bal</code>, <code>hi</code>, <code>mr</code>, <code>ne</code>, <code>bh</code>, <code>mai</code>, <code>ang</code>, <code>bho</code>, <code>mah</code>, <code>sck</code>, <code>new</code>, <code>gom</code>, <code>sa</code>, <code>bgc</code>, <code>ta</code></td>
+    </tr>
    <tr>
      <td><code>PP-OCRv4</code></td>
      <td><code>ch</code>, <code>en</code></td>

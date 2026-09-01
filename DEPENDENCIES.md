@@ -34,6 +34,8 @@
 |------|---------|------|---------|
 | `celery` | >=5.5.3 | 异步任务队列 | ✅ 已在requirements.txt |
 | `fonttools` | >=4.60.1 | 字体处理 | ✅ 已在requirements.txt |
+| `paddleocr` | >=3.7.0,<3.8.0 | 本地图片文字识别（可选） | ✅ 已在requirements.txt |
+| `paddlepaddle` | 平台相关 | PaddleOCR 推理运行时（可选） | 启动/打包脚本按平台安装 |
 
 ### 安装后端依赖
 

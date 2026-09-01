@@ -22,6 +22,7 @@ comments: true
 在本产线中，您可以根据下方的基准测试数据选择使用的模型。
 
 > 推理耗时仅包含模型推理耗时，不包含前后处理耗时。
+> 在带有 [常规模式 / 高性能模式] 标记的推理耗时列中，`常规模式` 对应本地推理引擎 `paddle_static`。
 
 <details>
 <summary><b>文档图像方向分类模块（可选）：</b></summary>
@@ -376,7 +377,7 @@ comments: true
               <li><strong>软件环境：</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -398,7 +399,7 @@ comments: true
             <td>常规模式</td>
             <td>FP32精度 / 无TRT加速</td>
             <td>FP32精度 / 8线程</td>
-            <td>PaddleInference</td>
+            <td><code>paddle_static</code></td>
         </tr>
         <tr>
             <td>高性能模式</td>
@@ -436,6 +437,18 @@ paddleocr formula_recognition_pipeline -i ./general_formula_recognition_001.png 
 paddleocr formula_recognition_pipeline -i ./general_formula_recognition_001.png --device gpu
 ```
 
+上述命令默认使用本地推理引擎 `paddle_static`。如需运行，请先参考[飞桨框架安装说明](../paddlepaddle_installation.md)安装 PaddlePaddle。
+
+如果选择 `transformers` 作为推理引擎，请先参考[推理引擎文档](../inference_deployment/local_inference/inference_engine.md)完成 Transformers 环境配置，然后执行如下命令：
+
+```bash
+# 使用 transformers 引擎进行推理
+paddleocr formula_recognition_pipeline -i https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/pipelines/general_formula_recognition_001.png \
+    --engine transformers
+```
+
+在大多数场景下，默认的 `paddle_static` 推理引擎通常具备更好的推理性能，建议优先使用。
+
 <details><summary><b>命令行支持更多参数设置，点击展开以查看命令行参数的详细说明</b></summary>
 <table>
 <thead>
@@ -449,104 +462,119 @@ paddleocr formula_recognition_pipeline -i ./general_formula_recognition_001.png 
 <tbody>
 <tr>
 <td><code>input</code></td>
-<td>待预测数据，必填。
-如图像文件或者PDF文件的本地路径：<code>/root/data/img.jpg</code>；<b>如URL链接</b>，如图像文件或PDF文件的网络URL：<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/pipelines/general_formula_recognition_001.png">示例</a>；<b>如本地目录</b>，该目录下需包含待预测图像，如本地路径：<code>/root/data/</code>(当前不支持目录中包含PDF文件的预测，PDF文件需要指定到具体文件路径)。
+<td><b>含义：</b>待预测数据，必填。<br/>
+<b>说明：</b>如图像文件或者PDF文件的本地路径：<code>/root/data/img.jpg</code>；<br/>
+<b>如URL链接</b>，如图像文件或PDF文件的网络URL：<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/demo_paper.png">示例</a>；<br/>
+<b>如本地目录</b>，该目录下需包含待预测图像，如本地路径：<code>/root/data/</code>(当前不支持目录中包含PDF文件的预测，PDF文件需要指定到具体文件路径)。
 </td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>save_path</code></td>
-<td>指定推理结果文件保存的路径。如果不设置，推理结果将不会保存到本地。</td>
+<td><b>含义：</b>指定推理结果文件保存的路径。<br/>
+<b>说明：</b>如果不设置，推理结果将不会保存到本地。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_name</code></td>
-<td>文档方向分类模型的名称。如果不设置，将会使用产线默认模型。</td>
+<td><b>含义：</b>文档方向分类模型的名称。<br/>
+<b>说明：</b>如果不设置，将会使用产线默认模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_dir</code></td>
-<td>文档方向分类模型的目录路径。如果不设置，将会下载官方模型。</td>
+<td><b>含义：</b>文档方向分类模型的目录路径。<br/>
+<b>说明：</b>如果不设置，将会下载官方模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_batch_size</code></td>
-<td>文档方向分类模型的batch size。如果不设置，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>文档方向分类模型的batch size。<br/>
+<b>说明：</b>如果不设置，将默认设置batch size为<code>1</code>。</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_name</code></td>
-<td>文本图像矫正模型的名称。如果不设置，将会使用产线默认模型。</td>
+<td><b>含义：</b>文本图像矫正模型的名称。<br/>
+<b>说明：</b>如果不设置，将会使用产线默认模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_dir</code></td>
-<td>文本图像矫正模型的目录路径。如果不设置，将会下载官方模型。</td>
+<td><b>含义：</b>文本图像矫正模型的目录路径。<br/>
+<b>说明：</b>如果不设置，将会下载官方模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_batch_size</code></td>
-<td>文本图像矫正模型的batch size。如果不设置，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>文本图像矫正模型的batch size。<br/>
+<b>说明：</b>如果不设置，将默认设置batch size为<code>1</code>。</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>是否加载并使用文档方向分类模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>是否加载并使用文档方向分类模块。<br/>
+<b>说明：</b>如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>是否加载并使用文本图像矫正模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>是否加载并使用文本图像矫正模块。<br/>
+<b>说明：</b>如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <tr>
 <td><code>layout_detection_model_name</code></td>
-<td>版面区域检测模型的名称。如果不设置，将会使用产线默认模型。</td>
+<td><b>含义：</b>版面区域检测模型的名称。<br/>
+<b>说明：</b>如果不设置，将会使用产线默认模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>layout_detection_model_dir</code></td>
-<td>版面区域检测模型的目录路径。如果不设置，将会下载官方模型。</td>
+<td><b>含义：</b>版面区域检测模型的目录路径。<br/>
+<b>说明：</b>如果不设置，将会下载官方模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>layout_threshold</code></td>
-<td>版面区域检测的阈值，用于过滤掉低置信度预测结果的阈值。
-如 0.2，表示过滤掉所有阈值小于0.2的目标框。如果不设置，将默认使用默认值。
+<td><b>含义：</b>版面区域检测的阈值，用于过滤掉低置信度预测结果的阈值。<br/>
+<b>说明：</b>如 0.2，表示过滤掉所有阈值小于0.2的目标框。如果不设置，将默认使用默认值。
 </td>
 <td><code>float</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>layout_nms</code></td>
-<td>版面检测是否使用后处理NMS。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>版面区域检测是否使用后处理NMS。<br/>
+<b>说明：</b>如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>layout_unclip_ratio</code></td>
-<td>版面区域检测中检测框的边长缩放倍数。
-大于0的浮点数，如 1.1 ，表示将模型输出的检测框中心不变，宽和高都扩张1.1倍。如果不设置，将使用默认值：1.0。
+<td><b>含义：</b>版面区域检测中检测框的边长缩放倍数。<br/>
+<b>说明：</b>大于0的浮点数，如 1.1 ，表示将模型输出的检测框中心不变，宽和高都扩张1.1倍。如果不设置，将使用默认值：1.0。
 </td>
 <td><code>float</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>layout_merge_bboxes_mode</code></td>
-<td>版面区域检测中模型输出的检测框的合并处理模式。
+<td><b>含义：</b>版面区域检测中模型输出的检测框的合并处理模式。<br/>
+<b>说明：</b>
 <ul>
 <li><b>large</b>，设置为large时，表示在模型输出的检测框中，对于互相重叠包含的检测框，只保留外部最大的框，删除重叠的内部框；</li>
 <li><b>small</b>，设置为small，表示在模型输出的检测框中，对于互相重叠包含的检测框，只保留内部被包含的小框，删除重叠的外部框；</li>
@@ -558,36 +586,42 @@ paddleocr formula_recognition_pipeline -i ./general_formula_recognition_001.png 
 </tr>
 <tr>
 <td><code>layout_detection_batch_size</code></td>
-<td>版面区域检测模型的batch size。如果不设置，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>版面区域检测模型的batch size。<br/>
+<b>说明：</b>如果不设置，将默认设置batch size为<code>1</code>。</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <td><code>use_layout_detection</code></td>
-<td>是否加载并使用版面区域检测模块。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>是否加载并使用版面区域检测模块。<br/>
+<b>说明：</b>如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>formula_recognition_model_name</code></td>
-<td>公式识别模型的名称。如果不设置，将会使用产线默认模型。</td>
+<td><b>含义：</b>公式识别模型的名称。<br/>
+<b>说明：</b>如果不设置，将会使用产线默认模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>formula_recognition_model_dir</code></td>
-<td>公式识别模型的目录路径。如果不设置，将会下载官方模型。</td>
+<td><b>含义：</b>公式识别模型的目录路径。<br/>
+<b>说明：</b>如果不设置，将会下载官方模型。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>formula_recognition_batch_size</code></td>
-<td>公式识别模型的batch size。如果不设置，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>公式识别模型的batch size。<br/>
+<b>说明：</b>如果不设置，将默认设置batch size为<code>1</code>。</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>用于推理的设备。支持指定具体卡号：
+<td><b>含义：</b>用于推理的设备。<br/>
+<b>说明：</b>支持指定具体卡号：
 <ul>
 <li><b>CPU</b>：如 <code>cpu</code> 表示使用 CPU 进行推理；</li>
 <li><b>GPU</b>：如 <code>gpu:0</code> 表示使用第 1 块 GPU 进行推理；</li>
@@ -595,6 +629,8 @@ paddleocr formula_recognition_pipeline -i ./general_formula_recognition_001.png 
 <li><b>XPU</b>：如 <code>xpu:0</code> 表示使用第 1 块 XPU 进行推理；</li>
 <li><b>MLU</b>：如 <code>mlu:0</code> 表示使用第 1 块 MLU 进行推理；</li>
 <li><b>DCU</b>：如 <code>dcu:0</code> 表示使用第 1 块 DCU 进行推理；</li>
+<li><b>沐曦 GPU</b>：如 <code>metax_gpu:0</code> 表示使用第 1 块沐曦 GPU 进行推理；</li>
+<li><b>天数 GPU</b>：如 <code>iluvatar_gpu:0</code> 表示使用第 1 块天数 GPU 进行推理；</li>
 </ul>如果不设置， 将默认使用产线初始化的该参数值，初始化时，会优先使用本地的 GPU 0号设备，如果没有，则使用 CPU 设备。
 
 </td>
@@ -602,29 +638,38 @@ paddleocr formula_recognition_pipeline -i ./general_formula_recognition_001.png 
 <td></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>含义：</b>推理引擎。<br><b>说明：</b>支持 <code>None</code>（默认值）、<code>paddle</code>、<code>paddle_static</code>、<code>paddle_dynamic</code>、<code>transformers</code>。保持为默认值 <code>None</code> 时，PaddleOCR 保留旧版本的行为，在大多数配置下等价于 <code>paddle</code>。详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>是否启用高性能推理。</td>
+<td><b>含义：</b>是否启用高性能推理。</td>
 <td><code>bool</code></td>
-<td><code>False</code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>是否启用 Paddle Inference 的 TensorRT 子图引擎。如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
+<td><b>含义：</b>是否启用 Paddle Inference 的 TensorRT 子图引擎。<br/>
+<b>说明：</b>
+如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
 对于 CUDA 11.8 版本的飞桨，兼容的 TensorRT 版本为 8.x（x>=6），建议安装 TensorRT 8.6.1.6。<br/>
-
 </td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>计算精度，如 fp32、fp16。</td>
+<td><b>含义：</b>计算精度，如 <code>fp32</code>、<code>fp16</code>。</td>
 <td><code>str</code></td>
 <td><code>fp32</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
-<td>是否启用 MKL-DNN 加速推理。如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。
+<td><b>含义：</b>是否启用 MKL-DNN 加速推理。<br/>
+<b>说明：</b>
+如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。
 </td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
@@ -632,23 +677,24 @@ paddleocr formula_recognition_pipeline -i ./general_formula_recognition_001.png 
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN 缓存容量。
+<b>含义：</b>MKL-DNN 缓存容量。
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>在 CPU 上进行推理时使用的线程数。</td>
+<td><b>含义：</b>在 CPU 上进行推理时使用的线程数。</td>
 <td><code>int</code></td>
-<td><code>8</code></td>
+<td><code>10</code></td>
 </tr>
 <tr>
 <td><code>paddlex_config</code></td>
-<td>PaddleX产线配置文件路径。</td>
+<td><b>含义：</b>PaddleX产线配置文件路径。</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
+
 </tbody>
 </table>
 </details>
@@ -660,7 +706,7 @@ MKL-DNN 缓存容量。
 {'res': {'input_path': './general_formula_recognition_001.png', 'page_index': None, 'model_settings': {'use_doc_preprocessor': True, 'use_layout_detection': True}, 'doc_preprocessor_res': {'input_path': None, 'page_index': None, 'model_settings': {'use_doc_orientation_classify': True, 'use_doc_unwarping': True}, 'angle': 0}, 'layout_det_res': {'input_path': None, 'page_index': None, 'boxes': [{'cls_id': 2, 'label': 'text', 'score': 0.9855189323425293, 'coordinate': [90.56131, 1086.7773, 658.8992, 1553.2681]}, {'cls_id': 2, 'label': 'text', 'score': 0.9814704060554504, 'coordinate': [93.04651, 127.988556, 664.8587, 396.60892]}, {'cls_id': 2, 'label': 'text', 'score': 0.9767388105392456, 'coordinate': [698.4391, 591.0454, 1293.3676, 748.28345]}, {'cls_id': 2, 'label': 'text', 'score': 0.9712911248207092, 'coordinate': [701.4946, 286.61566, 1299.0099, 391.87457]}, {'cls_id': 2, 'label': 'text', 'score': 0.9709068536758423, 'coordinate': [697.0126, 751.93604, 1290.2236, 883.64453]}, {'cls_id': 2, 'label': 'text', 'score': 0.9689271450042725, 'coordinate': [704.01196, 79.645935, 1304.7493, 187.96674]}, {'cls_id': 2, 'label': 'text', 'score': 0.9683637619018555, 'coordinate': [93.063385, 799.3567, 660.6935, 902.0344]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9660536646842957, 'coordinate': [728.5045, 440.9215, 1224.0634, 570.8518]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9616329669952393, 'coordinate': [722.9789, 1333.5085, 1257.1136, 1468.0432]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9610316753387451, 'coordinate': [756.4525, 1211.323, 1188.0428, 1268.2336]}, {'cls_id': 7, 'label': 'formula', 'score': 0.960993230342865, 'coordinate': [777.51355, 207.87927, 1222.8966, 267.33014]}, {'cls_id': 2, 'label': 'text', 'score': 0.9594196677207947, 'coordinate': [697.5154, 957.6764, 1288.6238, 1033.5211]}, {'cls_id': 2, 'label': 'text', 'score': 0.9593432545661926, 'coordinate': [691.333, 1511.8015, 1282.0968, 1642.5906]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9589930176734924, 'coordinate': [153.89856, 924.2046, 601.0946, 1036.9038]}, {'cls_id': 2, 'label': 'text', 'score': 0.9582098722457886, 'coordinate': [87.02347, 1557.2971, 655.9584, 1632.6912]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9579620957374573, 'coordinate': [810.86975, 1057.0771, 1175.101, 1117.6631]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9557801485061646, 'coordinate': [165.26271, 557.8495, 598.1803, 614.35]}, {'cls_id': 7, 'label': 'formula', 'score': 0.953873872756958, 'coordinate': [116.48187, 713.88416, 614.2181, 774.02576]}, {'cls_id': 2, 'label': 'text', 'score': 0.9521227478981018, 'coordinate': [96.6882, 478.32745, 662.573, 536.5877]}, {'cls_id': 2, 'label': 'text', 'score': 0.944242000579834, 'coordinate': [96.12866, 639.1591, 661.7959, 692.4849]}, {'cls_id': 2, 'label': 'text', 'score': 0.9403323531150818, 'coordinate': [695.9436, 1138.6748, 1286.7242, 1188.0049]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9249663949012756, 'coordinate': [852.90137, 908.64386, 1131.1882, 933.81793]}, {'cls_id': 7, 'label': 'formula', 'score': 0.9249223470687866, 'coordinate': [195.28397, 424.81024, 567.697, 451.1291]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.9173304438591003, 'coordinate': [1246.2393, 1079.0535, 1286.3281, 1104.3323]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.9169507026672363, 'coordinate': [1246.9003, 908.6482, 1288.2013, 934.61426]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.915979266166687, 'coordinate': [1247.0374, 1229.1572, 1287.094, 1254.9805]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.9085646867752075, 'coordinate': [1252.864, 492.1079, 1294.6238, 518.47095]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.9017605781555176, 'coordinate': [1242.1719, 1473.6951, 1283.02, 1498.6316]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.8999755382537842, 'coordinate': [1269.8164, 220.34933, 1299.8589, 247.01102]}, {'cls_id': 7, 'label': 'formula', 'score': 0.8965252041816711, 'coordinate': [96.00711, 235.49493, 295.43823, 265.60016]}, {'cls_id': 2, 'label': 'text', 'score': 0.8954343199729919, 'coordinate': [696.85693, 1286.2236, 1083.3921, 1310.8643]}, {'cls_id': 7, 'label': 'formula', 'score': 0.8952110409736633, 'coordinate': [166.60979, 129.20242, 511.65692, 156.29672]}, {'cls_id': 2, 'label': 'text', 'score': 0.893648624420166, 'coordinate': [725.64575, 396.18964, 1263.0391, 422.76813]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.8922948837280273, 'coordinate': [634.14124, 427.77087, 661.1686, 454.10022]}, {'cls_id': 2, 'label': 'text', 'score': 0.8892256617546082, 'coordinate': [94.483246, 1058.7595, 441.92313, 1082.4875]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.8878197073936462, 'coordinate': [630.4175, 939.3015, 657.7135, 965.36426]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.8831961154937744, 'coordinate': [630.5835, 1000.95715, 657.4309, 1026.2128]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.8767948150634766, 'coordinate': [634.1024, 575.3833, 660.59094, 601.1677]}, {'cls_id': 7, 'label': 'formula', 'score': 0.873543918132782, 'coordinate': [95.29655, 1320.3627, 264.93008, 1345.8473]}, {'cls_id': 17, 'label': 'formula_number', 'score': 0.8702306151390076, 'coordinate': [633.82825, 730.31525, 659.83215, 755.5485]}, {'cls_id': 7, 'label': 'formula', 'score': 0.8387619853019714, 'coordinate': [365.19897, 268.29675, 515.7938, 296.07013]}, {'cls_id': 7, 'label': 'formula', 'score': 0.8314349055290222, 'coordinate': [1090.509, 1599.1382, 1276.6736, 1622.156]}, {'cls_id': 7, 'label': 'formula', 'score': 0.817135751247406, 'coordinate': [246.175, 161.22958, 314.3764, 186.40591]}, {'cls_id': 3, 'label': 'number', 'score': 0.8042846322059631, 'coordinate': [1297.4036, 7.1497707, 1310.5969, 27.737753]}, {'cls_id': 7, 'label': 'formula', 'score': 0.7970448136329651, 'coordinate': [538.45593, 478.09354, 661.8812, 508.50778]}, {'cls_id': 7, 'label': 'formula', 'score': 0.7644855976104736, 'coordinate': [916.51746, 1618.5188, 1009.62537, 1640.8206]}, {'cls_id': 7, 'label': 'formula', 'score': 0.7423419952392578, 'coordinate': [694.8439, 1612.2507, 861.05334, 1635.9768]}, {'cls_id': 7, 'label': 'formula', 'score': 0.7072376608848572, 'coordinate': [99.72007, 508.21167, 254.91953, 535.74744]}, {'cls_id': 7, 'label': 'formula', 'score': 0.6976271867752075, 'coordinate': [696.8011, 1561.4375, 899.79584, 1586.7349]}, {'cls_id': 7, 'label': 'formula', 'score': 0.6707713007926941, 'coordinate': [1117.0862, 1571.9763, 1191.502, 1594.742]}, {'cls_id': 7, 'label': 'formula', 'score': 0.6338322162628174, 'coordinate': [577.33484, 1274.4131, 602.5636, 1296.7021]}, {'cls_id': 7, 'label': 'formula', 'score': 0.6199935674667358, 'coordinate': [175.28284, 349.82376, 241.24683, 376.6708]}, {'cls_id': 7, 'label': 'formula', 'score': 0.612853467464447, 'coordinate': [773.06287, 595.202, 800.43884, 617.3812]}, {'cls_id': 7, 'label': 'formula', 'score': 0.6107096672058105, 'coordinate': [706.6776, 316.87082, 736.69714, 339.9352]}, {'cls_id': 7, 'label': 'formula', 'score': 0.5520269870758057, 'coordinate': [1263.9711, 314.65167, 1292.7728, 337.3896]}, {'cls_id': 7, 'label': 'formula', 'score': 0.5346108675003052, 'coordinate': [1219.2955, 316.599, 1243.9181, 339.71802]}, {'cls_id': 7, 'label': 'formula', 'score': 0.5195119380950928, 'coordinate': [254.65729, 323.6553, 326.57758, 349.53494]}, {'cls_id': 7, 'label': 'formula', 'score': 0.501812219619751, 'coordinate': [255.8518, 1350.6472, 301.74304, 1375.5286]}]}, 'formula_res_list': [{'rec_formula': '\\begin{aligned}{\\psi_{0}(M)-\\psi_{}(M,z)=}&{{}\\frac{(1-\\epsilon_{r})}{\\epsilon_{r}}\\frac{\\lambda^{2}c^{2}}{t_{\\operatorname{E}}^{2}\\operatorname{l n}(10)}\\times}\\\\ {}&{{}\\int_{0}^{z}d z^{\\prime}\\frac{d t}{d z^{\\prime}}\\left.\\frac{\\partial\\phi}{\\partial L}\\right|_{L=\\lambda M c^{2}/t_{\\operatorname{E}}},}\\\\ \\end{aligned}', 'formula_region_id': 1, 'dt_polys': ([728.5045, 440.9215, 1224.0634, 570.8518],)}, {'rec_formula': '\\begin{aligned}{p(\\operatorname{l o g}_{10}}&{{}M|\\operatorname{l o g}_{10}\\sigma)=\\frac{1}{\\sqrt{2\\pi}\\epsilon_{0}}}\\\\ {}&{{}\\times\\operatorname{e x p}\\left[-\\frac{1}{2}\\left(\\frac{\\operatorname{l o g}_{10}M-a_{\\bullet}-b_{\\bullet}\\operatorname{l o g}_{10}\\sigma}{\\epsilon_{0}}\\right)^{2}\\right].}\\\\ \\end{aligned}', 'formula_region_id': 2, 'dt_polys': ([722.9789, 1333.5085, 1257.1136, 1468.0432],)}, {'rec_formula': '\\psi_{0}(M)=\\int d\\sigma\\frac{p(\\operatorname{l o g}_{10}M|\\operatorname{l o g}_{10}\\sigma)}{M\\operatorname{l o g}(10)}\\frac{d n}{d\\sigma}(\\sigma),', 'formula_region_id': 3, 'dt_polys': ([756.4525, 1211.323, 1188.0428, 1268.2336],)}, {'rec_formula': '\\phi(L)\\equiv\\frac{d n}{d\\operatorname{l o g}_{10}L}=\\frac{\\phi_{*}}{(L/L_{*})^{\\gamma_{1}}+(L/L_{*})^{\\gamma_{2}}}.', 'formula_region_id': 4, 'dt_polys': ([777.51355, 207.87927, 1222.8966, 267.33014],)}, {'rec_formula': '\\begin{aligned}{\\rho_{\\operatorname{B H}}}&{{}=\\int d M\\psi(M)M}\\\\ {}&{{}=\\frac{1-\\epsilon_{r}}{\\epsilon_{r}c^{2}}\\int_{0}^{\\infty}d z\\frac{d t}{d z}\\int d\\operatorname{l o g}_{10}L\\phi(L,z)L,}\\\\ \\end{aligned}', 'formula_region_id': 5, 'dt_polys': ([153.89856, 924.2046, 601.0946, 1036.9038],)}, {'rec_formula': '\\frac{d n}{d\\sigma}d\\sigma=\\psi_{*}\\left(\\frac{\\sigma}{\\sigma_{*}}\\right)^{\\alpha}\\frac{e^{-(\\sigma/\\sigma_{*})^{\\beta}}}{\\Gamma(\\alpha/\\beta)}\\beta\\frac{d\\sigma}{\\sigma}.', 'formula_region_id': 6, 'dt_polys': ([810.86975, 1057.0771, 1175.101, 1117.6631],)}, {'rec_formula': '\\langle\\dot{M}(M,t)\\rangle\\psi(M,t)=\\frac{(1-\\epsilon_{r})}{\\epsilon_{r}c^{2}\\operatorname{l n}(10)}\\phi(L,t)\\frac{d L}{d M}.', 'formula_region_id': 7, 'dt_polys': ([165.26271, 557.8495, 598.1803, 614.35],)}, {'rec_formula': '\\frac{\\partial\\psi}{\\partial t}(M,t)+\\frac{(1-\\epsilon_{r})}{\\epsilon_{r}}\\frac{\\lambda^{2}c^{2}}{t_{\\operatorname{E}}^{2}\\operatorname{l n}(10)}\\left.\\frac{\\partial\\phi}{\\partial L}\\right|_{L=\\lambda M c^{2}/t_{\\operatorname{E}}}=0,', 'formula_region_id': 8, 'dt_polys': ([116.48187, 713.88416, 614.2181, 774.02576],)}, {'rec_formula': '\\operatorname{l o g}_{10}M=a_{\\bullet}+b_{\\bullet}\\operatorname{l o g}_{10}X.', 'formula_region_id': 9, 'dt_polys': ([852.90137, 908.64386, 1131.1882, 933.81793],)}, {'rec_formula': '\\phi(L,t)d\\operatorname{l o g}_{10}L=\\delta(M,t)\\psi(M,t)d M.', 'formula_region_id': 10, 'dt_polys': ([195.28397, 424.81024, 567.697, 451.1291],)}, {'rec_formula': '\\dot{M}\\:=\\:(1\\:-\\:\\epsilon_{r})\\dot{M}_{\\mathrm{a c c}}^{\\mathrm{~\\tiny~\\cdot~}}', 'formula_region_id': 11, 'dt_polys': ([96.00711, 235.49493, 295.43823, 265.60016],)}, {'rec_formula': 't_{E}=\\sigma_{T}c/4\\pi G m_{p}=4.5\\times10^{8}\\mathrm{y r}', 'formula_region_id': 12, 'dt_polys': ([166.60979, 129.20242, 511.65692, 156.29672],)}, {'rec_formula': 'M_{*}=L_{*}t_{E}/\\tilde{\\lambda}c^{2}', 'formula_region_id': 13, 'dt_polys': ([95.29655, 1320.3627, 264.93008, 1345.8473],)}, {'rec_formula': '\\phi(L,t)d\\operatorname{l o g}_{10}L', 'formula_region_id': 14, 'dt_polys': ([365.19897, 268.29675, 515.7938, 296.07013],)}, {'rec_formula': 'a_{\\bullet}=8.32\\pm0.05', 'formula_region_id': 15, 'dt_polys': ([1090.509, 1599.1382, 1276.6736, 1622.156],)}, {'rec_formula': '\\epsilon_{r}\\dot{M}_{\\mathrm{a c c}}', 'formula_region_id': 16, 'dt_polys': ([246.175, 161.22958, 314.3764, 186.40591],)}, {'rec_formula': '\\langle\\dot{M}(M,t)\\rangle=', 'formula_region_id': 17, 'dt_polys': ([538.45593, 478.09354, 661.8812, 508.50778],)}, {'rec_formula': '\\epsilon_{0}=0.38', 'formula_region_id': 18, 'dt_polys': ([916.51746, 1618.5188, 1009.62537, 1640.8206],)}, {'rec_formula': 'b_{\\bullet}=5.64\\dot{\\pm}\\dot{0.32}', 'formula_region_id': 19, 'dt_polys': ([694.8439, 1612.2507, 861.05334, 1635.9768],)}, {'rec_formula': '\\delta(M,t)\\dot{M}(M,t)', 'formula_region_id': 20, 'dt_polys': ([99.72007, 508.21167, 254.91953, 535.74744],)}, {'rec_formula': 'X=\\sigma/200\\mathrm{k m}\\mathrm{~s^{-1}~}', 'formula_region_id': 21, 'dt_polys': ([696.8011, 1561.4375, 899.79584, 1586.7349],)}, {'rec_formula': 'M-\\sigma', 'formula_region_id': 22, 'dt_polys': ([1117.0862, 1571.9763, 1191.502, 1594.742],)}, {'rec_formula': 'L_{*}', 'formula_region_id': 23, 'dt_polys': ([577.33484, 1274.4131, 602.5636, 1296.7021],)}, {'rec_formula': '\\phi(L,t)', 'formula_region_id': 24, 'dt_polys': ([175.28284, 349.82376, 241.24683, 376.6708],)}, {'rec_formula': '\\psi_{0}', 'formula_region_id': 25, 'dt_polys': ([773.06287, 595.202, 800.43884, 617.3812],)}, {'rec_formula': '\\mathrm{A^{\\prime\\prime}}', 'formula_region_id': 26, 'dt_polys': ([706.6776, 316.87082, 736.69714, 339.9352],)}, {'rec_formula': 'L_{*}', 'formula_region_id': 27, 'dt_polys': ([1263.9711, 314.65167, 1292.7728, 337.3896],)}, {'rec_formula': '\\phi_{*}', 'formula_region_id': 28, 'dt_polys': ([1219.2955, 316.599, 1243.9181, 339.71802],)}, {'rec_formula': '\\delta(M,t)', 'formula_region_id': 29, 'dt_polys': ([254.65729, 323.6553, 326.57758, 349.53494],)}, {'rec_formula': '\\phi(L)', 'formula_region_id': 30, 'dt_polys': ([255.8518, 1350.6472, 301.74304, 1375.5286],)}]}}
 ```
 
-运行结果参数说明可以参考[2.2 Python脚本方式集成](#22-python脚本方式集成)中的结果解释。
+运行结果参数说明可以参考[2.2 Python脚本方式集成](#22-python)中的结果解释。
 
 可视化结果保存在`save_path`下，其中公式识别的可视化结果如下：
 
@@ -693,6 +739,28 @@ for res in output:
     res.save_to_json(save_path="output") ## 保存当前图像的结构化json结果
 ```
 
+上述代码默认使用本地推理引擎 `paddle_static`。如需运行，请先参考[飞桨框架安装说明](../paddlepaddle_installation.md)安装 PaddlePaddle。
+
+如果选择 `transformers` 作为推理引擎，请先参考[推理引擎文档](../inference_deployment/local_inference/inference_engine.md)完成 Transformers 环境配置，然后执行如下代码：
+
+```python
+from paddleocr import FormulaRecognitionPipeline
+
+pipeline = FormulaRecognitionPipeline(
+    engine="transformers",
+)
+# ocr = FormulaRecognitionPipeline(use_doc_orientation_classify=True) # 通过 use_doc_orientation_classify 指定是否使用文档方向分类模型
+# ocr = FormulaRecognitionPipeline(use_doc_unwarping=True) # 通过 use_doc_unwarping 指定是否使用文本图像矫正模块
+# ocr = FormulaRecognitionPipeline(device="gpu") # 通过 device 指定模型推理时使用 GPU
+output = pipeline.predict("./general_formula_recognition_001.png")
+for res in output:
+    res.print() ## 打印预测的结构化输出
+    res.save_to_img(save_path="output") ## 保存当前图像的公式可视化结果
+    res.save_to_json(save_path="output") ## 保存当前图像的结构化json结果
+```
+
+在大多数场景下，默认的 `paddle_static` 推理引擎通常具备更好的推理性能，建议优先使用。
+
 在上述 Python 脚本中，执行了如下几个步骤：
 
 （1）通过 `FormulaRecognitionPipeline()` 实例化公式识别产线对象，具体参数说明如下：
@@ -709,7 +777,8 @@ for res in output:
 <tbody>
 <tr>
 <td><code>doc_orientation_classify_model_name</code></td>
-<td>文档方向分类模型的名称。如果设置为<code>None</code>，将会使用产线默认模型。</td>
+<td><b>含义：</b>文档方向分类模型的名称。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将会使用产线默认模型。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
@@ -721,7 +790,8 @@ for res in output:
 </tr>
 <tr>
 <td><code>doc_orientation_classify_batch_size</code></td>
-<td>文档方向分类模型的batch size。如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>文档方向分类模型的batch size。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
@@ -733,43 +803,50 @@ for res in output:
 </tr>
 <tr>
 <td><code>doc_unwarping_model_dir</code></td>
-<td>文本图像矫正模型的目录路径。如果设置为<code>None</code>，将会下载官方模型。</td>
+<td><b>含义：</b>文本图像矫正模型的目录路径。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将会下载官方模型。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_batch_size</code></td>
-<td>文本图像矫正模型的batch size。如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>文本图像矫正模型的batch size。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>是否加载并使用文档方向分类模块。如果设置为<code>None</code>，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>是否加载并使用文档方向分类模块。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>是否加载并使用文本图像矫正模块。如果设置为<code>None</code>，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>是否加载并使用文本图像矫正模块。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_detection_model_name</code></td>
-<td>版面区域检测模型的名称。如果设置为<code>None</code>，将会使用产线默认模型。</td>
+<td><b>含义：</b>版面区域检测模型的名称。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将会使用产线默认模型。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_detection_model_dir</code></td>
-<td>版面区域检测模型的目录路径。如果设置为<code>None</code>，将会下载官方模型。</td>
+<td><b>含义：</b>版面区域检测模型的目录路径。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将会下载官方模型。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_threshold</code></td>
-<td>版面区域检测的阈值，用于过滤掉低置信度预测结果的阈值。
+<td><b>含义：</b>版面区域检测的阈值，用于过滤掉低置信度预测结果的阈值。<br/>
+<b>说明：</b>
 <ul>
 <li><b>float</b>：如 0.2，表示过滤掉所有阈值小于0.2的目标框；</li>
 <li><b>dict</b>：dict的key为<b>int</b>类型，代表<code>cls_id</code>，val为<b>float</b>类型阈值。如 <code>{0: 0.45，2: 0.48，7: 0.4}</code>，表示对cls_id为0的类别应用阈值0.45、cls_id为2的类别应用阈值0.48、cls_id为7的类别应用阈值0.4；</li>
@@ -780,13 +857,15 @@ for res in output:
 </tr>
 <tr>
 <td><code>layout_nms</code></td>
-<td>版面检测是否使用后处理NMS。如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>版面区域检测是否使用后处理NMS。<br/>
+<b>说明：</b>如果不设置，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_unclip_ratio</code></td>
-<td>版面区域检测模型检测框的扩张系数。
+<td><b>含义：</b>版面区域检测模型检测框的扩张系数。<br/>
+<b>说明：</b>
 <ul>
 <li><b>float</b>：任意大于 <code>0</code>  浮点数；</li>
 <li><b>Tuple[float,float]</b>：在横纵两个方向各自的扩张系数；</li>
@@ -799,7 +878,8 @@ for res in output:
 </tr>
 <tr>
 <td><code>layout_merge_bboxes_mode</code></td>
-<td>版面区域检测的重叠框过滤方式。
+<td><b>含义：</b>版面区域检测的重叠框过滤方式。<br/>
+<b>说明：</b>
 <ul>
 <li><b>str</b>：<code>large</code>，<code>small</code>，<code>union</code>，分别表示重叠框过滤时选择保留大框，小框还是同时保留；</li>
 <li><b>dict</b>： dict的key为<b>int</b>类型，代表<code>cls_id</code>，value为<b>str</b>类型，如<code>{0: "large", 2: "small"}</code>，表示对第0类别检测框使用large模式，对第2类别检测框使用small模式；</li>
@@ -811,37 +891,44 @@ for res in output:
 </tr>
 <tr>
 <td><code>layout_detection_batch_size</code></td>
-<td>版面区域检测模型的batch size。如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>版面区域检测模型的batch size。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_layout_detection</code></td>
-<td>是否加载并使用版面区域检测模块。如果设置为<code>None</code>，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
+<td><b>含义：</b>是否加载并使用版面区域检测模块。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将使用产线初始化的该参数值，默认初始化为<code>True</code>。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>formula_recognition_model_name</code></td>
-<td>公式识别模型的名称。如果设置为<code>None</code>，将会使用产线默认模型。</td>
+<td><b>含义：</b>公式识别模型的名称。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将会使用产线默认模型。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>formula_recognition_model_dir</code></td>
-<td>公式识别模型的目录路径。如果设置为<code>None</code>，将会下载官方模型。</td>
+<td><b>含义：</b>公式识别模型的目录路径。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将会下载官方模型。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>formula_recognition_batch_size</code></td>
-<td>公式识别模型的batch size。如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
+<td><b>含义：</b>公式识别模型的batch size。<br/>
+<b>说明：</b>如果设置为<code>None</code>，将默认设置batch size为<code>1</code>。</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>用于推理的设备。支持指定具体卡号：
+<td><b>含义：</b>用于推理的设备。<br/>
+<b>说明：</b>
+支持指定具体卡号：
 <ul>
 <li><b>CPU</b>：如 <code>cpu</code> 表示使用 CPU 进行推理；</li>
 <li><b>GPU</b>：如 <code>gpu:0</code> 表示使用第 1 块 GPU 进行推理；</li>
@@ -849,6 +936,8 @@ for res in output:
 <li><b>XPU</b>：如 <code>xpu:0</code> 表示使用第 1 块 XPU 进行推理；</li>
 <li><b>MLU</b>：如 <code>mlu:0</code> 表示使用第 1 块 MLU 进行推理；</li>
 <li><b>DCU</b>：如 <code>dcu:0</code> 表示使用第 1 块 DCU 进行推理；</li>
+<li><b>沐曦 GPU</b>：如 <code>metax_gpu:0</code> 表示使用第 1 块沐曦 GPU 进行推理；</li>
+<li><b>天数 GPU</b>：如 <code>iluvatar_gpu:0</code> 表示使用第 1 块天数 GPU 进行推理；</li>
 <li><b>None</b>：如果设置为<code>None</code>，将默认使用产线初始化的该参数值，初始化时，会优先使用本地的 GPU 0号设备，如果没有，则使用 CPU 设备。</li>
 </ul>
 </td>
@@ -856,29 +945,45 @@ for res in output:
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>含义：</b>推理引擎。<br><b>说明：</b>支持 <code>None</code>（默认值）、<code>paddle</code>、<code>paddle_static</code>、<code>paddle_dynamic</code>、<code>transformers</code>。保持为默认值 <code>None</code> 时，PaddleOCR 保留旧版本的行为，在大多数配置下等价于 <code>paddle</code>。详细说明、取值、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>含义：</b>推理引擎配置。<br><b>说明：</b>推荐与 <code>engine</code> 搭配使用。详细字段、兼容性规则与示例请参见 <a href="../inference_deployment/local_inference/inference_engine.md">推理引擎与配置说明</a>。</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+
+<tr>
 <td><code>enable_hpi</code></td>
-<td>是否启用高性能推理。</td>
+<td><b>含义：</b>是否启用高性能推理。</td>
 <td><code>bool</code></td>
-<td><code>False</code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>是否启用 Paddle Inference 的 TensorRT 子图引擎。如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
+<td><b>含义：</b>是否启用 Paddle Inference 的 TensorRT 子图引擎。<br/>
+<b>说明：</b>
+如果模型不支持通过 TensorRT 加速，即使设置了此标志，也不会使用加速。<br/>
 对于 CUDA 11.8 版本的飞桨，兼容的 TensorRT 版本为 8.x（x>=6），建议安装 TensorRT 8.6.1.6。<br/>
-
 </td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>计算精度，如 fp32、fp16。</td>
+<td><b>含义：</b>计算精度，如 <code>"fp32"</code>、<code>"fp16"</code>。</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
-<td>是否启用 MKL-DNN 加速推理。如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。
+<td><b>含义：</b>是否启用 MKL-DNN 加速推理。<br/>
+<b>说明：</b>
+如果 MKL-DNN 不可用或模型不支持通过 MKL-DNN 加速，即使设置了此标志，也不会使用加速。
 </td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
@@ -886,23 +991,24 @@ for res in output:
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN 缓存容量。
+<b>含义：</b>MKL-DNN 缓存容量。
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>在 CPU 上进行推理时使用的线程数。</td>
+<td><b>含义：</b>在 CPU 上进行推理时使用的线程数。</td>
 <td><code>int</code></td>
-<td><code>8</code></td>
+<td><code>10</code></td>
 </tr>
 <tr>
 <td><code>paddlex_config</code></td>
-<td>PaddleX产线配置文件路径。</td>
+<td><b>含义：</b>PaddleX产线配置文件路径。</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
+
 </tbody>
 </table>
 
@@ -923,7 +1029,8 @@ MKL-DNN 缓存容量。
 <tbody>
 <tr>
 <td><code>input</code></td>
-<td>待预测数据，支持多种输入类型，必填
+<td><b>含义：</b>待预测数据，支持多种输入类型，必填。<br/>
+<b>说明：</b>
 <ul>
 <li><b>Python Var</b>：如 <code>numpy.ndarray</code> 表示的图像数据；</li>
 <li><b>str</b>：如图像文件或者PDF文件的本地路径：<code>/root/data/img.jpg</code>；<b>如URL链接</b>，如图像文件或PDF文件的网络URL：<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/demo_image/pipelines/general_formula_recognition_001.png">示例</a>；<b>如本地目录</b>，该目录下需包含待预测图像，如本地路径：<code>/root/data/</code>(当前不支持目录中包含PDF文件的预测，PDF文件需要指定到具体文件路径)；</li>
@@ -935,42 +1042,46 @@ MKL-DNN 缓存容量。
 </tr>
 <tr>
 <td><code>use_layout_detection</code></td>
-<td>是否在推理时使用文档区域检测模块。</td>
+<td><b>含义：</b>是否在推理时使用文档区域检测模块。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>是否在推理时使用文档方向分类模块。</td>
+<td><b>含义：</b>是否在推理时使用文档方向分类模块。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>是否在推理时使用文本图像矫正模块。</td>
+<td><b>含义：</b>是否在推理时使用文本图像矫正模块。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_threshold</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>float|dict|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_nms</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_unclip_ratio</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>float|Tuple[float,float]|dict|None</code></td>
 <td><code>None</code></td>
 <tr>
 <td><code>layout_merge_bboxes_mode</code></td>
-<td>参数含义与实例化参数基本相同。设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
+<td><b>含义：</b>参数含义与实例化参数基本相同。<br/>
+<b>说明：</b>设置为<code>None</code>表示使用实例化参数，否则该参数优先级更高。</td>
 <td><code>str|dict|None</code></td>
 <td><code>None</code></td>
 </tr>
@@ -1039,38 +1150,51 @@ MKL-DNN 缓存容量。
 <td>无</td>
 </tr>
 </table>
-
-- 调用`print()` 方法会将结果打印到终端，打印到终端的内容解释如下：
-
-    - `input_path`: `(str)` 待预测图像的输入路径
-
-    - `page_index`: `(Union[int, None])` 如果输入是PDF文件，则表示当前是PDF的第几页，否则为 `None`
-
-    - `model_settings`: `(Dict[str, bool])` 配置产线所需的模型参数
-
-        - `use_doc_preprocessor`: `(bool)` 控制是否启用文档预处理子产线
-        - `use_layout_detection`: `(bool)` 控制是否启用版面区域检测模块
-
-    - `doc_preprocessor_res`: `(Dict[str, Union[str, Dict[str, bool], int]])` 文档预处理子产线的输出结果。仅当`use_doc_preprocessor=True`时存在
-        - `input_path`: `(Union[str, None])` 图像预处理子产线接受的图像路径，当输入为`numpy.ndarray`时，保存为`None`
-        - `model_settings`: `(Dict)` 预处理子产线的模型配置参数
-            - `use_doc_orientation_classify`: `(bool)` 控制是否启用文档方向分类
-            - `use_doc_unwarping`: `(bool)` 控制是否启用文本图像矫正
-        - `angle`: `(int)` 文档方向分类的预测结果。启用时取值为[0,1,2,3]，分别对应[0°,90°,180°,270°]；未启用时为-1
-    - `layout_det_res`: `(Dict[str, List[Dict]])` 版面区域检测模块的输出结果。仅当`use_layout_detection=True`时存在
-        - `input_path`: `(Union[str, None])` 版面区域检测模块接收的图像路径，当输入为`numpy.ndarray`时，保存为`None`
-        - `boxes`: `(List[Dict[int, str, float, List[float]]])` 版面区域检测预测结果列表
-            - `cls_id`: `(int)` 版面区域检测预测的类别id
-            - `label`: `(str)` 版面区域检测预测的类别
-            - `score`: `(float)` 版面区域检测预测的类别置信度分数
-            - `coordinate`: `(List[float])` 版面区域检测预测的边界框坐标，格式为[x_min, y_min, x_max, y_max]，其中(x_min, y_min)为左上角坐标，(x_max, y_max) 为右上角坐标
-    - `formula_res_list`:  `(List[Dict[str, int, List[float]]])` 公式识别的预测结果列表
-        - `rec_formula`: `(str)` 公式识别预测的LaTeX源码
-        - `formula_region_id`: `(int)` 公式识别预测的id编号
-        - `dt_polys`:  `(List[float])` 公式识别预测的边界框坐标，格式为[x_min, y_min, x_max, y_max]，其中(x_min, y_min)为左上角坐标，(x_max, y_max) 为右上角坐标
-
-- 调用`save_to_json()` 方法会将上述内容保存到指定的`save_path`中，如果指定为目录，则保存的路径为`save_path/{your_img_basename}_res.json`，如果指定为文件，则直接保存到该文件中。由于json文件不支持保存numpy数组，因此会将其中的`numpy.array`类型转换为列表形式。
-- 调用`save_to_img()` 方法会将可视化结果保存到指定的`save_path`中，如果指定为目录，则保存的路径为`save_path/{your_img_basename}_formula_res_img.{your_img_extension}`，如果指定为文件，则直接保存到该文件中。(产线通常包含较多结果图片，不建议直接指定为具体的文件路径，否则多张图会被覆盖，仅保留最后一张图)
+<!-- Luxorion-12 修改：markdown格式转换为html格式-->
+<ul>
+  <li>调用<code>print()</code> 方法会将结果打印到终端，打印到终端的内容解释如下：
+    <ol start="1" type="1">
+      <li><code>input_path</code>: <code>(str)</code> 待预测图像的输入路径</li>
+      <li><code>page_index</code>: <code>(Union[int, None])</code> 如果输入是PDF文件，则表示当前是PDF的第几页，否则为 <code>None</code></li>
+      <li><code>model_settings</code>: <code>(Dict[str, bool])</code> 配置产线所需的模型参数
+        <ol >
+          <li><code>use_doc_preprocessor</code>: <code>(bool)</code> 控制是否启用文档预处理子产线</li>
+          <li><code>use_layout_detection</code>: <code>(bool)</code> 控制是否启用版面检测模块</li>
+        </ol>
+      </li>
+      <li><code>doc_preprocessor_res</code>: <code>(Dict[str, Union[str, Dict[str, bool], int]])</code> 文档预处理子产线的输出结果。仅当<code>use_doc_preprocessor=True</code>时存在
+        <ol>
+          <li><code>input_path</code>: <code>(str)</code> 文档预处理子接受的图像路径，当输入为<code>numpy.ndarray</code>时，保存为<code>None</code>,此处为<code>None</code></li>
+          <li><code>model_settings</code>: <code>(Dict[str, bool])</code> 文档预处理子的模型配置参数
+            <ul>
+              <li><code>use_doc_orientation_classify</code>: <code>(bool)</code> 控制是否启用文档方向分类</li>
+              <li><code>use_doc_unwarping</code>: <code>(bool)</code> 控制是否启用文本图像扭曲矫正子模块</li>
+            </ul>
+          </li>
+          <li><code>angle</code>: <code>(int)</code> 文文档方向分类的预测结果。启用时取值为[0,1,2,3]，分别对应[0°,90°,180°,270°]；未启用时为-1</li>
+        </ol>
+      </li>
+      <li><code>layout_det_res</code>: <code>(Dict[str, List[Dict]])</code> 版面区域检测模块的输出结果。仅当<code>use_layout_detection=True</code>时存在</li>
+        <ol>
+          <li><code>input_path</code>: <code>(Union[str, None])</code> 版面区域检测模块接收的图像路径，当输入为<code>numpy.ndarray</code>时，保存为<code>None</code></li>
+            <ol>
+                <li><code>cls_id</code>: <code>(int)</code> 版面区域检测预测的类别id</li>
+                <li><code>label</code>: <code>(str)</code> 版面区域检测预测的类别</li>
+                <li><code>score</code>: <code>(float)</code> 版面区域检测预测的类别置信度分数</li>
+                <li><code>coordinate</code>: <code>(List[float])</code> 版面区域检测预测的边界框坐标，格式为[x_min, y_min, x_max, y_max]，其中(x_min, y_min)为左上角坐标，(x_max, y_max) 为右上角坐标</li>
+            </ol>
+          <li><code>formula_res_list</code>: <code>(List[Dict[str, int, List[float]]])</code> 公式识别的预测结果列表</li>
+            <ol>
+                <li><code>rec_formula</code>: <code>(str)</code> 公式识别预测的LaTeX源码</li>
+                <li><code>formula_region_id</code>: <code>(int)</code> 公式识别预测的id编号</li>
+                <li><code>dt_polys</code>:  <code>(List[float])</code> 公式识别预测的边界框坐标，格式为[x_min, y_min, x_max, y_max]，其中(x_min, y_min)为左上角坐标，(x_max, y_max) 为右上角坐标</li>
+            </ol>
+        </li>
+      </li>
+    </ol>
+  </li>
+  <li>调用<code>save_to_json()</code> 方法会将上述内容保存到指定的<code>save_path</code>中，如果指定为目录，则保存的路径为<code>save_path/{your_img_basename}_res.json</code>，如果指定为文件，则直接保存到该文件中。由于json文件不支持保存numpy数组，因此会将其中的<code>numpy.array</code>类型转换为列表形式。</li>
+<li>调用<code>save_to_img()</code> 方法会将可视化结果保存到指定的<code>save_path</code>中，如果指定为目录，则会将版面区域检测可视化图像、全局OCR可视化图像、版面阅读顺序可视化图像等内容保存，如果指定为文件，则直接保存到该文件中。</li>
 
 * 此外，也支持通过属性获取带结果的可视化图像和预测结果，具体如下：
 
@@ -1090,21 +1214,22 @@ MKL-DNN 缓存容量。
 <td rowspan="2">获取格式为 <code>dict</code> 的可视化图像</td>
 </tr>
 </table>
-
-- `json` 属性获取的预测结果为dict类型的数据，相关内容与调用 `save_to_json()` 方法保存的内容一致。
-- `img` 属性返回的预测结果是一个dict类型的数据。其中，键分别为 `preprocessed_img`、 `layout_det_res`和 `formula_res_img`，对应的值是三个 `Image.Image` 对象：第一个用于展示图像预处理的可视化图像，第二个用于展示版面区域检测的可视化图像，第三个用于展示公式识别的可视化图像。如果没有使用图像预处理子模块，则dict中不包含 `preprocessed_img`；如果没有使用版面区域检测子模块，则dict中不包含`layout_det_res`。
+<ul>
+  <li><code>json</code> 属性获取的预测结果为dict类型的数据，相关内容与调用 <code>save_to_json()</code> 方法保存的内容一致。</li>
+  <li><code>img</code> 属性返回的预测结果是一个dict类型的数据。其中，键分别为 <code>ocr_res_img</code> 和 <code>preprocessed_img</code>，对应的值是两个 <code>Image.Image</code> 对象：一个用于显示 OCR 结果的可视化图像，另一个用于展示图像预处理的可视化图像。如果没有使用图像预处理子模块，则dict中只包含 <code>ocr_res_img</code>。</li>
+</ul>
 
 ## 3. 开发集成/部署
 
 如果产线可以达到您对产线推理速度和精度的要求，您可以直接进行开发集成/部署。
 
-若您需要将产线直接应用在您的Python项目中，可以参考 [2.2 Python脚本方式](#22-python脚本方式集成)中的示例代码。
+若您需要将产线直接应用在您的Python项目中，可以参考 [2.2 Python脚本方式](#22-python)中的示例代码。
 
 此外，PaddleOCR 也提供了其他两种部署方式，详细说明如下：
 
-🚀 高性能推理：在实际生产环境中，许多应用对部署策略的性能指标（尤其是响应速度）有着较严苛的标准，以确保系统的高效运行与用户体验的流畅性。为此，PaddleOCR 提供高性能推理功能，旨在对模型推理及前后处理进行深度性能优化，实现端到端流程的显著提速，详细的高性能推理流程请参考[高性能推理](../deployment/high_performance_inference.md)。
+🚀 高性能推理：在实际生产环境中，许多应用对部署策略的性能指标（尤其是响应速度）有着较严苛的标准，以确保系统的高效运行与用户体验的流畅性。为此，PaddleOCR 提供高性能推理功能，旨在对模型推理及前后处理进行深度性能优化，实现端到端流程的显著提速，详细的高性能推理流程请参考[高性能推理](../inference_deployment/local_inference/high_performance_inference.md)。
 
-☁️ 服务化部署：服务化部署是实际生产环境中常见的一种部署形式。通过将推理功能封装为服务，客户端可以通过网络请求来访问这些服务，以获取推理结果。详细的产线服务化部署流程请参考[服务化部署](../deployment/serving.md)。
+☁️ 服务化部署：服务化部署是实际生产环境中常见的一种部署形式。通过将推理功能封装为服务，客户端可以通过网络请求来访问这些服务，以获取推理结果。详细的产线服务化部署流程请参考[服务化部署](../inference_deployment/serving/serving.md)。
 
 以下是基础服务化部署的API参考与多语言服务调用示例：
 
@@ -1197,7 +1322,7 @@ MKL-DNN 缓存容量。
 <tr>
 <td><code>file</code></td>
 <td><code>string</code></td>
-<td>服务器可访问的图像文件或PDF文件的URL，或上述类型文件内容的Base64编码结果。默认对于超过10页的PDF文件，只有前10页的内容会被处理。<br /> 要解除页数限制，请在产线配置文件中添加以下配置：
+<td>服务器可访问的图像文件（含 TIFF，多页时按页处理）或 PDF 文件的 URL，或上述类型文件内容的 Base64 编码结果。默认对于超过 10 页的 PDF 或多页 TIFF，仅处理前 10 页。<br /> 要解除页数限制，请在产线配置文件中添加以下配置：
 <pre><code>Serving:
   extra:
     max_num_input_imgs: null
@@ -1208,7 +1333,7 @@ MKL-DNN 缓存容量。
 <tr>
 <td><code>fileType</code></td>
 <td><code>integer</code> | <code>null</code></td>
-<td>文件类型。<code>0</code>表示PDF文件，<code>1</code>表示图像文件。若请求体无此属性，则将根据URL推断文件类型。</td>
+<td>文件类型。<code>0</code> 表示 PDF 文件，<code>1</code> 表示图像文件（含 TIFF）。若请求体无此属性，则将根据URL推断文件类型。</td>
 <td>否</td>
 </tr>
 <tr>
@@ -1296,6 +1421,7 @@ MKL-DNN 缓存容量。
 </tr>
 </tbody>
 </table>
+<p>下表中涉及图像的字段（如 <code>outputImages</code>、<code>inputImage</code>）默认以 Base64 字符串内联返回；当服务端开启 URL 返回模式时，相应字段的值变为预签名 URL，字段类型保持不变。配置方式参见 <a href="../inference_deployment/serving/serving.md">服务化部署</a>「以 URL 形式返回二进制内容」一节。</p>
 <p><code>formulaRecResults</code>中的每个元素为一个<code>object</code>，具有如下属性：</p>
 <table>
 <thead>
@@ -1314,12 +1440,12 @@ MKL-DNN 缓存容量。
 <tr>
 <td><code>outputImages</code></td>
 <td><code>object</code> | <code>null</code></td>
-<td>参见产线预测结果的<code>img</code>属性说明。图像为JPEG格式，使用Base64编码。</td>
+<td>参见产线预测结果的<code>img</code>属性说明。图像为JPEG格式，使用Base64编码；启用 URL 返回模式时为预签名 URL。</td>
 </tr>
 <tr>
 <td><code>inputImage</code> | <code>null</code></td>
 <td><code>string</code></td>
-<td>输入图像。图像为JPEG格式，使用Base64编码。</td>
+<td>输入图像。图像为JPEG格式，使用Base64编码；启用 URL 返回模式时为预签名 URL。</td>
 </tr>
 </tbody>
 </table>

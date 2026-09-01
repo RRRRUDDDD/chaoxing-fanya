@@ -12,7 +12,7 @@ The primary purpose of text image rectification is to perform geometric transfor
 
 ## 2. Supported Model List
 
-> The inference time only includes the model inference time and does not include the time for pre- or post-processing.
+> The inference time only includes the model inference time and does not include the time for pre- or post-processing. The "Normal Mode" values correspond to the local <code>paddle_static</code> inference engine.
 
 <table>
 <thead>
@@ -53,7 +53,7 @@ The primary purpose of text image rectification is to perform geometric transfor
               <li><strong>Software Environment:</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -96,6 +96,26 @@ You can quickly experience it with one command:
 paddleocr text_image_unwarping -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/doc_test.jpg
 ```
 
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following command:
+
+```bash
+# Use the transformers engine for inference
+paddleocr text_image_unwarping -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/doc_test.jpg \
+    --engine transformers
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following command:
+
+```bash
+# Use the onnxruntime engine for inference
+paddleocr text_image_unwarping -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/doc_test.jpg \
+    --engine onnxruntime
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
 <b>Note: </b>The official models would be download from HuggingFace by default. If can't access to HuggingFace, please set the environment variable `PADDLE_PDX_MODEL_SOURCE="BOS"` to change the model source to BOS. In the future, more model sources will be supported.
 
 You can also integrate the model inference from the image rectification module into your project. Before running the following code, please download the [sample image](https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/doc_test.jpg) locally.
@@ -110,6 +130,40 @@ for res in output:
     res.save_to_json(save_path="./output/res.json")
 ```
 
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following code:
+
+```python
+from paddleocr import TextImageUnwarping
+model = TextImageUnwarping(
+    model_name="UVDoc",
+    engine="transformers",
+)
+output = model.predict("doc_test.jpg", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following code:
+
+```python
+from paddleocr import TextImageUnwarping
+model = TextImageUnwarping(
+    model_name="UVDoc",
+    engine="onnxruntime",
+)
+output = model.predict("doc_test.jpg", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
 After running, the result obtained is:
 
 ```bash
@@ -117,8 +171,10 @@ After running, the result obtained is:
 ```
 
 The meanings of the parameters in the result are as follows:
-- `input_path`: Indicates the path of the image to be rectified
-- `doctr_img`: Indicates the rectified image result. Due to the large amount of data, it is not convenient to print directly, so it is replaced here with `...`. You can use `res.save_to_img()` to save the prediction result as an image, and `res.save_to_json()` to save the prediction result as a json file.
+<ul>
+<li><code>input_path</code>：Indicates the path of the image to be rectified</li>
+<li><code>doctr_img</code>：Indicates the rectified image result. Due to the large amount of data, it is not convenient to print directly, so it is replaced here with<code>...</code>.You can use<code>res.save_to_img()</code>to save the prediction result as an image, and <code>res.save_to_json()</code> to save the prediction result as a json file.</li>
+</ul>
 
 The visualized image is as follows:
 
@@ -126,7 +182,7 @@ The visualized image is as follows:
 
 The relevant methods, parameters, etc., are described as follows:
 
-* `TextImageUnwarping` instantiates the image rectification model (taking `UVDoc` as an example here), with specific explanations as follows:
+* <code>TextImageUnwarping</code> instantiates the image rectification model (taking <code>UVDoc</code> as an example here), with specific explanations as follows:
 <table>
 <thead>
 <tr>
@@ -139,19 +195,20 @@ The relevant methods, parameters, etc., are described as follows:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>Name of the model</td>
+<td><b>Meaning:</b> Name of the model</td>
 <td><code>str</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>Model storage path</td>
+<td><b>Meaning:</b> Model storage path</td>
 <td><code>str</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>Device(s) to use for inference.<br/>
+<td><b>Meaning:</b> Device(s) to use for inference.<br/>
+<b>Description:</b>
 <b>Examples:</b> <code>cpu</code>, <code>gpu</code>, <code>npu</code>, <code>gpu:0</code>, <code>gpu:0,1</code>.<br/>
 If multiple devices are specified, inference will be performed in parallel. Note that parallel inference is not always supported.<br/>
 By default, GPU 0 will be used if available; otherwise, the CPU will be used.
@@ -160,14 +217,28 @@ By default, GPU 0 will be used if available; otherwise, the CPU will be used.
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_static</code>, <code>paddle_dynamic</code>, <code>transformers</code>, and <code>onnxruntime</code>. When left as <code>None</code>, local inference uses the <code>paddle_static</code> engine by default. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>Meaning:</b> Inference-engine configuration.<br/><b>Description:</b> Recommended together with <code>engine</code>. For supported fields, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>Whether to use the high performance inference.</td>
+<td><b>Meaning:</b> Whether to use the high performance inference.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<td><b>Meaning:</b> Whether to use the Paddle Inference TensorRT subgraph engine.<br/> 
+<b>Description:</b>
+If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
 For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6), and it is recommended to install TensorRT 8.6.1.6.<br/>
 
 </td>
@@ -176,14 +247,18 @@ For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6)
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>Precision for TensorRT when using the Paddle Inference TensorRT subgraph engine.<br/><b>Options:</b> <code>fp32</code>, <code>fp16</code>, etc.</td>
+<td><b>Meaning:</b>Precision for TensorRT when using the Paddle Inference TensorRT subgraph engine.<br/>
+<b>Description:</b>
+<b>Options:</b> <code>"fp32"</code>, <code>"fp16"</code>, etc.</td>
 <td><code>str</code></td>
-<td><code>fp32</code></td>
+<td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
 <td>
-Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.
+<b>Meaning:</b> Whether to enable MKL-DNN acceleration for inference. <br/>
+<b>Description:</b>
+If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.
 </td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
@@ -191,21 +266,21 @@ Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable 
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN cache capacity.
+<b>Meaning:</b>MKL-DNN cache capacity.
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>Number of threads to use for inference on CPUs.</td>
+<td><b>Meaning:</b> Number of threads to use for inference on CPUs.</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 </tbody>
 </table>
 
-* Call the `predict()` method of the image rectification model for inference prediction. This method will return a result list. Additionally, this module also provides a `predict_iter()` method. Both methods are consistent in terms of parameter acceptance and result return. The difference is that `predict_iter()` returns a `generator`, which can process and obtain prediction results step by step, suitable for handling large datasets or scenarios where memory saving is desired. You can choose to use either of these methods according to your actual needs. The `predict()` method has parameters `input` and `batch_size`, with specific explanations as follows:
+* Call the  <code>predict()</code> method of the image rectification model for inference prediction. This method will return a result list. Additionally, this module also provides a <code>predict_iter()</code> method. Both methods are consistent in terms of parameter acceptance and result return. The difference is that <code>predict_iter()</code> returns a <code>generator</code>, which can process and obtain prediction results step by step, suitable for handling large datasets or scenarios where memory saving is desired. You can choose to use either of these methods according to your actual needs. The  <code>predict()</code> method has parameters <code>input</code> and <code>batch_size</code>, with specific explanations as follows:
 
 <table>
 <thead>
@@ -218,13 +293,18 @@ MKL-DNN cache capacity.
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>Input data to be predicted. Required. Supports multiple input types:
+<td><b>Meaning:</b> Input data to be predicted. Required.<br/> 
+<b>Description:</b>
+Supports multiple input types:
 <ul>
 <li><b>Python Var</b>: e.g., <code>numpy.ndarray</code> representing image data</li>
 <li><b>str</b>: 
-  - Local image or PDF file path: <code>/root/data/img.jpg</code>;
-  - <b>URL</b> of image or PDF file: e.g., <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_doc_preprocessor_002.png">example</a>;
-  - <b>Local directory</b>: directory containing images for prediction, e.g., <code>/root/data/</code> (Note: directories containing PDF files are not supported; PDFs must be specified by exact file path)</li>
+    <ul>
+    <li>Local image or PDF file path: <code>/root/data/img.jpg</code>;</li>
+    <li><b>URL</b> of image or PDF file: e.g., <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_doc_preprocessor_002.png">example</a>;</li>
+    <li><b>Local directory</b>: directory containing images for prediction, e.g., <code>/root/data/</code> (Note: directories containing PDF files are not supported; PDFs must be specified by exact file path)</li>
+    </ul>
+    </li>
 <li><b>list</b>: Elements must be of the above types, e.g., <code>[numpy.ndarray, numpy.ndarray]</code>, <code>["/root/data/img1.jpg", "/root/data/img2.jpg"]</code>, <code>["/root/data1", "/root/data2"]</code></li>
 </ul>
 </td>
@@ -233,13 +313,15 @@ MKL-DNN cache capacity.
 </tr>
 <tr>
 <td><code>batch_size</code></td>
-<td>Batch size, positive integer.</td>
+<td><b>Meaning:</b> Batch size<br/>
+<b>Description:</b>
+Positive integer.</td>
 <td><code>int</code></td>
 <td>1</td>
 </tr>
 </table>
 
-* Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports printing, saving as an image, and saving as a `json` file:
+* Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports printing, saving as an image, and saving as a <code>json</code> file:
 
 <table>
 <thead>
@@ -326,4 +408,71 @@ MKL-DNN cache capacity.
 
 The current module does not support fine-tuning training and only supports inference integration. Concerning fine-tuning training for this module, there are plans to support it in the future.
 
-## 5. FAQ
+## 5. Inference Engine
+
+For detailed descriptions, values, compatibility rules, and examples of the inference engine, please refer to <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration Description</a>.
+
+### 5.1 Speed Data
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>engine</th>
+            <th>Preprocessing (ms)</th>
+            <th>Inference (ms)</th>
+            <th>PostProcessing (ms)</th>
+            <th>End-to-End (ms)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="4">UVDoc</td>
+            <td>paddle_static</td>
+            <td>14.96</td>
+            <td>18.60</td>
+            <td>1.93</td>
+            <td>36.66</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>10.90</td>
+            <td>27.59</td>
+            <td>1.96</td>
+            <td>40.94</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>13.54</td>
+            <td>6.74</td>
+            <td>0.91</td>
+            <td>33.07</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>10.60</td>
+            <td>8.44</td>
+            <td>1.75</td>
+            <td>21.30</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>Test Environment Description:</strong>
+<ul>
+    <li><strong>Test Data:</strong> <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/doc_test.jpg">Sample Image</a></li>
+    <li><strong>Hardware Configuration:</strong>
+        <ul>
+            <li>GPU: NVIDIA A100 40G</li>
+            <li>CPU: Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz</li>
+        </ul>
+    </li>
+    <li><strong>Software Environment:</strong>
+        <ul>
+            <li>Ubuntu 22.04 / CUDA 12.6 / cuDNN 9.5</li>
+            <li>paddlepaddle-gpu 3.2.1 / paddleocr 3.5 / transformers 5.4.0 / torch 2.10 / onnxruntime-gpu 1.23.2</li>
+        </ul>
+    </li>
+</ul>
+
+## 6. FAQ

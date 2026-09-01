@@ -10,7 +10,7 @@ The text recognition module is the core part of the OCR (Optical Character Recog
 
 ## 2. List of Supported Models
 
-> The inference time only includes the model inference time and does not include the time for pre- or post-processing.
+> The inference time only includes the model inference time and does not include the time for pre- or post-processing. The "Normal Mode" values correspond to the local <code>paddle_static</code> inference engine.
 
 <table>
 <tr>
@@ -20,6 +20,31 @@ The text recognition module is the core part of the OCR (Optical Character Recog
 <th>CPU Inference Time (ms)<br/>[Normal Mode / High-Performance Mode]</th>
 <th>Model Storage Size (MB)</th>
 <th>Introduction</th>
+</tr>
+<tr>
+<td>PP-OCRv6_medium_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_medium_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_medium_rec_pretrained.pdparams">Training Model</a></td>
+<td>83.2*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>73.3</td>
+<td rowspan="3">PP-OCRv6 text recognition models based on PPLCNetV4 + LightSVTR + CTC/NRTR multi-head decoder, single model supports 50 languages (tiny: 49). Medium achieves +5.1% over PP-OCRv5_server.</td>
+</tr>
+<tr>
+<td>PP-OCRv6_small_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_small_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_small_rec_pretrained.pdparams">Training Model</a></td>
+<td>81.3*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>20.4</td>
+</tr>
+<tr>
+<td>PP-OCRv6_tiny_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_tiny_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_tiny_rec_pretrained.pdparams">Training Model</a></td>
+<td>73.5*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>4.4</td>
 </tr>
 <tr>
 <td>PP-OCRv5_server_rec</td>
@@ -80,9 +105,24 @@ en_PP-OCRv4_mobile_rec_infer.tar">Inference Model</a>/<a href="https://paddle-mo
 </tr>
 </table>
 
+> *Note: PP-OCRv6 metrics are evaluated on an internal multi-scenario evaluation set, while PP-OCRv5/v4 metrics are based on a general evaluation set. As the evaluation sets differ, the metrics are not directly comparable.
+
 > ❗ The above lists the <b>4 core models</b> mainly supported by the text recognition module. The module supports a total of <b>20 full models</b>, including multiple multilingual text recognition models. The complete model list is as follows:
 
 <details><summary> 👉Model List Details</summary>
+
+* <b>PP-OCRv6 Multi-Scenario Models</b>
+
+<table>
+<tr>
+<th>Model</th><th>Model Download Links</th>
+<th>Recognition Avg Accuracy(%)</th>
+<th>GPU Inference Time (ms)<br/>[Normal Mode / High-Performance Mode]</th>
+<th>CPU Inference Time (ms)<br/>[Normal Mode / High-Performance Mode]</th>
+<th>Model Storage Size (MB)</th>
+<th>Introduction</th>
+</tr>
+</table>
 
 * <b>PP-OCRv5 Multi-Scenario Models</b>
 
@@ -97,6 +137,31 @@ en_PP-OCRv4_mobile_rec_infer.tar">Inference Model</a>/<a href="https://paddle-mo
 <th>CPU Inference Time (ms)<br/>[Normal Mode / High-Performance Mode]</th>
 <th>Model Storage Size (MB)</th>
 <th>Introduction</th>
+</tr>
+<tr>
+<td>PP-OCRv6_medium_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_medium_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_medium_rec_pretrained.pdparams">Training Model</a></td>
+<td>83.2*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>73.3</td>
+<td rowspan="3">PP-OCRv6 text recognition models based on PPLCNetV4 + LightSVTR + CTC/NRTR multi-head decoder, single model supports 50 languages (tiny: 49). Medium achieves +5.1% over PP-OCRv5_server.</td>
+</tr>
+<tr>
+<td>PP-OCRv6_small_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_small_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_small_rec_pretrained.pdparams">Training Model</a></td>
+<td>81.3*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>20.4</td>
+</tr>
+<tr>
+<td>PP-OCRv6_tiny_rec</td>
+<td><a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_inference_model/paddle3.0.0/PP-OCRv6_tiny_rec_infer.tar">Inference Model</a>/<a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_model/PP-OCRv6_tiny_rec_pretrained.pdparams">Training Model</a></td>
+<td>73.5*</td>
+<td>- / -</td>
+<td>- / -</td>
+<td>4.4</td>
 </tr>
 <tr>
 <td>PP-OCRv5_server_rec</td>
@@ -497,7 +562,7 @@ devanagari_PP-OCRv3_mobile_rec_infer.tar">Inference Model</a>/<a href="https://p
               <li><strong>Software Environment:</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -542,13 +607,33 @@ You can quickly experience it with one command:
 paddleocr text_recognition -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.png
 ```
 
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following command:
+
+```bash
+# Use the transformers engine for inference
+paddleocr text_recognition -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.png \
+    --engine transformers
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following command:
+
+```bash
+# Use the onnxruntime engine for inference
+paddleocr text_recognition -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.png \
+    --engine onnxruntime
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
 <b>Note:</b> The official PaddleOCR models are downloaded from HuggingFace by default. If you cannot access HuggingFace, you can change the model source to BOS by setting the environment variable `PADDLE_PDX_MODEL_SOURCE="BOS"`. More mainstream model sources will be supported in the future.
 
 You can also integrate the model inference of the text recognition module into your project. Before running the following code, please download the [sample image](https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.png) to your local machine.
 
 ```python
 from paddleocr import TextRecognition
-model = TextRecognition(model_name="PP-OCRv5_server_rec")
+model = TextRecognition()
 output = model.predict(input="general_ocr_rec_001.png", batch_size=1)
 for res in output:
     res.print()
@@ -556,7 +641,38 @@ for res in output:
     res.save_to_json(save_path="./output/res.json")
 ```
 
+The example above uses the <code>paddle_static</code> inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured, and then run the following code:
+
+```python
+from paddleocr import TextRecognition
+model = TextRecognition(engine="transformers")
+output = model.predict(input="general_ocr_rec_001.png", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+If you choose `onnxruntime` as the inference engine, make sure the ONNX Runtime environment is configured, and then run the following code:
+
+```python
+from paddleocr import TextRecognition
+model = TextRecognition(engine="onnxruntime")
+output = model.predict(input="general_ocr_rec_001.png", batch_size=1)
+for res in output:
+    res.print()
+    res.save_to_img(save_path="./output/")
+    res.save_to_json(save_path="./output/res.json")
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
+If you want to use the trained model with the `paddle_dynamic` or `transformers` engine, refer to the [Weight Conversion](#52-weight-conversion) section in the [Inference Engine](#5-inference-engine) section below to convert the model from the `pdparams` format to the `safetensors` format using PaddleX.
+
 After running, the result is as follows:
+
 ```bash
 {'res': {'input_path': 'general_ocr_rec_001.png', 'page_index': None, 'rec_text': '绿洲仕格维花园公寓', 'rec_score': 0.9823867082595825}}
 ```
@@ -573,7 +689,7 @@ The visualized image is as follows:
 
 Descriptions of related methods and parameters are as follows:
 
-* Instantiate the text recognition model using `TextRecognition` (using `PP-OCRv5_server_rec` as an example), as follows:
+* Instantiate the text recognition model using <code>TextRecognition</code>, as follows:
 <table>
 <thead>
 <tr>
@@ -586,19 +702,20 @@ Descriptions of related methods and parameters are as follows:
 <tbody>
 <tr>
 <td><code>model_name</code></td>
-<td>If set to <code>None</code>, <code>PP-OCRv5_server_rec</code> is used.</td>
+<td><b>Description:</b> If set to <code>None</code>, <code>PP-OCRv6_medium_rec</code> is used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>model_dir</code></td>
-<td>Model storage path.</td>
+<td><b>Meaning:</b>Model storage path.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>Device for inference.<br/>
+<td><b>Meaning:</b> Device for inference.<br/>
+<b>Description:</b>
 <b>Examples:</b> <code>"cpu"</code>, <code>"gpu"</code>, <code>"npu"</code>, <code>"gpu:0"</code>, <code>"gpu:0,1"</code>.<br/>
 If multiple devices are specified, inference will be performed in parallel.<br/>
 By default, GPU 0 is used; if unavailable, CPU is used.
@@ -607,14 +724,27 @@ By default, GPU 0 is used; if unavailable, CPU is used.
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_static</code>, <code>paddle_dynamic</code>, <code>transformers</code>, and <code>onnxruntime</code>. When left as <code>None</code>, local inference uses the <code>paddle_static</code> engine by default. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>Meaning:</b> Inference-engine configuration.<br/><b>Description:</b> Recommended together with <code>engine</code>. For supported fields, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>Whether to enable high performance inference.</td>
+<td><b>Meaning:</b> Whether to enable high performance inference.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>Whether to enable the TensorRT subgraph engine of Paddle Inference.<br/>
+<td><b>Meaning:</b> Whether to enable the TensorRT subgraph engine of Paddle Inference.<br/>
+<b>Description:</b>
 For Paddle with CUDA 11.8, the compatible TensorRT version is 8.x (x>=6), recommended 8.6.1.6.<br/>
 
 </td>
@@ -623,38 +753,42 @@ For Paddle with CUDA 11.8, the compatible TensorRT version is 8.x (x>=6), recomm
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>Precision for TensorRT when using the Paddle Inference TensorRT subgraph engine.<br/><b>Options:</b> <code>fp32</code>, <code>fp16</code>.</td>
+<td><b>Meaning:</b>Precision for TensorRT when using the Paddle Inference TensorRT subgraph engine.<br/>
+<b>Description:</b>
+<b>Options:</b> <code>"fp32"</code>, <code>"fp16"</code>.</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
-<td>Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
+<td><b>Meaning:</b> Whether to enable MKL-DNN acceleration for inference. <br/>
+<b>Description:</b>
+If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 </tr>
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
-<td>MKL-DNN cache capacity.</td>
+<td><b>Meaning:</b> MKL-DNN cache capacity.</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>Number of threads to use for inference on CPUs.</td>
+<td><b>Meaning:</b>Number of threads to use for inference on CPUs.</td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>input_shape</code></td>
-<td>Input image size for the model in the format <code>(C, H, W)</code>.</td>
+<td><b>Meaning:</b>Input image size for the model in the format <code>(C, H, W)</code>.</td>
 <td><code>tuple|None</code></td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 
-* Call the `predict()` method of the text recognition model for inference. This method returns a list of results. In addition, this module also provides the `predict_iter()` method. The two methods are completely consistent in terms of parameter acceptance and result return. The difference is that `predict_iter()` returns a `generator`, which can process and obtain prediction results step by step. It is suitable for scenarios where large datasets need to be processed or memory savings are desired. You can choose either of these two methods according to your actual needs. The parameters of the `predict()` method include `input` and `batch_size`, with specific descriptions as follows:
+* Call the <code>predict()</code> method of the text recognition model for inference. This method returns a list of results. In addition, this module also provides the <code>predict_iter()</code>  method. The two methods are completely consistent in terms of parameter acceptance and result return. The difference is that <code>predict_iter()</code>  returns a <code>generator</code>, which can process and obtain prediction results step by step. It is suitable for scenarios where large datasets need to be processed or memory savings are desired. You can choose either of these two methods according to your actual needs. The parameters of the <code>predict()</code> method include <code>input</code> and <code>batch_size</code>, with specific descriptions as follows:
 
 <table>
 <thead>
@@ -667,7 +801,8 @@ For Paddle with CUDA 11.8, the compatible TensorRT version is 8.x (x>=6), recomm
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>Data to be predicted, supporting multiple input types, required.
+<td><b>Meaning:</b>Data to be predicted, supporting multiple input types, required.<br/>
+<b>Description:</b>
 <ul>
 <li><b>Python Var</b>: Image data represented by <code>numpy.ndarray</code></li>
 <li><b>str</b>: Local path of image file or PDF file: <code>/root/data/img.jpg</code>; <b>URL link</b>: Network URL of image file or PDF file: <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.png">Example</a>; <b>Local directory</b>: The directory should contain the images to be predicted, such as <code>/root/data/</code> (currently, prediction of PDF files in the directory is not supported, PDF files need to be specified to a specific file path)</li>
@@ -685,7 +820,7 @@ For Paddle with CUDA 11.8, the compatible TensorRT version is 8.x (x>=6), recomm
 </tr>
 </table>
 
-* Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports operations such as printing, saving as an image, and saving as a `json` file:
+* Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports operations such as printing, saving as an image, and saving as a <code>json</code> file:
 
 <table>
 <thead>
@@ -790,7 +925,7 @@ wget https://paddle-model-ecology.bj.bcebos.com/paddlex/official_pretrained_mode
 
 ### 4.2 Model Training
 
-PaddleOCR modularizes its code. To train the `PP-OCRv5_server_rec` recognition model, you need to use its [configuration file](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv5/PP-OCRv5_server_rec.yml).
+PaddleOCR modularizes its code. To train the `PP-OCRv5_server_rec` recognition model, you need to use its [configuration file](https://github.com/PaddlePaddle/PaddleOCR/blob/{{PADDLEOCR_GITHUB_REF}}/configs/rec/PP-OCRv5/PP-OCRv5_server_rec.yml).
 
 The training commands are as follows:
 
@@ -832,4 +967,193 @@ After exporting the model, the static graph model will be stored in `./PP-OCRv5_
 ```
 At this point, the secondary development is complete. This static graph model can be directly integrated into the PaddleOCR API.
 
-## 5. FAQ
+If you want to use the `paddle_dynamic` or `transformers` engine with the trained model, please refer to the [Weight Conversion](#52-weight-conversion) section in [Inference Engine](#5-inference-engine) later in this document to convert the model from the `pdparams` format to the `safetensors` format using PaddleX.
+
+## 5. Inference Engine
+
+For detailed descriptions, values, compatibility rules, and examples of the inference engine, please refer to <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration Description</a>.
+
+### 5.1 Speed Data
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>model</th>
+            <th>engine</th>
+            <th>Preprocessing (ms)</th>
+            <th>Inference (ms)</th>
+            <th>PostProcessing (ms)</th>
+            <th>End-to-End (ms)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan="4">PP-OCRv5_mobile_rec</td>
+            <td>paddle_static</td>
+            <td>1.94</td>
+            <td>6.69</td>
+            <td>1.00</td>
+            <td>9.76</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>1.97</td>
+            <td>35.38</td>
+            <td>1.11</td>
+            <td>38.60</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>3.31</td>
+            <td>17.70</td>
+            <td>0.50</td>
+            <td>21.68</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>1.82</td>
+            <td>2.05</td>
+            <td>0.91</td>
+            <td>4.91</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv5_server_rec</td>
+            <td>paddle_static</td>
+            <td>1.98</td>
+            <td>11.37</td>
+            <td>1.21</td>
+            <td>14.69</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>1.98</td>
+            <td>23.89</td>
+            <td>1.32</td>
+            <td>27.34</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>3.99</td>
+            <td>11.69</td>
+            <td>0.51</td>
+            <td>16.36</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>1.80</td>
+            <td>3.15</td>
+            <td>0.90</td>
+            <td>5.98</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv6_medium_rec</td>
+            <td>paddle_static</td>
+            <td>1.74</td>
+            <td>5.38</td>
+            <td>0.84</td>
+            <td>8.08</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>1.76</td>
+            <td>13.38</td>
+            <td>0.85</td>
+            <td>16.10</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>2.58</td>
+            <td>7.04</td>
+            <td>0.41</td>
+            <td>10.19</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>1.74</td>
+            <td>2.28</td>
+            <td>0.84</td>
+            <td>4.97</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv6_small_rec</td>
+            <td>paddle_static</td>
+            <td>1.74</td>
+            <td>4.73</td>
+            <td>0.82</td>
+            <td>7.41</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>1.76</td>
+            <td>12.43</td>
+            <td>0.87</td>
+            <td>15.18</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>2.55</td>
+            <td>6.70</td>
+            <td>0.41</td>
+            <td>9.82</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>1.73</td>
+            <td>1.79</td>
+            <td>0.83</td>
+            <td>4.46</td>
+        </tr>
+        <tr>
+            <td rowspan="4">PP-OCRv6_tiny_rec</td>
+            <td>paddle_static</td>
+            <td>1.76</td>
+            <td>2.77</td>
+            <td>0.40</td>
+            <td>5.04</td>
+        </tr>
+        <tr>
+            <td>paddle_dynamic</td>
+            <td>1.75</td>
+            <td>6.96</td>
+            <td>0.36</td>
+            <td>9.19</td>
+        </tr>
+        <tr>
+            <td>transformers</td>
+            <td>2.45</td>
+            <td>3.12</td>
+            <td>0.40</td>
+            <td>6.12</td>
+        </tr>
+        <tr>
+            <td>onnxruntime</td>
+            <td>1.73</td>
+            <td>0.92</td>
+            <td>0.36</td>
+            <td>3.12</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>Test Environment Description:</strong>
+<ul>
+    <li><strong>Test Data:</strong> <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/general_ocr_rec_001.jpg">Sample Image</a></li>
+    <li><strong>Hardware Configuration:</strong>
+        <ul>
+            <li>GPU: NVIDIA A100 40G</li>
+            <li>CPU: Intel(R) Xeon(R) Gold 6248 CPU @ 2.50GHz</li>
+        </ul>
+    </li>
+    <li><strong>Software Environment:</strong>
+        <ul>
+            <li>Ubuntu 22.04 / CUDA 12.6 / cuDNN 9.5</li>
+            <li>paddlepaddle-gpu 3.2.1 / paddleocr 3.5 / transformers 5.4.0 / torch 2.10 / onnxruntime-gpu 1.23.2</li>
+        </ul>
+    </li>
+</ul>
+
+### 5.2 Weight Conversion
+
+When using the inference engine, the system will automatically download the official pre-trained model. If you need to use a self-trained model with the `paddle_dynamic` or `transformers` engine, please refer to the [PaddleX Text Image Orientation Classification Module Weight Conversion](https://paddlepaddle.github.io/PaddleX/latest/en/module_usage/tutorials/ocr_modules/text_recognition.html#442) section to convert the model from the `pdparams` format to the `safetensors` format using PaddleX. This allows seamless integration into the PaddleOCR API for inference. If you need to use a self-trained model with the `onnxruntime` engine, refer to [PaddleX Obtain ONNX Models](https://paddlepaddle.github.io/PaddleX/latest/pipeline_deploy/paddle2onnx.html) to obtain the ONNX model, so it can be seamlessly integrated into the PaddleOCR API for inference.
+
+## 6. FAQ

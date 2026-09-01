@@ -32,6 +32,7 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+!chaoxing.spec
 
 # Installer logs
 pip-log.txt
@@ -132,6 +133,7 @@ saves/
 build/
 dist/
 *.spec
+!chaoxing.spec
 
 # python-uv.lock
 # just like Pipfile.lock,
@@ -141,6 +143,7 @@ uv.lock
 poetry.lock
 
 # Custom files
+.ccg/
 .cookies.txt
 cookies.txt
 .config.ini

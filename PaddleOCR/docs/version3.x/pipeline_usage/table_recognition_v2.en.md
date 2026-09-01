@@ -28,6 +28,7 @@ This pipeline is applicable in a variety of fields, including general, manufactu
 In this pipeline, you can choose the models to use based on the benchmark data below.
 
 > The inference time only includes the model inference time and does not include the time for pre- or post-processing.
+> In the inference time columns labeled [Regular Mode / High-Performance Mode], the Regular Mode values correspond to the local `paddle_static` inference engine.
 
 <details>
 <summary> <b>Table Structure Recognition Module Models:</b></summary>
@@ -806,7 +807,7 @@ devanagari_PP-OCRv3_mobile_rec_infer.tar">Inference Model</a>/<a href="https://p
               <li><strong>Software Environment:</strong>
                   <ul>
                       <li>Ubuntu 20.04 / CUDA 11.8 / cuDNN 8.9 / TensorRT 8.6.1.6</li>
-                      <li>paddlepaddle 3.0.0 / paddleocr 3.0.3</li>
+                      <li>paddlepaddle-gpu 3.0.0 / paddleocr 3.0.3</li>
                   </ul>
               </li>
           </ul>
@@ -828,7 +829,7 @@ devanagari_PP-OCRv3_mobile_rec_infer.tar">Inference Model</a>/<a href="https://p
             <td>Regular Mode</td>
             <td>FP32 Precision / No TRT Acceleration</td>
             <td>FP32 Precision / 8 Threads</td>
-            <td>PaddleInference</td>
+            <td><code>paddle_static</code></td>
         </tr>
         <tr>
             <td>High-Performance Mode</td>
@@ -847,7 +848,7 @@ devanagari_PP-OCRv3_mobile_rec_infer.tar">Inference Model</a>/<a href="https://p
 
 ## 2. Quick Start
 
-Before using the table structure recognition V2 pipeline locally, please ensure that you have completed the installation of the wheel package according to the [installation guide](../installation.md). If you prefer to install dependencies selectively, please refer to the relevant instructions in the installation documentation. The corresponding dependency group for this pipeline is `doc-parser`. After installation, you can experience it locally using the command line or Python integration.
+Before using the table structure recognition V2 pipeline locally, please ensure that you have completed the installation of the wheel package according to the [installation guide](../installation.md). If you prefer to install dependencies selectively, please refer to the relevant instructions in the installation documentation. The corresponding dependency group for this pipeline is <code>doc-parser</code>. After installation, you can experience it locally using the command line or Python integration.
 
 Please note: If you encounter issues such as the program becoming unresponsive, unexpected program termination, running out of memory resources, or extremely slow inference during execution, please try adjusting the configuration according to the documentation, such as disabling unnecessary features or using lighter-weight models.
 
@@ -868,6 +869,18 @@ paddleocr table_recognition_v2 -i ./table_recognition_v2.jpg --use_doc_unwarping
 paddleocr table_recognition_v2 -i ./table_recognition_v2.jpg --device gpu
 ```
 
+The examples above use the local `paddle_static` inference engine by default. To run them, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md), and then run the following command:
+
+```bash
+# Use the transformers engine for inference
+paddleocr table_recognition_v2 -i https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition_v2.jpg \
+    --engine transformers
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
 <details><summary><b>More command line parameters are supported. Click to expand for detailed descriptions of the command line parameters</b></summary>
 <table>
 <thead>
@@ -881,7 +894,8 @@ paddleocr table_recognition_v2 -i ./table_recognition_v2.jpg --device gpu
 <tbody>
 <tr>
 <td><code>input</code></td>
-<td>Data to be predicted, required.
+<td><b>Meaning:</b>Data to be predicted, required.<br/>
+<b>Description:</b>
 Local path to image files or PDF files: <code>/root/data/img.jpg</code>; <b>as URL links</b>, such as network URLs for image files or PDF files: <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition_v2.jpg">example</a>; <b>as local directories</b>, the directory must contain images to be predicted, such as local path: <code>/root/data/</code> (currently, predictions do not support directories that contain PDF files; the PDF file must be specified to the specific file path).
 </td>
 <td><code>str</code></td>
@@ -889,13 +903,17 @@ Local path to image files or PDF files: <code>/root/data/img.jpg</code>; <b>as U
 </tr>
 <tr>
 <td><code>save_path</code></td>
-<td>Specify the path to save the inference result file. If not set, the inference result will not be saved locally.</td>
+<td><b>Meaning:</b>Specify the path to save the inference result file. <br/>
+<b>Description:</b>
+If not set, the inference result will not be saved locally.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>layout_detection_model_name</code></td>
-<td>Name of the layout detection model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the layout detection model.<br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
@@ -907,103 +925,136 @@ Local path to image files or PDF files: <code>/root/data/img.jpg</code>; <b>as U
 </tr>
 <tr>
 <td><code>table_classification_model_name</code></td>
-<td>Name of the table classification model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the table classification model. <br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>table_classification_model_dir</code></td>
-<td>Directory path of the table classification model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the table classification model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wired_table_structure_recognition_model_name</code></td>
-<td>Name of the wired table structure recognition model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the wired table structure recognition model.<br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wired_table_structure_recognition_model_dir</code></td>
-<td>Directory path of the wired table structure recognition model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the wired table structure recognition model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wireless_table_structure_recognition_model_name</code></td>
-<td>Name of the wireless table structure recognition model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the wireless table structure recognition model. <br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wireless_table_structure_recognition_model_dir</code></td>
-<td>Directory path of the wireless table structure recognition model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the wireless table structure recognition model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wired_table_cells_detection_model_name</code></td>
-<td>Name of the wired table cell detection model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the wired table cell detection model. <br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wired_table_cells_detection_model_dir</code></td>
-<td>Directory path of the wired table cell detection model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the wired table cell detection model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wireless_table_cells_detection_model_name</code></td>
-<td>Name of the wireless table cell detection model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the wireless table cell detection model. <br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>wireless_table_cells_detection_model_dir</code></td>
-<td>Directory path of the wireless table cell detection model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the wireless table cell detection model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_name</code></td>
-<td>Name of the document orientation classification model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the document orientation classification model. <br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_dir</code></td>
-<td>Directory path of the document orientation classification model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the document orientation classification model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_name</code></td>
-<td>Name of the text image unwarping model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the text image unwarping model. <br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_dir</code></td>
-<td>Directory path of the text image unwarping model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text image unwarping model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_detection_model_name</code></td>
-<td>Name of the text detection model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the text detection model. <br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_detection_model_dir</code></td>
-<td>Directory path of the text detection model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text detection model. <br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_det_limit_side_len</code></td>
-<td>Image side length limit for text detection.
+<td><b>Meaning:</b>Image side length limit for text detection.<br/>
+<b>Description:</b>
 Any integer greater than <code>0</code>. If not set, the value initialized by the pipeline will be used, which defaults to <code>960</code>.
 </td>
 <td><code>int</code></td>
@@ -1011,7 +1062,8 @@ Any integer greater than <code>0</code>. If not set, the value initialized by th
 </tr>
 <tr>
 <td><code>text_det_limit_type</code></td>
-<td>Type of the image side length limit for text detection.
+<td><b>Meaning:</b>Type of the image side length limit for text detection.<br/>
+<b>Description:</b>
 Supports <code>min</code> and <code>max</code>. <code>min</code> ensures that the shortest side of the image is not less than <code>det_limit_side_len</code>, while <code>max</code> ensures that the longest side of the image is not greater than <code>limit_side_len</code>. If not set, the value initialized by the pipeline will be used, which defaults to <code>max</code>.
 </td>
 <td><code>str</code></td>
@@ -1019,7 +1071,8 @@ Supports <code>min</code> and <code>max</code>. <code>min</code> ensures that th
 </tr>
 <tr>
 <td><code>text_det_thresh</code></td>
-<td>Detection pixel threshold. In the output probability map, only pixels with a score greater than this threshold will be considered text pixels.
+<td><b>Meaning:</b>Detection pixel threshold. In the output probability map, only pixels with a score greater than this threshold will be considered text pixels.<br/>
+<b>Description:</b>
 Any floating-point number greater than <code>0</code>. If not set, the value initialized by the pipeline will be used, which defaults to <code>0.3</code>.
 </td>
 <td><code>float</code></td>
@@ -1027,7 +1080,8 @@ Any floating-point number greater than <code>0</code>. If not set, the value ini
 </tr>
 <tr>
 <td><code>text_det_box_thresh</code></td>
-<td>Detection box threshold. When the average score of all pixels within the detection result box is greater than this threshold, the result is considered a text area.
+<td><b>Meaning:</b>Detection box threshold. When the average score of all pixels within the detection result box is greater than this threshold, the result is considered a text area.<br/>
+<b>Description:</b>
 Any floating-point number greater than <code>0</code>. If not set, the value initialized by the pipeline will be used, which defaults to <code>0.6</code>.
 </td>
 <td><code>float</code></td>
@@ -1035,7 +1089,8 @@ Any floating-point number greater than <code>0</code>. If not set, the value ini
 </tr>
 <tr>
 <td><code>text_det_unclip_ratio</code></td>
-<td>Text detection expansion coefficient. This method expands the text area; the larger this value, the larger the expanded area.
+<td><b>Meaning:</b>Text detection expansion coefficient. This method expands the text area; the larger this value, the larger the expanded area.<br/>
+<b>Description:</b>
 Any floating-point number greater than <code>0</code>. If not set, the value initialized by the pipeline will be used, which defaults to <code>2.0</code>.
 </td>
 <td><code>float</code></td>
@@ -1043,25 +1098,32 @@ Any floating-point number greater than <code>0</code>. If not set, the value ini
 </tr>
 <tr>
 <td><code>text_recognition_model_name</code></td>
-<td>Name of the text recognition model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the text recognition model. <br/>
+<b>Description:</b>
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_recognition_model_dir</code></td>
-<td>Directory path of the text recognition model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the text recognition model. <br/>
+<b>Description:</b>
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_recognition_batch_size</code></td>
-<td>Batch size for the text recognition model. If not set, the default batch size will be set to <code>1</code>.</td>
+<td><b>Meaning:</b>Batch size for the text recognition model.<br/>
+<b>Description:</b> 
+If not set, the default batch size will be set to <code>1</code>.</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>text_rec_score_thresh</code></td>
-<td>Text recognition threshold. Text results with a score greater than this threshold will be retained.
+<td><b>Meaning:</b>Text recognition threshold. Text results with a score greater than this threshold will be retained.<br/>
+<b>Description:</b>
 Any floating-point number greater than <code>0</code>. If not set, the value initialized by the pipeline will be used, which defaults to <code>0.0</code>. That is, no threshold is set.
 </td>
 <td><code>float</code></td>
@@ -1069,31 +1131,41 @@ Any floating-point number greater than <code>0</code>. If not set, the value ini
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>Whether to load and use the document orientation classification module. If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td><b>Meaning:</b>Whether to load and use the document orientation classification module.<br/>
+<b>Description:</b> 
+If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>Whether to load and use the text image unwarping module. If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td><b>Meaning:</b>Whether to load and use the text image unwarping module. <br/>
+<b>Description:</b> 
+If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_layout_detection</code></td>
-<td>Whether to load and use the layout detection module. If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td><b>Meaning:</b>Whether to load and use the layout detection module.<br/>
+<b>Description:</b> 
+If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>use_ocr_model</code></td>
-<td>Whether to load and use the OCR module. If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td><b>Meaning:</b>Whether to load and use the OCR module. <br/>
+<b>Description:</b> 
+If not set, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>The device used for inference. Supports specifying a specific card number:
+<td><b>Meaning:</b>The device used for inference.<br/>
+<b>Description:</b> 
+Supports specifying a specific card number:
 <ul>
 <li><b>CPU</b>: For example, <code>cpu</code> indicates using CPU for inference;</li>
 <li><b>GPU</b>: For example, <code>gpu:0</code> indicates using the first GPU for inference;</li>
@@ -1101,20 +1173,30 @@ Any floating-point number greater than <code>0</code>. If not set, the value ini
 <li><b>XPU</b>: For example, <code>xpu:0</code> indicates using the first XPU for inference;</li>
 <li><b>MLU</b>: For example, <code>mlu:0</code> indicates using the first MLU for inference;</li>
 <li><b>DCU</b>: For example, <code>dcu:0</code> indicates using the first DCU for inference;</li>
+<li><b>MetaX GPU</b>: For example, <code>metax_gpu:0</code> indicates using the first MetaX GPU for inference;</li>
+<li><b>Iluvatar GPU</b>: For example, <code>iluvatar_gpu:0</code> indicates using the first Iluvatar GPU for inference;</li>
 </ul>If not set, the pipeline initialized value for this parameter will be used. During initialization, the local GPU device 0 will be preferred; if unavailable, the CPU device will be used.
 </td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, <code>paddle_static</code>, <code>paddle_dynamic</code>, and <code>transformers</code>. When left as <code>None</code>, PaddleOCR preserves the behavior of earlier versions, which in most configurations is equivalent to <code>paddle</code>. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str</code></td>
+<td></td>
+</tr>
+<tr>
 <td><code>enable_hpi</code></td>
-<td>Whether to enable high-performance inference.</td>
+<td><b>Meaning:</b>Whether to enable high-performance inference.</td>
 <td><code>bool</code></td>
-<td><code>False</code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<td><b>Meaning:</b>Whether to use the Paddle Inference TensorRT subgraph engine. <br/>
+<b>Description:</b>
+If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
 For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6), and it is recommended to install TensorRT 8.6.1.6.<br/>
 
 </td>
@@ -1123,33 +1205,35 @@ For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6)
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>Computation precision, such as fp32, fp16.</td>
+<td><b>Meaning:</b>Computation precision, such as <code>fp32</code>, <code>fp16</code>.</td>
 <td><code>str</code></td>
 <td><code>fp32</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
-<td>Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
+<td><b>Meaning:</b>Whether to enable MKL-DNN acceleration for inference.<br/>
+<b>Description:</b> 
+If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 </tr>
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN cache capacity.
+<b>Meaning:</b>MKL-DNN cache capacity.
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>Number of threads to use for inference on the CPU.</td>
+<td><b>Meaning:</b>Number of threads to use for inference on the CPU.</td>
 <td><code>int</code></td>
-<td><code>8</code></td>
+<td><code>10</code></td>
 </tr>
 <tr>
 <td><code>paddlex_config</code></td>
-<td>Path to PaddleX pipeline configuration file.</td>
+<td><b>Meaning:</b> Path to the PaddleX pipeline configuration file.<br/><b>Description:</b> Use this parameter when you need to configure advanced options such as <code>engine_config</code> through a configuration file. See <a href="../paddleocr_and_paddlex.en.md">PaddleOCR and PaddleX</a>.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
@@ -1198,7 +1282,7 @@ The running results will be printed to the terminal. The default configuration o
        [1046, ...,  573]], dtype=int16)}}]}}
 ```
 
-The visualization results are saved under `save_path`, and the visualization results are as follows:
+The visualization results are saved under <code>save_path</code>, and the visualization results are as follows:
 
 <img src="https://raw.githubusercontent.com/cuicheng01/PaddleX_doc_images/main/images/pipelines/table_recognition_v2/02.jpg">
 
@@ -1222,9 +1306,33 @@ for res in output:
     res.save_to_json("./output/")
 ```
 
+The example above uses the local `paddle_static` inference engine by default. To run it, first install PaddlePaddle by following [PaddlePaddle Framework Installation](../paddlepaddle_installation.en.md).
+
+If you choose `transformers` as the inference engine, make sure the Transformers environment is configured by following [Inference Engine and Configuration](../inference_deployment/local_inference/inference_engine.en.md), and then run the following code:
+
+```python
+from paddleocr import TableRecognitionPipelineV2
+
+pipeline = TableRecognitionPipelineV2(
+    engine="transformers",
+)
+# ocr = TableRecognitionPipelineV2(use_doc_orientation_classify=True) # Specify whether to use the document orientation classification model with use_doc_orientation_classify
+# ocr = TableRecognitionPipelineV2(use_doc_unwarping=True) # Specify whether to use the text image unwarping module with use_doc_unwarping
+# ocr = TableRecognitionPipelineV2(device="gpu") # Specify the device to use GPU for model inference
+output = pipeline.predict("./table_recognition_v2.jpg")
+for res in output:
+    res.print() ## Print the predicted structured output
+    res.save_to_img("./output/")
+    res.save_to_xlsx("./output/")
+    res.save_to_html("./output/")
+    res.save_to_json("./output/")
+```
+
+In most scenarios, the default `paddle_static` inference engine delivers better inference performance and is the recommended first choice.
+
 In the above Python script, the following steps are performed:
 
-(1) Instantiate the general table recognition V2 pipeline object using `TableRecognitionPipelineV2()`. The specific parameter descriptions are as follows:
+(1) Instantiate the general table recognition V2 pipeline object using <code>TableRecognitionPipelineV2()</code>. The specific parameter descriptions are as follows:
 
 <table>
 <thead>
@@ -1238,115 +1346,162 @@ In the above Python script, the following steps are performed:
 <tbody>
 <tr>
 <td><code>layout_detection_model_name</code></td>
-<td>Name of the layout detection model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the layout detection model.<br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>layout_detection_model_dir</code></td>
-<td>Directory path of the layout detection model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the layout detection model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>table_classification_model_name</code></td>
-<td>Name of the table classification model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the table classification model.<br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>table_classification_model_dir</code></td>
-<td>Directory path of the table classification model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the table classification model.<br/> 
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wired_table_structure_recognition_model_name</code></td>
-<td>Name of the wired table structure recognition model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the wired table structure recognition model.<br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wired_table_structure_recognition_model_dir</code></td>
-<td>Directory path of the wired table structure recognition model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the wired table structure recognition model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wireless_table_structure_recognition_model_name</code></td>
-<td>Name of the wireless table structure recognition model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the wireless table structure recognition model.<br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wireless_table_structure_recognition_model_dir</code></td>
-<td>Directory path of the wireless table structure recognition model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>Directory path of the wireless table structure recognition model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wired_table_cells_detection_model_name</code></td>
-<td>Name of the wired table cell detection model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td>Name of the wired table cell detection model. 
+<td><b>Meaning:</b>Name of the wired table cell detection model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wired_table_cells_detection_model_dir</code></td>
-<td>Directory path of the wired table cell detection model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td>Directory path of the wired table cell detection model. 
+<td><b>Meaning:</b>Directory path of the wired table cell detection model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wireless_table_cells_detection_model_name</code></td>
-<td>Name of the wireless table cell detection model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td>Name of the wireless table cell detection model. 
+<td><b>Meaning:</b>Name of the wireless table cell detection model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>wireless_table_cells_detection_model_dir</code></td>
-<td>Directory path of the wireless table cell detection model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td>Directory path of the wireless table cell detection model. 
+<td><b>Meaning:</b>Directory path of the wireless table cell detection model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_name</code></td>
-<td>Name of the document orientation classification model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td>Name of the document orientation classification model. 
+<td><b>Meaning:</b>Name of the document orientation classification model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_orientation_classify_model_dir</code></td>
-<td>Directory path of the document orientation classification model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td>Directory path of the document orientation classification model. 
+<td><b>Meaning:</b>Directory path of the document orientation classification model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_name</code></td>
-<td>Name of the text image unwarping model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td>Name of the text image unwarping model. 
+<td><b>Meaning:</b>Name of the text image unwarping model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_unwarping_model_dir</code></td>
-<td>Directory path of the text image unwarping model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td>Directory path of the text image unwarping model. 
+<td><b>Meaning:</b>Directory path of the text image unwarping model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_detection_model_name</code></td>
-<td>Name of the text detection model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td>Name of the text detection model. 
+<td><b>Meaning:</b>Name of the text detection model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_detection_model_dir</code></td>
-<td>Directory path of the text detection model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td>Directory path of the text detection model. 
+<td><b>Meaning:</b>Directory path of the text detection model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_det_limit_side_len</code></td>
-<td>Image side length limit for text detection.
+<td><b>Meaning:</b>Image side length limit for text detection. <br/>
+<b>Description:</b> 
 <ul>
 <li><b>int</b>: Any integer greater than <code>0</code>;</li>
 <li><b>None</b>: If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>960</code>.</li>
@@ -1357,7 +1512,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_limit_type</code></td>
-<td>Type of the image side length limit for text detection.
+<td><b>Meaning:</b>Type of the image side length limit for text detection. <br/>
+<b>Description:</b> 
 <ul>
 <li><b>str</b>: Supports <code>min</code> and <code>max</code>. <code>min</code> ensures that the shortest side of the image is not less than <code>det_limit_side_len</code>, while <code>max</code> ensures that the longest side of the image is not greater than <code>limit_side_len</code>;</li>
 <li><b>None</b>: If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>max</code>.</li>
@@ -1368,7 +1524,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_thresh</code></td>
-<td>Detection pixel threshold. In the output probability map, only pixels with a score greater than this threshold will be considered text pixels.
+<td><b>Meaning:</b>Detection pixel threshold. In the output probability map, only pixels with a score greater than this threshold will be considered text pixels. <br/>
+<b>Description:</b> 
 <ul>
 <li><b>float</b>: Any floating-point number greater than <code>0</code>;</li>
 <li><b>None</b>: If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>0.3</code>.</li>
@@ -1379,7 +1536,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_box_thresh</code></td>
-<td>Detection box threshold. When the average score of all pixels within the detection result box is greater than this threshold, the result is considered a text area.
+<td><b>Meaning:</b>Detection box threshold. When the average score of all pixels within the detection result box is greater than this threshold, the result is considered a text area. <br/>
+<b>Description:</b> 
 <ul>
 <li><b>float</b>: Any floating-point number greater than <code>0</code>;</li>
 <li><b>None</b>: If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>0.6</code>.</li>
@@ -1390,7 +1548,8 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_det_unclip_ratio</code></td>
-<td>Text detection expansion coefficient. This method expands the text area; the larger this value, the larger the expanded area.
+<td><b>Meaning:</b>Text detection expansion coefficient. This method expands the text area; the larger this value, the larger the expanded area. <br/>
+<b>Description:</b> 
 <ul>
 <li><b>float</b>: Any floating-point number greater than <code>0</code>;</li>
 <li><b>None</b>: If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>2.0</code>.</li>
@@ -1401,25 +1560,34 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>text_recognition_model_name</code></td>
-<td>Name of the text recognition model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>Name of the text recognition model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_recognition_model_dir</code></td>
-<td>Directory path of the text recognition model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td>Directory path of the text recognition model. 
+<td><b>Meaning:</b>Directory path of the text recognition model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_recognition_batch_size</code></td>
-<td>Batch size for the text recognition model. If set to <code>None</code>, the default batch size will be set to <code>1</code>.</td>
+<td>Batch size for the text recognition model. 
+<td><b>Meaning:</b>Batch size for the text recognition model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default batch size will be set to <code>1</code>.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_rec_score_thresh</code></td>
-<td>Text recognition threshold. Text results with a score greater than this threshold will be retained.
+<td><b>Meaning:</b>Text recognition threshold. Text results with a score greater than this threshold will be retained.<br/>
+<b>Description:</b>
 <ul>
 <li><b>float</b>: Any floating-point number greater than <code>0</code>;</li>
 <li><b>None</b>: If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>0.0</code>. That is, no threshold is set.
@@ -1430,31 +1598,44 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>Whether to load and use the document orientation classification module. If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td><b>Meaning:</b>Whether to load and use the document orientation classification module. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>Whether to load and use the text image unwarping module. If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td>Whether to load and use the text image unwarping module. 
+<td><b>Meaning:</b>Whether to load and use the text image unwarping module. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_layout_detection</code></td>
-<td>Whether to load and use the layout detection module. If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td>Whether to load and use the layout detection module. 
+<td><b>Meaning:</b>Whether to load and use the layout detection module. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_ocr_model</code></td>
-<td>Whether to load and use the OCR module. If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
+<td>Whether to load and use the OCR module. 
+<td><b>Meaning:</b>Whether to load and use the OCR module. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the value initialized by the pipeline will be used, which defaults to <code>True</code>.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>The device used for inference. Supports specifying a specific card number:
+<td><b>Meaning:</b>The device used for inference. <br/>
+<b>Description:</b> 
+Supports specifying a specific card number:
 <ul>
 <li><b>CPU</b>: For example, <code>cpu</code> indicates using CPU for inference;</li>
 <li><b>GPU</b>: For example, <code>gpu:0</code> indicates using the first GPU for inference;</li>
@@ -1462,6 +1643,8 @@ In the above Python script, the following steps are performed:
 <li><b>XPU</b>: For example, <code>xpu:0</code> indicates using the first XPU for inference;</li>
 <li><b>MLU</b>: For example, <code>mlu:0</code> indicates using the first MLU for inference;</li>
 <li><b>DCU</b>: For example, <code>dcu:0</code> indicates using the first DCU for inference;</li>
+<li><b>MetaX GPU</b>: For example, <code>metax_gpu:0</code> indicates using the first MetaX GPU for inference;</li>
+<li><b>Iluvatar GPU</b>: For example, <code>iluvatar_gpu:0</code> indicates using the first Iluvatar GPU for inference;</li>
 <li><b>None</b>: If set to <code>None</code>, the pipeline initialized value for this parameter will be used. During initialization, the local GPU device 0 will be preferred; if unavailable, the CPU device will be used.</li>
 </ul>
 </td>
@@ -1470,13 +1653,14 @@ In the above Python script, the following steps are performed:
 </tr>
 <tr>
 <td><code>enable_hpi</code></td>
-<td>Whether to enable high-performance inference.</td>
+<td><b>Meaning:</b>Whether to enable high-performance inference.</td>
 <td><code>bool</code></td>
-<td><code>False</code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_tensorrt</code></td>
-<td>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<td><b>Meaning:</b>Whether to use the Paddle Inference TensorRT subgraph engine. If the model does not support acceleration through TensorRT, setting this flag will not enable acceleration.<br/>
+<b>Description:</b>
 For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6), and it is recommended to install TensorRT 8.6.1.6.<br/>
 
 </td>
@@ -1485,44 +1669,46 @@ For Paddle with CUDA version 11.8, the compatible TensorRT version is 8.x (x>=6)
 </tr>
 <tr>
 <td><code>precision</code></td>
-<td>Computation precision, such as fp32, fp16.</td>
+<td><b>Meaning:</b>Computation precision, such as <code>"fp32"</code>, <code>"fp16"</code>.</td>
 <td><code>str</code></td>
 <td><code>"fp32"</code></td>
 </tr>
 <tr>
 <td><code>enable_mkldnn</code></td>
-<td>Whether to enable MKL-DNN acceleration for inference. If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
+<td><b>Meaning:</b>Whether to enable MKL-DNN acceleration for inference.<br/>
+<b>Description:</b> 
+If MKL-DNN is unavailable or the model does not support it, acceleration will not be used even if this flag is set.</td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 </tr>
 <tr>
 <td><code>mkldnn_cache_capacity</code></td>
 <td>
-MKL-DNN cache capacity.
+<b>Meaning:</b>MKL-DNN cache capacity.
 </td>
 <td><code>int</code></td>
 <td><code>10</code></td>
 </tr>
 <tr>
 <td><code>cpu_threads</code></td>
-<td>Number of threads to use for inference on the CPU.</td>
+<td><b>Meaning:</b>Number of threads to use for inference on the CPU.</td>
 <td><code>int</code></td>
-<td><code>8</code></td>
+<td><code>10</code></td>
 </tr>
 <tr>
 <td><code>paddlex_config</code></td>
-<td>Path to PaddleX pipeline configuration file.</td>
+<td><b>Meaning:</b>Path to PaddleX pipeline configuration file.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 
-(2) Call the `predict()` method of the general table recognition V2 pipeline object to perform inference prediction, which returns a result list.
+(2) Call the <code>predict()</code> method of the general table recognition V2 pipeline object to perform inference prediction, which returns a result list.
 
-Additionally, the pipeline also provides the `predict_iter()` method. Both methods accept the same parameters and return results in the same way; the difference is that `predict_iter()` returns a `generator`, allowing for gradual processing and retrieval of prediction results, suitable for handling large datasets or for scenarios where memory savings are desired. You can choose to use either method based on your actual needs.
+Additionally, the pipeline also provides the <code>predict_iter()</code> method. Both methods accept the same parameters and return results in the same way; the difference is that <code>predict_iter()</code> returns a <code>generator</code>, allowing for gradual processing and retrieval of prediction results, suitable for handling large datasets or for scenarios where memory savings are desired. You can choose to use either method based on your actual needs.
 
-The parameters and descriptions of the `predict()` method are as follows:
+The parameters and descriptions of the <code>predict()</code> method are as follows:
 
 <table>
 <thead>
@@ -1536,7 +1722,8 @@ The parameters and descriptions of the `predict()` method are as follows:
 <tbody>
 <tr>
 <td><code>input</code></td>
-<td>Data to be predicted, supports multiple input types, required.
+<td><b>Meaning:</b>Data to be predicted, supports multiple input types, required.<br/>
+<b>Description:</b>
 <ul>
 <li><b>Python Var</b>: For example, image data represented as <code>numpy.ndarray</code>;</li>
 <li><b>str</b>: Local path to image files or PDF files: <code>/root/data/img.jpg</code>; <b>as URL links</b>, such as network URLs for image files or PDF files: <a href="https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/table_recognition_v2.jpg">example</a>; <b>as local directories</b>, the directory must contain images to be predicted, such as local path: <code>/root/data/</code> (currently, predictions do not support directories that contain PDF files; the PDF file must be specified to the specific file path);</li>
@@ -1548,104 +1735,124 @@ The parameters and descriptions of the `predict()` method are as follows:
 </tr>
 <tr>
 <td><code>use_doc_orientation_classify</code></td>
-<td>Whether to use the document orientation classification module during inference.</td>
+<td><b>Meaning:</b>Whether to use the document orientation classification module during inference.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_doc_unwarping</code></td>
-<td>Whether to use the text image unwarping module during inference.</td>
+<td><b>Meaning:</b>Whether to use the text image unwarping module during inference.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_layout_detection</code></td>
-<td>Whether to use the layout detection module during inference.</td>
+<td><b>Meaning:</b>Whether to use the layout detection module during inference.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_ocr_model</code></td>
-<td>Whether to use the <code>ocr</code> model during inference.</td>
+<td><b>Meaning:</b>Whether to use the <code>ocr</code> model during inference.</td>
 <td><code>bool|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_det_limit_side_len</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b>
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_det_limit_type</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters.<br/>
+<b>Description:</b> 
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_det_thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_det_box_thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_det_unclip_ratio</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>text_rec_score_thresh</code></td>
-<td>Same meaning as the instantiation parameters. If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
+<td><b>Meaning:</b>Same meaning as the instantiation parameters. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the instantiation value is used; otherwise, this parameter takes precedence.</td>
 <td><code>float|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>use_e2e_wired_table_rec_model</code></td>
-<td>Whether to use the wired end-to-end table recognition mode during inference.</td>
+<td><b>Meaning:</b>Whether to use the wired end-to-end table recognition mode during inference.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_e2e_wireless_table_rec_model</code></td>
-<td>Whether to use the wireless end-to-end table recognition mode during inference.</td>
+<td><b>Meaning:</b>Whether to use the wireless end-to-end table recognition mode during inference.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_wired_table_cells_trans_to_html</code></td>
-<td>Whether to use the wired table cell detection result direct-to-HTML mode during inference. If enabled, it directly constructs the HTML based on the geometric relationships of the wired table cell detection results.</td>
+<td><b>Meaning:</b>Whether to use the wired table cell detection result direct-to-HTML mode during inference. <br/>
+<b>Description:</b> 
+If enabled, it directly constructs the HTML based on the geometric relationships of the wired table cell detection results.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_wireless_table_cells_trans_to_html</code></td>
-<td>Whether to use the wireless table cell detection result direct-to-HTML mode during inference. If enabled, it directly constructs the HTML based on the geometric relationships of the wireless table cell detection results.</td>
+<td><b>Meaning:</b>Whether to use the wireless table cell detection result direct-to-HTML mode during inference.<br/>
+<b>Description:</b> 
+If enabled, it directly constructs the HTML based on the geometric relationships of the wireless table cell detection results.</td>
 <td><code>bool</code></td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>use_table_orientation_classify</code></td>
-<td>Whether to use the table orientation classification mode during inference. If enabled, it can correct the direction and correctly complete table recognition when the table in the image has 90/180/270-degree rotation.</td>
+<td><b>Meaning:</b>Whether to use the table orientation classification mode during inference.<br/> 
+<b>Description:</b> 
+If enabled, it can correct the direction and correctly complete table recognition when the table in the image has 90/180/270-degree rotation.</td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 </tr>
 <tr>
 <td><code>use_ocr_results_with_table_cells</code></td>
-<td>Whether to use the cell-split OCR mode during inference. If enabled, it will split and re-recognize OCR detection results based on the cell prediction results to avoid missing text.</td>
+<td><b>Meaning:</b>Whether to use the cell-split OCR mode during inference.<br/>
+<b>Description:</b> 
+If enabled, it will split and re-recognize OCR detection results based on the cell prediction results to avoid missing text.</td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 </tr>
 </tbody>
 </table>
 
-(3) Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports printing, saving as an image, saving as an `xlsx` file, saving as an `HTML` file, and saving as a `json` file:
+(3) Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports printing, saving as an image, saving as an <code>xlsx</code> file, saving as an <code>HTML</code> file, and saving as a <code>json</code> file:
 
 <table>
 <thead>
@@ -1725,58 +1932,68 @@ The parameters and descriptions of the `predict()` method are as follows:
 </tr>
 </tbody>
 </table>
-
-- Calling the `print()` method will print the results to the terminal. The content printed to the terminal is explained as follows:
-
-    - `input_path`: `(str)` The input path of the image to be predicted.
-
-    - `page_index`: `(Union[int, None])` If the input is a PDF file, this indicates which page of the PDF it is; otherwise, it is `None`.
-
-    - `model_settings`: `(Dict[str, bool])` Configuration parameters required by the pipeline.
-
-        - `use_doc_preprocessor`: `(bool)` Controls whether to enable the document preprocessing sub-pipeline.
-        - `use_layout_detection`: `(bool)` Controls whether to enable the layout area detection sub-pipeline.
-        - `use_ocr_model`: `(bool)` Controls whether to enable the OCR sub-pipeline.
-    - `layout_det_res`: `(Dict[str, Union[List[numpy.ndarray], List[float]]])` Output results of the layout detection sub-module. Only exists when `use_layout_detection=True`.
-        - `input_path`: `(Union[str, None])` The image path accepted by the layout detection area module, saved as `None` when the input is `numpy.ndarray`.
-        - `page_index`: `(Union[int, None])` If the input is a PDF file, this indicates which page of the PDF it is; otherwise, it is `None`.
-        - `boxes`: `(List[Dict])` List of detection boxes for the layout seal area. Each element in the list contains the following fields:
-            - `cls_id`: `(int)` The category ID of the detection box.
-            - `score`: `(float)` The confidence of the detection box.
-            - `coordinate`: `(List[float])` The coordinates of the four vertices of the detection box, in the order of x1, y1, x2, y2, indicating the x coordinate and y coordinate of the top left corner and the bottom right corner.
-    - `doc_preprocessor_res`: `(Dict[str, Union[str, Dict[str, bool], int]])` Output results of the document preprocessing sub-pipeline. Only exists when `use_doc_preprocessor=True`.
-        - `input_path`: `(Union[str, None])` The image path accepted by the image preprocessing sub-pipeline, saved as `None` when the input is `numpy.ndarray`.
-        - `model_settings`: `(Dict)` Configuration parameters for the preprocessing sub-pipeline.
-            - `use_doc_orientation_classify`: `(bool)` Controls whether to enable document orientation classification.
-            - `use_doc_unwarping`: `(bool)` Controls whether to enable text image unwarping.
-        - `angle`: `(int)` Prediction result of the document orientation classification. When enabled, the values are [0,1,2,3], corresponding to [0°,90°,180°,270°]; when not enabled, it is -1.
-
-    - `dt_polys`: `(List[numpy.ndarray])` List of polygon boxes for text detection. Each detection box is represented by a numpy array consisting of 4 vertex coordinates, with an array shape of (4, 2) and data type of int16.
-
-    - `dt_scores`: `(List[float])` List of confidence scores for the text detection boxes.
-
-    - `text_det_params`: `(Dict[str, Dict[str, int, float]])` Configuration parameters for the text detection module.
-        - `limit_side_len`: `(int)` Side length limit value during image preprocessing.
-        - `limit_type`: `(str)` Processing method for side length limits.
-        - `thresh`: `(float)` Confidence threshold for classifying text pixels.
-        - `box_thresh`: `(float)` Confidence threshold for text detection boxes.
-        - `unclip_ratio`: `(float)` Expansion coefficient for text detection boxes.
-        - `text_type`: `(str)` The type of text detection, currently fixed as "general".
-
-    - `text_rec_score_thresh`: `(float)` Filtering threshold for text recognition results.
-
-    - `rec_texts`: `(List[str])` List of text recognition results, including only the text with confidence exceeding `text_rec_score_thresh`.
-
-    - `rec_scores`: `(List[float])` List of confidence scores for text recognition, filtered by `text_rec_score_thresh`.
-
-    - `rec_polys`: `(List[numpy.ndarray])` List of text detection boxes that have been filtered by confidence, with the same format as `dt_polys`.
-
-    - `rec_boxes`: `(numpy.ndarray)` Array of rectangular bounding boxes for detection boxes, with a shape of (n, 4) and dtype of int16. Each row represents the coordinates of a rectangular box as [x_min, y_min, x_max, y_max], where (x_min, y_min) is the top left corner coordinate, and (x_max, y_max) is the bottom right corner coordinate.
-
-- Calling the `save_to_json()` method will save the above content to the specified `save_path`. If a directory is specified, the saved path will be `save_path/{your_img_basename}_res.json`; if a file is specified, it will be saved directly to that file. Since json files do not support saving numpy arrays, the `numpy.array` types will be converted to list format.
-- Calling the `save_to_img()` method will save the visualization results to the specified `save_path`. If a directory is specified, the saved path will be `save_path/{your_img_basename}_ocr_res_img.{your_img_extension}`; if a file is specified, it will be saved directly to that file. (The pipeline usually contains many result images, so it is not recommended to specify a specific file path directly, as multiple images will be overwritten and only the last image will be retained.)
-- Calling the `save_to_html()` method will save the above content to the specified `save_path`. If a directory is specified, the saved path will be `save_path/{your_img_basename}_table_1.html`; if a file is specified, it will be saved directly to that file. In the general table recognition V2 pipeline, the HTML format of the table in the image will be written to the specified HTML file.
-- Calling the `save_to_xlsx()` method will save the above content to the specified `save_path`. If a directory is specified, the saved path will be `save_path/{your_img_basename}_res.xlsx`; if a file is specified, it will be saved directly to that file. In the general table recognition V2 pipeline, the Excel format of the table in the image will be written to the specified xlsx file.
+<ul>
+<li>Calling the <code>print()</code> method will print the results to the terminal. The content printed to the terminal is explained as follows:
+    <ol start="1" type="1">
+    <li><code>input_path</code>: <code>(str)</code> The input path of the image to be predicted.</li>
+    <li><code>page_index</code>: <code>(Union[int, None])</code> If the input is a PDF file, it represents the current page number of the PDF file; otherwise, it is <code>None</code>.</li>
+    <li><code>model_settings</code>: <code>(Dict[str, bool])</code> Configuration parameters required for the production line.
+        <ol>
+        <li><code>use_doc_preprocessor</code>: <code>(bool)</code> Control whether to enable the document preprocessing sub-line.</li>
+        <li><code>use_layout_detection</code>: <code>(bool)</code> Control whether to enable the layout detection sub-line.</li>
+        <li><code>use_ocr_model</code>: <code>(bool)</code> Control whether to enable the OCR sub-line.</li>
+        </ol>
+    </li>
+    <li><code>layout_det_res</code>: <code>(Dict[str, Union[List[numpy.ndarray], List[float]]])</code> Output results of the layout detection sub-module. Only exists when <code>use_layout_detection=True</code>
+        <ol>
+        <li><code>input_path</code>: <code>(Union[str, None])</code> The image path accepted by the layout detection area module, saved as <code>None</code> when the input is <code>numpy.ndarray</code>.</li>
+        <li><code>page_index</code>: <code>(Union[int, None])</code> If the input is a PDF file, it represents the current page number of the PDF file; otherwise, it is <code>None</code>.</li>
+        <li><code>boxes</code>: <code>(List[Dict])</code> A list of layout seal area detection boxes. Each element in the list contains the following fields
+            <ul>
+            <li><code>cls_id</code>: <code>(int)</code> The class ID of the layout seal area detection box.</li>
+            <li><code>score</code>: <code>(float)</code> The confidence score of the layout seal area detection box.</li>
+            <li><code>coordinate</code>: <code>(List[float])</code> The coordinates of the four vertices of the layout seal area detection box, in the order of x1, y1, x2, y2, representing the top-left x coordinate, top-left y coordinate, bottom-right x coordinate, and bottom-right y coordinate.</li>
+            </ul>
+        </li>
+        </ol>
+    </li>
+    <li><code>doc_preprocessor_res</code>: <code>(Dict[str, Union[str, Dict[str, bool], int]])</code> Output results of the document preprocessing sub-module. Only exists when <code>use_doc_preprocessor=True</code>
+        <ol>
+        <li><code>input_path</code>: <code>(Union[str, None])</code> The image path accepted by the document preprocessing area module, saved as <code>None</code> when the input is <code>numpy.ndarray</code>.</li>
+        <li><code>page_index</code>: <code>(Union[int, None])</code> If the input is a PDF file, it represents the current page number of the PDF file; otherwise, it is <code>None</code>.</li>
+        <li><code>model_settings</code>: <code>(Dict)</code> Model configuration parameters of the document preprocessing sub-line.</li>
+        <li><code>model_settings</code>: <code>(Dict)</code> Model configuration parameters of the document preprocessing sub-line.
+            <ul>
+            <li><code>use_doc_orientation_classify</code>: <code>(bool)</code> Control whether to enable document orientation classification.</li>
+            <li><code>use_doc_unwarping</code>: <code>(bool)</code> Control whether to enable text image unwarping.</li>
+            </ul>
+        </li>
+        <li><code>angle</code>: <code>(int)</code> The predicted result of document orientation classification. Enabled values are [0,1,2,3], corresponding to [0°,90°,180°,270°]; disabled value is -1.</li>
+        </ol>
+    </li>
+    <li><code>dt_polys</code>: <code>(List[numpy.ndarray])</code> List of text detection polygons. Each detection box is represented by a numpy array of shape (4, 2), with data type int16.</li>
+    <li><code>dt_scores</code>: <code>(List[float])</code> List of text detection box confidence scores</li>
+    <li><code>text_det_params</code>: <code>(Dict[str, Dict[str, int, float]])</code> Configuration parameters for the text detection module.
+        <ol>
+        <li><code>limit_side_len</code>: <code>(int)</code> Side length limit value during image preprocessing.</li>
+        <li><code>limit_type</code>: <code>(str)</code> Type of side length limit processing.</li>
+        <li><code>thresh</code>: <code>(float)</code> Confidence threshold for text pixel classification.</li>
+        <li><code>box_thresh</code>: <code>(float)</code> Confidence threshold for text detection boxes.</li>
+        <li><code>unclip_ratio</code>: <code>(float)</code> Expansion coefficient for text detection boxes.</li>
+        <li><code>text_type</code>: <code>(str)</code> Type of text detection, currently fixed as "general".</li>
+        </ol>
+    </li>
+    <li><code>text_rec_score_thresh</code>: <code>(float)</code> Confidence threshold for text recognition results filtering.</li>
+    <li><code>rec_texts</code>: <code>(List[str])</code> List of text recognition results, only containing texts with confidence scores higher than <code>text_rec_score_thresh</code>.</li>
+    <li><code>rec_scores</code>: <code>(List[float])</code> List of text recognition confidence scores, filtered by <code>text_rec_score_thresh</code>.</li>
+    <li><code>rec_polys</code>: <code>(List[numpy.ndarray])</code> List of text detection boxes after confidence filtering, in the same format as <code>dt_polys</code>.</li>
+    <li><code>rec_boxes</code>: <code>(numpy.ndarray)</code> Array of rectangular bounding boxes for text detection boxes, with shape (n, 4) and dtype int16. Each row represents the coordinates of a rectangular box in the format [x_min, y_min, x_max, y_max], where (x_min, y_min) is the top-left coordinate and (x_max, y_max) is the bottom-right coordinate.</li>
+    </ol>
+</li>
+<li>Calling the <code>save_to_json()</code> method will save the above content to the specified <code>save_path</code>. If a directory is specified, the saved path will be <code>save_path/{your_img_basename}_res.json</code>; if a file is specified, it will be saved directly to that file. Since json files do not support saving numpy arrays, the <code>numpy.array</code> types will be converted to list format.</li>
+<li>Calling the <code>save_to_img()</code> method will save the visualization results to the specified <code>save_path</code>. If a directory is specified, the saved path will be <code>save_path/{your_img_basename}_ocr_res_img.{your_img_extension}</code>; if a file is specified, it will be saved directly to that file. (The pipeline usually contains many result images, so it is not recommended to specify a specific file path directly, as multiple images will be overwritten and only the last image will be retained.)</li>
+<li>Calling the <code>save_to_html()</code> method will save the above content to the specified <code>save_path</code>. If a directory is specified, the saved path will be <code>save_path/{your_img_basename}_table_1.html</code>; if a file is specified, it will be saved directly to that file. In the general table recognition V2 pipeline, the HTML format of the table in the image will be written to the specified HTML file.</li>
+<li>Calling the <code>save_to_xlsx()</code> method will save the above content to the specified <code>save_path</code>. If a directory is specified, the saved path will be <code>save_path/{your_img_basename}_res.xlsx</code>; if a file is specified, it will be saved directly to that file. In the general table recognition V2 pipeline, the Excel format of the table in the image will be written to the specified xlsx file.</li> 
 
 * Additionally, it also supports obtaining visualization images and prediction results through attributes, as follows:
 
@@ -1796,10 +2013,10 @@ The parameters and descriptions of the `predict()` method are as follows:
 <td rowspan="2">Get visualization images in <code>dict</code> format</td>
 </tr>
 </table>
-
-- The prediction result obtained by the `json` attribute is of dict type, and the relevant content is consistent with the content saved by calling the `save_to_json()` method.
-- The prediction result returned by the `img` attribute is a dictionary type data. The keys are `table_res_img`, `ocr_res_img`, `layout_res_img`, and `preprocessed_img`, and the corresponding values are four `Image.Image` objects, in the order of: visualization image of the table recognition result, visualization image of the OCR result, visualization image of the layout area detection result, and visualization image of the image preprocessing. If a certain sub-module is not used, the corresponding result image will not be included in the dictionary.
-
+<ul>
+<li>The prediction result obtained by the <code>json</code> attribute is of dict type, and the relevant content is consistent with the content saved by calling the <code>save_to_json()</code> method.</li>
+<li>The prediction result returned by the <code>img</code> attribute is a dictionary type data. The keys are <code>table_res_img</code>、<code>ocr_res_img</code> 、<code>layout_res_img</code>, and <code>preprocessed_img</code>, and the corresponding values are four <code>Image.Image</code> objects, in the order of: visualization image of the table recognition result, visualization image of the OCR result, visualization image of the layout area detection result, and visualization image of the image preprocessing. If a certain sub-module is not used, the corresponding result image will not be included in the dictionary.</li>
+</ul>
 ## 3. Development Integration/Deployment
 
 If the model can meet your requirements for inference speed and accuracy, you can proceed directly with development integration/deployment.
@@ -1808,9 +2025,9 @@ If you need to apply the model directly in your Python project, you can refer to
 
 Additionally, PaddleOCR provides two other deployment methods, which are described in detail below:
 
-🚀 High-Performance Inference: In actual production environments, many applications have strict performance criteria (especially response speed) for deployment strategies to ensure efficient system operation and smooth user experience. To address this, PaddleOCR provides high-performance inference capabilities aimed at optimizing model inference and preprocessing to significantly speed up the end-to-end process. For detailed high-performance inference procedures, please refer to [High-Performance Inference](../deployment/high_performance_inference.md).
+🚀 High-Performance Inference: In actual production environments, many applications have strict performance criteria (especially response speed) for deployment strategies to ensure efficient system operation and smooth user experience. To address this, PaddleOCR provides high-performance inference capabilities aimed at optimizing model inference and preprocessing to significantly speed up the end-to-end process. For detailed high-performance inference procedures, please refer to [High-Performance Inference](../inference_deployment/local_inference/high_performance_inference.md).
 
-☁️ Service-Oriented Deployment: Service-oriented deployment is a common form of deployment in actual production environments. By encapsulating inference functions as services, clients can access these services via network requests to obtain inference results. For detailed service-oriented deployment procedures, please refer to [Serving](../deployment/serving.md).
+☁️ Service-Oriented Deployment: Service-oriented deployment is a common form of deployment in actual production environments. By encapsulating inference functions as services, clients can access these services via network requests to obtain inference results. For detailed service-oriented deployment procedures, please refer to [Serving](../inference_deployment/serving/serving.md).
 
 Below is the API reference for basic service-oriented deployment and examples of multilingual service calls:
 
@@ -2041,6 +2258,7 @@ If neither the request body nor the configuration file is set (If <code>visualiz
 </tr>
 </tbody>
 </table>
+<p>Image fields in the element schema below (e.g. <code>outputImages</code>, <code>inputImage</code>) are returned inline as Base64 strings by default; when the server is configured to return URLs, those values become pre-signed URLs while the field types remain unchanged. See the "Returning Binary Content as URLs" section of the <a href="../inference_deployment/serving/serving.en.md">Serving Deployment Guide</a> for configuration.</p>
 <p>Each element in <code>tableRecResults</code> is an <code>object</code> with the following properties:</p>
 <table>
 <thead>
@@ -2059,12 +2277,12 @@ If neither the request body nor the configuration file is set (If <code>visualiz
 <tr>
 <td><code>outputImages</code></td>
 <td><code>object</code> | <code>null</code></td>
-<td>Refer to the <code>img</code> property description of the model prediction results. The images are in JPEG format and encoded in Base64.</td>
+<td>Refer to the <code>img</code> property description of the model prediction results. The images are in JPEG format and encoded in Base64 by default; returned as pre-signed URLs when URL-return mode is enabled.</td>
 </tr>
 <tr>
 <td><code>inputImage</code></td>
 <td><code>string</code> | <code>null</code></td>
-<td>Input image. The image is in JPEG format and encoded in Base64.</td>
+<td>Input image. The image is in JPEG format and encoded in Base64 by default; returned as a pre-signed URL when URL-return mode is enabled.</td>
 </tr>
 </tbody>
 </table></details>

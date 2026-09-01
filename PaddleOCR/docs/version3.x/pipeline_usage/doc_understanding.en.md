@@ -55,7 +55,7 @@ In this pipeline, you can choose the model to use based on the benchmark data be
 
 ## 2. Quick Start
 
-Before using the document understanding pipeline locally, ensure that you have completed the installation of the wheel package according to the [installation tutorial](../installation.en.md). If you prefer to install dependencies selectively, please refer to the relevant instructions in the installation documentation. The corresponding dependency group for this pipeline is `doc-parser`. After installation, you can experience it locally using the command line or Python integration.
+Before using the document understanding pipeline locally, ensure that you have completed the installation of the wheel package according to the [installation tutorial](../installation.en.md). If you prefer to install dependencies selectively, please refer to the relevant instructions in the installation documentation. The corresponding dependency group for this pipeline is <code>doc-parser</code>. After installation, you can experience it locally using the command line or Python integration.
 
 Please note: If you encounter issues such as the program becoming unresponsive, unexpected program termination, running out of memory resources, or extremely slow inference during execution, please try adjusting the configuration according to the documentation, such as disabling unnecessary features or using lighter-weight models.
 
@@ -80,7 +80,8 @@ paddleocr doc_understanding -i "{'image': 'https://paddle-model-ecology.bj.bcebo
 <tbody>
 <tr>
 <td><code>input</code></td>
-<td>Data to be predicted,  required.
+<td><b>Meaning:</b>Data to be predicted,  required.<br/>
+<b>Description:</b>
 "{'image': 'https://paddle-model-ecology.bj.bcebos.com/paddlex/imgs/demo_image/medal_table.png', 'query': 'Recognize the content of this table and output it in markdown format'}".
 </td>
 <td><code>str</code></td>
@@ -88,31 +89,41 @@ paddleocr doc_understanding -i "{'image': 'https://paddle-model-ecology.bj.bcebo
 </tr>
 <tr>
 <td><code>save_path</code></td>
-<td>Specify the path for saving the inference result file. If not set, the inference result will not be saved locally.</td>
+<td><b>Meaning:</b>Specify the path for saving the inference result file.<br/>
+<b>Description:</b> 
+If not set, the inference result will not be saved locally.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_understanding_model_name</code></td>
-<td>The name of the document understanding model. If not set, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>The name of the document understanding model.<br/>
+<b>Description:</b> 
+If not set, the default model of the pipeline will be used.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_understanding_model_dir</code></td>
-<td>The directory path of the document understanding model. If not set, the official model will be downloaded.</td>
+<td><b>Meaning:</b>The directory path of the document understanding model.<br/>
+<b>Description:</b> 
+If not set, the official model will be downloaded.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>doc_understanding_batch_size</code></td>
-<td>The batch size of the document understanding model. If not set, the default batch size will be set to <code>1</code>.</td>
+<td><b>Meaning:</b>The batch size of the document understanding model.<br/>
+<b>Description:</b> 
+If not set, the default batch size will be set to <code>1</code>.</td>
 <td><code>int</code></td>
 <td></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>The device used for inference. Supports specifying a specific card number:
+<td><b>Meaning:</b>The device used for inference.<br/> 
+<b>Description:</b> 
+Supports specifying a specific card number:
 <ul>
 <li><b>CPU</b>: For example, <code>cpu</code> indicates using the CPU for inference;</li>
 <li><b>GPU</b>: For example, <code>gpu:0</code> indicates using the first GPU for inference;</li>
@@ -120,14 +131,67 @@ paddleocr doc_understanding -i "{'image': 'https://paddle-model-ecology.bj.bcebo
 <li><b>XPU</b>: For example, <code>xpu:0</code> indicates using the first XPU for inference;</li>
 <li><b>MLU</b>: For example, <code>mlu:0</code> indicates using the first MLU for inference;</li>
 <li><b>DCU</b>: For example, <code>dcu:0</code> indicates using the first DCU for inference;</li>
+<li><b>MetaX GPU</b>: For example, <code>metax_gpu:0</code> indicates using the first MetaX GPU for inference;</li>
+<li><b>Iluvatar GPU</b>: For example, <code>iluvatar_gpu:0</code> indicates using the first Iluvatar GPU for inference;</li>
 </ul>If not set,  the pipeline initialized value for this parameter will be used. During initialization, the local GPU device 0 will be preferred; if unavailable, the CPU device will be used.
 </td>
 <td><code>str</code></td>
 <td></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, and <code>paddle_dynamic</code>. When left as <code>None</code>, PaddleOCR preserves the behavior of earlier versions, which in most configurations is equivalent to <code>paddle</code>. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>enable_hpi</code></td>
+<td><b>Meaning:</b> Whether to enable high-performance inference.</td>
+<td><code>bool</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>use_tensorrt</code></td>
+<td><b>Meaning:</b> Whether to enable the TensorRT subgraph engine of Paddle Inference.<br/>
+<b>Description:</b>
+If the model does not support TensorRT acceleration, acceleration will not be used even if this flag is set.<br/>
+For CUDA 11.8 versions of PaddlePaddle, the compatible TensorRT version is 8.x (x>=6). TensorRT 8.6.1.6 is recommended.<br/>
+</td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>precision</code></td>
+<td><b>Meaning:</b> Computation precision, such as <code>"fp32"</code> or <code>"fp16"</code>.</td>
+<td><code>str</code></td>
+<td><code>"fp32"</code></td>
+</tr>
+<tr>
+<td><code>enable_mkldnn</code></td>
+<td><b>Meaning:</b> Whether to enable MKL-DNN accelerated inference.<br/>
+<b>Description:</b>
+If MKL-DNN is unavailable or the model does not support MKL-DNN acceleration, acceleration will not be used even if this flag is set.
+</td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>mkldnn_cache_capacity</code></td>
+<td>
+<b>Meaning:</b> MKL-DNN cache capacity.
+</td>
+<td><code>int</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
+<td><code>cpu_threads</code></td>
+<td><b>Meaning:</b> Number of threads used for inference on CPU.</td>
+<td><code>int</code></td>
+<td><code>10</code></td>
+</tr>
+<tr>
 <td><code>paddlex_config</code></td>
-<td>Path to PaddleX pipeline configuration file.</td>
+<td><b>Meaning:</b> Path to the PaddleX pipeline configuration file.</td>
 <td><code>str</code></td>
 <td></td>
 </tr>
@@ -163,7 +227,7 @@ for res in output:
 
 In the above Python script, the following steps are performed:
 
-(1) Instantiate a Document Understanding Pipeline object through `DocUnderstanding()`. The specific parameter descriptions are as follows:
+(1) Instantiate a Document Understanding Pipeline object through <code>DocUnderstanding()</code>. The specific parameter descriptions are as follows:
 
 <table>
 <thead>
@@ -177,25 +241,33 @@ In the above Python script, the following steps are performed:
 <tbody>
 <tr>
 <td><code>doc_understanding_model_name</code></td>
-<td>The name of the document understanding model. If set to <code>None</code>, the default model of the pipeline will be used.</td>
+<td><b>Meaning:</b>The name of the document understanding model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the default model of the pipeline will be used.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_understanding_model_dir</code></td>
-<td>The directory path of the document understanding model. If set to <code>None</code>, the official model will be downloaded.</td>
+<td><b>Meaning:</b>The directory path of the document understanding model. <br/>
+<b>Description:</b> 
+If set to <code>None</code>, the official model will be downloaded.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>doc_understanding_batch_size</code></td>
-<td>The batch size of the document understanding model. If set to <code>None</code>, the default batch size will be set to <code>1</code>.</td>
+<td><b>Meaning:</b>The batch size of the document understanding model.<br/> 
+<b>Description:</b> 
+If set to <code>None</code>, the default batch size will be set to <code>1</code>.</td>
 <td><code>int|None</code></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>The device used for inference. Supports specifying a specific card number:
+<td><b>Meaning:</b>The device used for inference. <br/>
+<b>Description:</b> 
+Supports specifying a specific card number:
 <ul>
 <li><b>CPU</b>: For example, <code>cpu</code> indicates using the CPU for inference;</li>
 <li><b>GPU</b>: For example, <code>gpu:0</code> indicates using the first GPU for inference;</li>
@@ -203,6 +275,8 @@ In the above Python script, the following steps are performed:
 <li><b>XPU</b>: For example, <code>xpu:0</code> indicates using the first XPU for inference;</li>
 <li><b>MLU</b>: For example, <code>mlu:0</code> indicates using the first MLU for inference;</li>
 <li><b>DCU</b>: For example, <code>dcu:0</code> indicates using the first DCU for inference;</li>
+<li><b>MetaX GPU</b>: For example, <code>metax_gpu:0</code> indicates using the first MetaX GPU for inference;</li>
+<li><b>Iluvatar GPU</b>: For example, <code>iluvatar_gpu:0</code> indicates using the first Iluvatar GPU for inference;</li>
 <li><b>None</b>: If set to <code>None</code>,  the pipeline initialized value for this parameter will be used. During initialization, the local GPU device 0 will be preferred; if unavailable, the CPU device will be used.</li>
 </ul>
 </td>
@@ -210,19 +284,31 @@ In the above Python script, the following steps are performed:
 <td><code>None</code></td>
 </tr>
 <tr>
+<td><code>engine</code></td>
+<td><b>Meaning:</b> Inference engine.<br/><b>Description:</b> Supports <code>None</code> (the default), <code>paddle</code>, and <code>paddle_dynamic</code>. When left as <code>None</code>, PaddleOCR preserves the behavior of earlier versions, which in most configurations is equivalent to <code>paddle</code>. For detailed descriptions, supported values, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>str|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>engine_config</code></td>
+<td><b>Meaning:</b> Inference-engine configuration.<br/><b>Description:</b> Recommended together with <code>engine</code>. For supported fields, compatibility rules, and examples, see <a href="../inference_deployment/local_inference/inference_engine.en.md">Inference Engine and Configuration</a>.</td>
+<td><code>dict|None</code></td>
+<td><code>None</code></td>
+</tr>
+<tr>
 <td><code>paddlex_config</code></td>
-<td>Path to PaddleX pipeline configuration file.</td>
+<td><b>Meaning:</b>Path to PaddleX pipeline configuration file.</td>
 <td><code>str|None</code></td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 
-(2) Call the `predict()` method of the Document Understanding Pipeline object for inference prediction, which will return a result list.
+(2) Call the <code>predict()</code> method of the Document Understanding Pipeline object for inference prediction, which will return a result list.
 
-Additionally, the pipeline also provides a `predict_iter()` method. Both methods are consistent in terms of parameter acceptance and result return. The difference is that `predict_iter()` returns a `generator` that can process and obtain prediction results step by step, suitable for handling large datasets or scenarios where memory saving is desired. You can choose to use either method according to your actual needs.
+Additionally, the pipeline also provides a <code>predict_iter()</code> method. Both methods are consistent in terms of parameter acceptance and result return. The difference is that <code>predict_iter()</code> returns a <code>generator</code> that can process and obtain prediction results step by step, suitable for handling large datasets or scenarios where memory saving is desired. You can choose to use either method according to your actual needs.
 
-Below are the parameters and their descriptions for the `predict()` method:
+Below are the parameters and their descriptions for the <code>predict()</code> method:
 
 <table>
 <thead>
@@ -235,7 +321,8 @@ Below are the parameters and their descriptions for the `predict()` method:
 </thead>
 <tr>
 <td><code>input</code></td>
-<td>Data to be predicted, currently only supports dictionary type input
+<td><b>Meaning:</b>Data to be predicted, currently only supports dictionary type input<br/>
+<b>Description:</b>
 <ul>
   <li><b>Python Dict</b>: The input format for PP-DocBee is: <code>{"image":/path/to/image, "query": user question}</code>, representing the input image and corresponding user question.</li>
 </ul>
@@ -246,7 +333,7 @@ Below are the parameters and their descriptions for the `predict()` method:
 
 </table>
 
-(3) Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports printing and saving as a `json` file:
+(3) Process the prediction results. The prediction result for each sample is a corresponding Result object, which supports printing and saving as a <code>json</code> file:
 
 <table>
 <thead>
@@ -340,9 +427,9 @@ If you need to apply the pipeline directly to your Python project, you can refer
 
 In addition, PaddleOCR also provides two other deployment methods, detailed descriptions are as follows:
 
-🚀 High-Performance Inference: In real production environments, many applications have strict standards for the performance indicators of deployment strategies (especially response speed) to ensure efficient system operation and smooth user experience. To this end, PaddleOCR provides high-performance inference capabilities, aiming to deeply optimize the performance of model inference and pre-and post-processing, achieving significant acceleration of the end-to-end process. For detailed high-performance inference processes, refer to [High-Performance Inference](../deployment/high_performance_inference.md).
+🚀 High-Performance Inference: In real production environments, many applications have strict standards for the performance indicators of deployment strategies (especially response speed) to ensure efficient system operation and smooth user experience. To this end, PaddleOCR provides high-performance inference capabilities, aiming to deeply optimize the performance of model inference and pre-and post-processing, achieving significant acceleration of the end-to-end process. For detailed high-performance inference processes, refer to [High-Performance Inference](../inference_deployment/local_inference/high_performance_inference.md).
 
-☁️ Service Deployment: Service deployment is a common form of deployment in real production environments. By encapsulating inference functions as services, clients can access these services through network requests to obtain inference results. For detailed pipeline service deployment processes, refer to [Serving](../deployment/serving.md).
+☁️ Service Deployment: Service deployment is a common form of deployment in real production environments. By encapsulating inference functions as services, clients can access these services through network requests to obtain inference results. For detailed pipeline service deployment processes, refer to [Serving](../inference_deployment/serving/serving.md).
 
 Below is the API reference for basic service deployment and examples of service invocation in multiple languages:
 
