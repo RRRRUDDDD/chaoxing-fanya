@@ -229,6 +229,7 @@ def start_study():
             'speed': min(2.0, max(1.0, speed)),
             'jobs': jobs,
             'notopen_action': notopen_action,
+            'retry_interval': float(data.get('retry_interval', 1.0)),
             'use_cookies': False
         }
         

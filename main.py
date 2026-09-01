@@ -89,6 +89,9 @@ def parse_args():
         choices=["retry", "ask", "continue"],
         help="遇到关闭任务点时的行为: retry-重试, ask-询问, continue-继续"
     )
+    parser.add_argument(
+        "--retry-interval", type=float, default=1.0, help="重试等待时间, 单位秒 (默认1.0)"
+    )
 
     # 在解析之前捕获 -h 的行为
     if len(sys.argv) == 2 and sys.argv[1] in {"-h", "--help"}:
@@ -121,6 +124,10 @@ def load_config_from_file(config_path):
         # 处理notopen_action，设置默认值为retry
         if "notopen_action" not in common_config:
             common_config["notopen_action"] = "retry"
+        if "retry_interval" in common_config:
+            common_config["retry_interval"] = float(common_config["retry_interval"])
+        else:
+            common_config["retry_interval"] = 1.0
         if "use_cookies" in common_config:
             common_config["use_cookies"] = str_to_bool(common_config["use_cookies"])
         if "username" in common_config and common_config["username"] is not None:
@@ -152,7 +159,8 @@ def build_config_from_args(args):
         "course_list": [item.strip() for item in args.list.split(",") if item.strip()] if args.list else None,
         "speed": args.speed if args.speed else 1.0,
         "jobs": args.jobs,
-        "notopen_action": args.notopen_action if args.notopen_action else "retry"
+        "notopen_action": args.notopen_action if args.notopen_action else "retry",
+        "retry_interval": args.retry_interval or 1.0,
     }
     return common_config, {}, {}
 
@@ -283,6 +291,7 @@ class JobProcessor:
         self.threads: list[threading.Thread] = []
         self.worker_num = config["jobs"]
         self.config = config
+        self.retry_interval = config.get("retry_interval", 1.0)
 
     def run(self):
         for task in self.tasks:
@@ -319,12 +328,12 @@ class JobProcessor:
                     logger.debug(f"unfinished task: {self.task_queue.unfinished_tasks}")
 
                 case ChapterResult.NOT_OPEN:
-                    # task.tries += 1
                     if self.config["notopen_action"] == "continue":
                         logger.warning("章节未开启: {}, 正在跳过", task.point["title"])
                         self.task_queue.task_done()
                         continue
 
+                    task.tries += 1
                     if task.tries >= self.max_tries:
                         logger.error(
                             "章节未开启: {} 可能由于上一章节的章节检测未完成, 也可能由于该章节因为时效已关闭，"
@@ -359,7 +368,7 @@ class JobProcessor:
                 task = self.retry_queue.get()
                 self.task_queue.put(task)
                 self.task_queue.task_done() # task_done is not called when a task failed and needs to be retried, so if is reput into the queue, the task num will increase by one and become more than the real task number
-                time.sleep(1)
+                time.sleep(self.retry_interval)
         except ShutDown:
             pass
 

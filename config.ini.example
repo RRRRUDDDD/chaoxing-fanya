@@ -24,6 +24,9 @@ jobs = 4
 # 遇到未开放章节的处理方式: retry-重试, continue-跳过
 notopen_action = retry
 
+# 任务失败或未开放章节的重试等待时间（秒）
+retry_interval = 1.0
+
 
 [tiku]
 # 题库类型: ai, disable
