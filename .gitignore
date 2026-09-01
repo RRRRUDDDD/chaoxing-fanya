@@ -144,6 +144,7 @@ poetry.lock
 
 # Custom files
 .ccg/
+chaoxing/
 .cookies.txt
 cookies.txt
 .config.ini
