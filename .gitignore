@@ -33,6 +33,7 @@ MANIFEST
 *.manifest
 *.spec
 !chaoxing.spec
+!chaoxing-backend.spec
 
 # Installer logs
 pip-log.txt
@@ -134,6 +135,7 @@ build/
 dist/
 *.spec
 !chaoxing.spec
+!chaoxing-backend.spec
 
 # python-uv.lock
 # just like Pipfile.lock,
@@ -171,3 +173,9 @@ get-pip.py
 web/node_modules/
 web/dist/
 web/.vite/
+
+# Desktop (Electron)
+desktop/node_modules/
+desktop/backend/
+desktop/release/
+desktop/*.log

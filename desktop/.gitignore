@@ -1,0 +1,4 @@
+node_modules/
+backend/
+release/
+*.log

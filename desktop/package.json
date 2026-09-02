@@ -1,0 +1,16 @@
+{
+  "name": "chaoxing-desktop",
+  "version": "1.0.0",
+  "description": "超星泛雅刷课助手桌面版",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "dev": "electron .",
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^26.0.0"
+  }
+}

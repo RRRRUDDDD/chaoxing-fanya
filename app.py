@@ -40,6 +40,11 @@ else:
 
 CORS(app)
 
+# === 环境变量：支持 Electron 无头模式 ===
+HEADLESS = os.environ.get("CHAOXING_HEADLESS") == "1"
+PORT = int(os.environ.get("CHAOXING_PORT", "5000"))
+HOST = "127.0.0.1" if HEADLESS else "0.0.0.0"
+
 # Web 配置文件路径
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "web_config.json")
 
@@ -592,7 +597,7 @@ def create_tray_icon():
 
 def open_browser():
     """打开浏览器"""
-    webbrowser.open("http://localhost:5000")
+    webbrowser.open(f"http://localhost:{PORT}")
 
 
 def setup_tray_icon():
@@ -609,17 +614,29 @@ def setup_tray_icon():
     return icon
 
 
+def watch_parent_stdin():
+    """stdin 守护线程：监测父进程（Electron）退出，防止孤儿进程"""
+    try:
+        # 阻塞读取，父进程关闭管道时触发 EOF
+        while sys.stdin.buffer.read(1):
+            pass
+    except Exception:
+        pass
+    logger.info("父进程已退出，正在终止后端...")
+    os._exit(0)
+
+
 if __name__ == "__main__":
-    # === 打包态特殊处理：无窗口模式下重定向输出 ===
-    if getattr(sys, 'frozen', False):
-        # PyInstaller 冻结态
+    # === 打包态特殊处理 ===
+    if getattr(sys, 'frozen', False) and not HEADLESS:
+        # 独立 exe 模式（向后兼容）
         if sys.stdout is None or sys.stderr is None:
             # console=False 时 stdout/stderr 为 None，重定向到 devnull 防止 loguru/tqdm 崩溃
             sys.stdout = open(os.devnull, 'w', encoding='utf-8')
             sys.stderr = open(os.devnull, 'w', encoding='utf-8')
 
         # 检查端口是否已占用（实例复用逻辑）
-        if is_port_in_use(5000):
+        if is_port_in_use(PORT):
             logger.info("检测到已有实例运行，直接打开浏览器")
             open_browser()
             sys.exit(0)
@@ -627,6 +644,11 @@ if __name__ == "__main__":
         # 修复 web_config.json 路径：冻结态下写到 exe 同目录，而非临时解包目录
         base_path = os.path.dirname(sys.executable)
         os.chdir(base_path)
+    elif HEADLESS and getattr(sys, 'frozen', False):
+        # Electron 无头模式：chdir 到 exe 目录（配置文件写入位置）
+        base_path = os.path.dirname(sys.executable)
+        os.chdir(base_path)
+        logger.info(f"Electron 无头模式启动，工作目录: {base_path}")
 
     # 检测是否存在前端构建
     if os.path.exists(STATIC_DIR):
@@ -634,30 +656,37 @@ if __name__ == "__main__":
     else:
         logger.info("未检测到前端构建，仅提供 API 服务")
 
-    # 启动托盘图标（仅打包态 + pystray 可用时）
+    # 启动托盘图标（仅独立 exe 模式 + pystray 可用时）
     tray_icon = None
-    if getattr(sys, 'frozen', False) and TRAY_AVAILABLE:
+    if getattr(sys, 'frozen', False) and TRAY_AVAILABLE and not HEADLESS:
         tray_icon = setup_tray_icon()
         threading.Thread(target=tray_icon.run, daemon=True).start()
         logger.info("托盘图标已启动，右键可退出")
 
     # 后台启动 Flask
     flask_thread = threading.Thread(
-        target=lambda: app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False),
+        target=lambda: app.run(host=HOST, port=PORT, debug=False, use_reloader=False),
         daemon=True
     )
     flask_thread.start()
 
-    # 等待服务器就绪后打开浏览器（仅打包态）
-    if getattr(sys, 'frozen', False):
-        if wait_for_server_ready("http://localhost:5000/api/health", timeout=60):
+    # HEADLESS 模式：启动 stdin 守护 + 等待就绪
+    if HEADLESS:
+        threading.Thread(target=watch_parent_stdin, daemon=True).start()
+        if wait_for_server_ready(f"http://127.0.0.1:{PORT}/api/health", timeout=60):
+            logger.info(f"后端就绪: http://127.0.0.1:{PORT}")
+        else:
+            logger.error("服务器启动超时")
+    # 独立 exe 模式：等待就绪后打开浏览器
+    elif getattr(sys, 'frozen', False):
+        if wait_for_server_ready(f"http://localhost:{PORT}/api/health", timeout=60):
             logger.info("服务器就绪，正在打开浏览器...")
             open_browser()
         else:
             logger.error("服务器启动超时")
     else:
         # 开发模式：直接提示 URL，不自动开浏览器
-        logger.info("开发模式：请手动访问 http://localhost:5000")
+        logger.info(f"开发模式：请手动访问 http://localhost:{PORT}")
 
     # 主线程保持运行（托盘图标需要主线程存活）
     try:

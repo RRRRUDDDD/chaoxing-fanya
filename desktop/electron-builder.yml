@@ -1,0 +1,19 @@
+appId: com.chaoxing.fanya
+productName: 超星泛雅刷课助手
+directories:
+  output: release
+files:
+  - main.js
+  - package.json
+extraResources:
+  - from: backend
+    to: backend
+win:
+  target:
+    - target: nsis
+    - target: portable
+  icon: build/icon.png
+nsis:
+  oneClick: true
+  artifactName: chaoxing-fanya-desktop-${version}.${ext}
+  deleteAppDataOnUninstall: false
