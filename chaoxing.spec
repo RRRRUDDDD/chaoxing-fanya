@@ -6,6 +6,7 @@ datas = [
     ("resource", "resource"),
     ("config.ini.example", "."),
     ("fav.jpg", "."),
+    ("web/public/fav.jpg", "."),
 ]
 datas += collect_data_files("ddddocr")
 
@@ -61,5 +62,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon="fav.jpg",
+    icon="web/public/fav.jpg",
 )

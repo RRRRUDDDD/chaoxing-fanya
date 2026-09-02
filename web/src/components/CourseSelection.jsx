@@ -25,7 +25,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
     jobs: 1,
     notopen_action: 'retry',
     tiku_config: {},
-    notification_config: {},
+    notification_config: { provider: 'Windows' },
     ocr_config: {},
   });
 
@@ -41,7 +41,18 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
       if (response.data.status && response.data.data) {
         const cfg = response.data.data;
         if (cfg.settings) {
-          setSettings((prev) => ({ ...prev, ...cfg.settings }));
+          setSettings((prev) => {
+            const merged = { ...prev, ...cfg.settings };
+            // 默认启用 Windows 系统通知(老配置未记录过通知方式时回填);
+            // 用户明确选择过(含"不使用通知")则尊重其选择
+            if (typeof merged.notification_config?.provider !== 'string') {
+              merged.notification_config = {
+                ...(merged.notification_config || {}),
+                provider: 'Windows',
+              };
+            }
+            return merged;
+          });
         }
         if (Array.isArray(cfg.selectedCourses)) {
           setSelectedCourses(cfg.selectedCourses);
@@ -289,7 +300,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
                     value={settings.jobs}
                     onChange={(e) => setSettings({ ...settings, jobs: parseInt(e.target.value) || 1 })}
                   />
-                  <p className="text-xs text-faint">同时处理的章节数量,默认 1</p>
+                  <p className="text-xs text-faint">同时处理的章节数量,默认1，建议最高不超过4</p>
                 </div>
 
                 <div className="space-y-1.5">

@@ -1,11 +1,14 @@
 """
 通知服务模块，用于向外部服务发送通知消息。
-支持多种通知服务，如ServerChan、Qmsg和Bark。
+支持多种通知服务，如ServerChan、Qmsg、Bark和Windows系统通知。
 """
 
 import configparser
+import subprocess
+import sys
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
+from xml.sax.saxutils import escape
 
 import requests
 
@@ -315,6 +318,92 @@ class Telegram(NotificationService):
             logger.error(f"Telegram通知发送失败: {e}")
         except ValueError as e:
             logger.error(f"Telegram返回数据解析失败: {e}")
+
+class Windows(NotificationService):
+    """
+    Windows 系统通知（Toast），通过 Windows PowerShell 调用 WinRT 接口发送。
+    注意：必须使用 Windows PowerShell 5.1 (powershell.exe)，
+    PowerShell 7 (pwsh) 没有 WinRT 投影，无法加载 Toast 类型。
+    """
+
+    def _init_service(self) -> None:
+        """初始化Windows系统通知服务"""
+        if sys.platform != 'win32':
+            self.disabled = True
+            logger.info("当前系统不是 Windows，已忽略Windows系统通知服务")
+            return
+
+        # 预先探测 PowerShell 能否成功弹出 Toast（同时作为启用确认）
+        ok, err = self._run_powershell(self._build_script("Windows 系统通知已启用"))
+        if not ok:
+            self.disabled = True
+            logger.error(f"Windows系统通知不可用，已忽略该通知服务: {err}")
+            return
+
+        logger.info("已初始化Windows系统通知服务")
+
+    @staticmethod
+    def _build_script(message: str) -> str:
+        """
+        构造发送 Toast 通知的 PowerShell 脚本
+
+        Args:
+            message: 通知内容（调用方需保证已 XML 转义）
+        """
+        return (
+            "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, "
+            "ContentType = WindowsRuntime] | Out-Null; "
+            "[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, "
+            "ContentType = WindowsRuntime] | Out-Null; "
+            "$xmlText = @'\n"
+            '<toast><visual><binding template="ToastGeneric">'
+            f"<text>{message}</text>"
+            '</binding></visual></toast>\n'
+            "'@; "
+            "$xml = New-Object Windows.Data.Xml.Dom.XmlDocument; "
+            "$xml.LoadXml($xmlText); "
+            "$toast = New-Object Windows.UI.Notifications.ToastNotification($xml); "
+            "[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("
+            "'Microsoft.Windows.Explorer').Show($toast)"
+        )
+
+    @staticmethod
+    def _run_powershell(script: str) -> tuple:
+        """
+        执行 PowerShell 脚本
+
+        Args:
+            script: PowerShell 脚本内容
+
+        Returns:
+            (是否成功, 错误信息)
+        """
+        try:
+            result = subprocess.run(
+                ['powershell.exe', '-NoProfile', '-NonInteractive', '-Command', script],
+                capture_output=True,
+                timeout=15,
+            )
+            if result.returncode == 0:
+                return True, ''
+            return False, result.stderr.decode('utf-8', errors='replace').strip()
+        except Exception as e:
+            return False, str(e)
+
+    def _send(self, message: str) -> None:
+        """
+        发送Windows系统通知
+
+        Args:
+            message: 要发送的消息内容
+        """
+        # 消息需经过 XML 转义后再嵌入 Toast 模板
+        ok, err = self._run_powershell(self._build_script(escape(message)))
+        if ok:
+            logger.info("Windows系统通知发送成功")
+        else:
+            logger.error(f"Windows系统通知发送失败: {err}")
+
 
 # 为了向后兼容，保留原来的Notification类
 Notification = DefaultNotification

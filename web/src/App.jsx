@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Login from './components/Login';
+import Login, { SAVED_LOGIN_KEY } from './components/Login';
 import CourseSelection from './components/CourseSelection';
 import StudyProgress from './components/StudyProgress';
 import api from './api/axios';
@@ -43,6 +43,12 @@ function App() {
   };
 
   const handleLogout = () => {
+    // 用户主动退出登录,清除本地保存的自动登录凭据
+    try {
+      localStorage.removeItem(SAVED_LOGIN_KEY);
+    } catch (e) {
+      // 存储不可用时忽略
+    }
     setUserInfo(null);
     setTaskId(null);
     setStep('login');

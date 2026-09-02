@@ -252,6 +252,7 @@ const AdvancedSettings = ({ settings, onChange }) => {
                     onChange={(e) => handleNotificationChange('provider', e.target.value)}
                   >
                     <option value="">不使用通知</option>
+                    <option value="Windows">Windows 系统通知</option>
                     <option value="ServerChan">Server酱</option>
                     <option value="Qmsg">Qmsg酱</option>
                     <option value="Bark">Bark</option>
@@ -259,24 +260,25 @@ const AdvancedSettings = ({ settings, onChange }) => {
                   </select>
                 </div>
 
-                {settings.notification_config?.provider && (
-                  <>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="notification-url">通知 URL</Label>
-                      <Input
-                        id="notification-url"
-                        type="text"
-                        placeholder="https://..."
-                        value={settings.notification_config?.url || ''}
-                        onChange={(e) => handleNotificationChange('url', e.target.value)}
-                      />
-                      <p className="break-all font-mono text-xs text-faint">
-                        {settings.notification_config?.provider === 'ServerChan' && 'https://sctapi.ftqq.com/YOUR_KEY.send'}
-                        {settings.notification_config?.provider === 'Qmsg' && 'https://qmsg.zendee.cn/send/YOUR_KEY'}
-                        {settings.notification_config?.provider === 'Bark' && 'https://api.day.app/YOUR_KEY/'}
-                        {settings.notification_config?.provider === 'Telegram' && 'https://api.telegram.org/botYOUR_TOKEN/sendMessage'}
-                      </p>
-                    </div>
+                {settings.notification_config?.provider &&
+                  settings.notification_config?.provider !== 'Windows' && (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="notification-url">通知 URL</Label>
+                        <Input
+                          id="notification-url"
+                          type="text"
+                          placeholder="https://..."
+                          value={settings.notification_config?.url || ''}
+                          onChange={(e) => handleNotificationChange('url', e.target.value)}
+                        />
+                        <p className="break-all font-mono text-xs text-faint">
+                          {settings.notification_config?.provider === 'ServerChan' && 'https://sctapi.ftqq.com/YOUR_KEY.send'}
+                          {settings.notification_config?.provider === 'Qmsg' && 'https://qmsg.zendee.cn/send/YOUR_KEY'}
+                          {settings.notification_config?.provider === 'Bark' && 'https://api.day.app/YOUR_KEY/'}
+                          {settings.notification_config?.provider === 'Telegram' && 'https://api.telegram.org/botYOUR_TOKEN/sendMessage'}
+                        </p>
+                      </div>
 
                     {settings.notification_config?.provider === 'Telegram' && (
                       <div className="space-y-1.5">
