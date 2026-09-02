@@ -18,9 +18,11 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        timeout-minutes: 10
 
       - name: Set up Python
         uses: actions/setup-python@v5
+        timeout-minutes: 10
         with:
           python-version: "3.11"
           architecture: x64
@@ -29,6 +31,7 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
+        timeout-minutes: 10
         with:
           node-version: "20"
           cache: npm
