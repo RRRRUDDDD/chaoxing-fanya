@@ -7,23 +7,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: "hsl(var(--paper))",
+        /* 现代工具风 · 石墨蓝灰 */
         ink: "hsl(var(--ink))",
-        accent: "hsl(var(--accent))",
-        line: "hsl(var(--line))",
-        soft: "hsl(var(--soft))",
+        body: "hsl(var(--body))",
         faint: "hsl(var(--faint))",
+        canvas: "hsl(var(--canvas))",
+        surface: "hsl(var(--surface))",
+        soft: "hsl(var(--soft))",
+        line: "hsl(var(--line))",
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          dark: "hsl(var(--brand-dark))",
+          soft: "hsl(var(--brand-soft))",
+        },
         success: "hsl(var(--success))",
         danger: "hsl(var(--danger))",
         warning: "hsl(var(--warning))",
+        /* 兼容旧语义 token */
+        paper: "hsl(var(--canvas))",
+        accent: "hsl(var(--brand))",
         border: "hsl(var(--line))",
         input: "hsl(var(--line))",
-        ring: "hsl(var(--accent))",
-        background: "hsl(var(--paper))",
+        ring: "hsl(var(--brand))",
+        background: "hsl(var(--canvas))",
         foreground: "hsl(var(--ink))",
         primary: {
-          DEFAULT: "hsl(var(--ink))",
-          foreground: "hsl(var(--paper))",
+          DEFAULT: "hsl(var(--brand))",
+          foreground: "#ffffff",
         },
         secondary: {
           DEFAULT: "hsl(var(--soft))",
@@ -31,66 +41,50 @@ export default {
         },
         destructive: {
           DEFAULT: "hsl(var(--danger))",
-          foreground: "hsl(var(--paper))",
+          foreground: "#ffffff",
         },
         muted: {
           DEFAULT: "hsl(var(--soft))",
           foreground: "hsl(var(--faint))",
         },
+        card: {
+          DEFAULT: "#ffffff",
+          foreground: "hsl(var(--ink))",
+        },
       },
       fontFamily: {
         sans: ['"Inter"', '"Noto Sans SC"', 'system-ui', 'sans-serif'],
-        display: ['"Oswald"', '"Noto Sans SC"', '"Archivo Black"', 'sans-serif'],
-        mono: ['"IBM Plex Mono"', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
-      },
-      fontSize: {
-        hero: ['clamp(3rem,10vw,9rem)', { lineHeight: '0.9', letterSpacing: '0.01em', fontWeight: '700' }],
-        marq: ['clamp(1rem,2vw,1.5rem)', { lineHeight: '1', letterSpacing: '0.05em', fontWeight: '600' }],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       boxShadow: {
-        'b-xs': '2px 2px 0 0 hsl(var(--ink))',
-        'b-sm': '4px 4px 0 0 hsl(var(--ink))',
-        'b': '6px 6px 0 0 hsl(var(--ink))',
-        'b-lg': '8px 8px 0 0 hsl(var(--ink))',
-        'b-xl': '12px 12px 0 0 hsl(var(--ink))',
-        'b-accent': '6px 6px 0 0 hsl(var(--accent))',
-        'b-accent-lg': '10px 10px 0 0 hsl(var(--accent))',
-        'none': '0 0 0 0 transparent',
-      },
-      borderWidth: {
-        '3': '3px',
+        card: '0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06)',
+        lift: '0 4px 8px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04)',
+        pop: '0 12px 24px -6px rgb(16 24 40 / 0.14), 0 4px 8px -4px rgb(16 24 40 / 0.06)',
+        focus: '0 0 0 4px hsl(var(--brand) / 0.15)',
+        none: '0 0 0 0 transparent',
       },
       borderRadius: {
-        none: '0',
-        DEFAULT: '0',
+        xl: '12px',
+        '2xl': '16px',
       },
       keyframes: {
         'stagger-up': {
-          from: { opacity: '0', transform: 'translateY(28px)' },
+          from: { opacity: '0', transform: 'translateY(12px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
-        'marquee': {
-          from: { transform: 'translateX(0)' },
-          to: { transform: 'translateX(-50%)' },
+        'fade-in': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
         },
-        'spin-slow': {
-          to: { transform: 'rotate(360deg)' },
-        },
-        'stripes': {
-          from: { backgroundPosition: '0 0' },
-          to: { backgroundPosition: '40px 0' },
-        },
-        'pulse-hard': {
-          '0%,100%': { opacity: '1' },
-          '50%': { opacity: '0.4' },
+        'pop-in': {
+          from: { opacity: '0', transform: 'scale(0.98)' },
+          to: { opacity: '1', transform: 'scale(1)' },
         },
       },
       animation: {
-        'stagger-up': 'stagger-up 0.7s cubic-bezier(0.16,1,0.3,1) both',
-        'marquee': 'marquee 20s linear infinite',
-        'spin-slow': 'spin-slow 3s linear infinite',
-        'stripes': 'stripes 1s linear infinite',
-        'pulse-hard': 'pulse-hard 1.2s cubic-bezier(0.4,0,0.6,1) infinite',
+        'stagger-up': 'stagger-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'fade-in': 'fade-in 0.25s ease-out both',
+        'pop-in': 'pop-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both',
       },
     },
   },

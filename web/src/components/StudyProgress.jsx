@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import Button from './ui/Button';
-import { 
-  CheckCircle2, Clock, AlertCircle, Play, Home, BookOpen, 
-  FileText, XCircle, Loader2, ChevronDown, ChevronRight,
-  Activity, TrendingUp, Film, MonitorPlay
+import CountUp from './CountUp';
+import {
+  Loader2, ArrowLeft, CheckCircle2, XCircle, AlertCircle,
+  Play, Clock, ChevronDown, ChevronRight, BookOpen, MonitorPlay,
+  FileText, Home,
 } from 'lucide-react';
 import api from '../api/axios';
 
@@ -32,10 +32,11 @@ const StudyProgress = ({ taskId, onBack }) => {
         clearInterval(intervalRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    logsEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [logs]);
 
   const fetchTaskStatus = async () => {
@@ -43,7 +44,7 @@ const StudyProgress = ({ taskId, onBack }) => {
       const response = await api.get(`/task/${taskId}`);
       if (response.data.status) {
         setTaskStatus(response.data.data);
-        
+
         if (response.data.data.status === 'completed' || response.data.data.status === 'error') {
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -78,7 +79,7 @@ const StudyProgress = ({ taskId, onBack }) => {
   };
 
   const toggleCourse = (courseId) => {
-    setExpandedCourses(prev => {
+    setExpandedCourses((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(courseId)) {
         newSet.delete(courseId);
@@ -90,28 +91,28 @@ const StudyProgress = ({ taskId, onBack }) => {
   };
 
   const getStatusInfo = () => {
-    if (!taskStatus) return { text: '加载中...', color: 'text-gray-500', icon: Clock };
-    
+    if (!taskStatus) return { text: '加载中', cls: 'text-faint', icon: Clock };
+
     switch (taskStatus.status) {
       case 'running':
-        return { text: '学习中', color: 'text-blue-600', icon: Play };
+        return { text: '学习中', cls: 'text-brand', icon: Play };
       case 'completed':
-        return { text: '已完成', color: 'text-green-600', icon: CheckCircle2 };
+        return { text: '已完成', cls: 'text-success', icon: CheckCircle2 };
       case 'error':
-        return { text: '出现错误', color: 'text-red-600', icon: AlertCircle };
+        return { text: '出现错误', cls: 'text-danger', icon: AlertCircle };
       default:
-        return { text: '未知状态', color: 'text-gray-500', icon: Clock };
+        return { text: '未知状态', cls: 'text-faint', icon: Clock };
     }
   };
 
   const getLogLevelColor = (level) => {
     switch (level) {
       case 'error':
-        return 'text-red-400';
+        return 'text-[#f87171]';
       case 'warning':
-        return 'text-yellow-400';
+        return 'text-[#fbbf24]';
       case 'success':
-        return 'text-green-400';
+        return 'text-[#4ade80]';
       default:
         return 'text-gray-300';
     }
@@ -120,19 +121,20 @@ const StudyProgress = ({ taskId, onBack }) => {
   const getCourseStatusIcon = (status) => {
     switch (status) {
       case 'running':
-        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+        return <Loader2 className="h-4 w-4 text-brand animate-spin" aria-hidden="true" />;
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />;
       case 'error':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4 text-danger" aria-hidden="true" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-400" />;
+        return <Clock className="h-4 w-4 text-faint" aria-hidden="true" />;
     }
   };
 
   const statusInfo = getStatusInfo();
   const StatusIcon = statusInfo.icon;
   const progress = taskStatus ? (taskStatus.progress / (taskStatus.total || 1)) * 100 : 0;
+  const activeJobs = taskDetails?.active_jobs ? Object.values(taskDetails.active_jobs) : [];
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
@@ -140,364 +142,368 @@ const StudyProgress = ({ taskId, onBack }) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const finished = taskStatus?.status === 'completed';
+  const errored = taskStatus?.status === 'error';
+
+  const statCards = [
+    {
+      label: '课程进度',
+      icon: BookOpen,
+      iconCls: 'bg-brand-soft text-brand',
+      value: (
+        <>
+          <CountUp value={taskStatus?.progress || 0} />
+          <span className="ml-1 text-base font-medium text-faint">/ {taskStatus?.total || 0}</span>
+        </>
+      ),
+    },
+    {
+      label: '章节统计',
+      icon: FileText,
+      iconCls: 'bg-success/10 text-success',
+      value: (
+        <>
+          <CountUp value={taskStatus?.stats?.completed_chapters || 0} />
+          <span className="ml-1 text-base font-medium text-faint">/ {taskStatus?.stats?.total_chapters || 0}</span>
+        </>
+      ),
+    },
+    {
+      label: '完成率',
+      icon: Clock,
+      iconCls: 'bg-warning/10 text-warning',
+      value: <CountUp value={Math.round(progress)} suffix="%" />,
+    },
+    {
+      label: '任务状态',
+      icon: statusInfo.icon,
+      iconCls: 'bg-soft text-body',
+      value: (
+        <span className={`flex items-center gap-1.5 text-lg font-semibold ${statusInfo.cls}`}>
+          <StatusIcon className={`h-4.5 w-4.5 ${taskStatus?.status === 'running' ? 'animate-pulse' : ''}`} aria-hidden="true" />
+          {statusInfo.text}
+        </span>
+      ),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">学习进度监控</h1>
-            <p className="text-muted-foreground mt-1">实时跟踪任务执行详情</p>
+    <div className="min-h-screen bg-canvas">
+      {/* 顶栏 */}
+      <header className="sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
+              <MonitorPlay className="h-5 w-5 text-white" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold leading-tight">学习进度监控</p>
+              <p className="text-xs leading-tight text-faint">实时跟踪任务执行详情</p>
+            </div>
           </div>
-          {(taskStatus?.status === 'completed' || taskStatus?.status === 'error') && (
-            <Button onClick={onBack}>
-              <Home className="mr-2 h-4 w-4" />
+          {(finished || errored) && (
+            <Button onClick={onBack} size="sm">
+              <Home className="h-3.5 w-3.5" aria-hidden="true" />
               返回首页
             </Button>
           )}
         </div>
+      </header>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">课程进度</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {taskStatus?.progress || 0} / {taskStatus?.total || 0}
-                  </p>
-                </div>
-                <BookOpen className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">章节统计</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {taskStatus?.stats?.completed_chapters || 0} / {taskStatus?.stats?.total_chapters || 0}
-                  </p>
-                </div>
-                <FileText className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">任务状态</p>
-                  <p className="text-lg font-semibold mt-1 flex items-center">
-                    <StatusIcon className={`mr-2 h-5 w-5 ${statusInfo.color}`} />
-                    {statusInfo.text}
-                  </p>
-                </div>
-                <Activity className="h-8 w-8 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">完成率</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {Math.round(progress)}%
-                  </p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Current Progress */}
-            <Card>
-              <CardHeader>
-                <CardTitle>当前进度</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">整体进度</span>
-                    <span className="font-semibold">
-                      {taskStatus?.progress || 0} / {taskStatus?.total || 0} 课程
-                    </span>
+      <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
+        {/* 统计卡片 */}
+        <section
+          aria-label="任务统计"
+          className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4 animate-stagger-up"
+        >
+          {statCards.map((card, i) => {
+            const Icon = card.icon;
+            return (
+              <div
+                key={card.label}
+                className="rounded-xl border border-line bg-white p-5 shadow-card"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[13px] text-faint">{card.label}</p>
+                    <p className="mt-1.5 text-2xl font-semibold tracking-tight leading-none tnum">
+                      {card.value}
+                    </p>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${card.iconCls}`}>
+                    <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+          {/* 主栏 */}
+          <div className="space-y-6 lg:col-span-2 min-w-0">
+            {/* 当前进度 */}
+            <section className="rounded-xl border border-line bg-white p-5 shadow-card animate-stagger-up" style={{ animationDelay: '120ms' }}>
+              <div className="mb-4 flex items-baseline justify-between">
+                <h2 className="text-[15px] font-semibold">当前进度</h2>
+                <span className="text-xs text-faint tnum">
+                  {taskStatus?.progress || 0} / {taskStatus?.total || 0} 课程
+                </span>
+              </div>
+              <div
+                className="h-2.5 w-full overflow-hidden rounded-full bg-soft"
+                role="progressbar"
+                aria-valuenow={Math.round(progress)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="整体学习进度"
+              >
+                <div
+                  className="h-full rounded-full bg-brand transition-[width] duration-700 ease-out"
+                  style={{ width: `${Math.min(progress, 100)}%` }}
+                />
+              </div>
+
+              {taskStatus?.current_course && (
+                <div className="mt-5 flex items-start gap-3.5 rounded-lg border border-line bg-soft/60 p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-card">
+                    <Loader2 className="h-4.5 w-4.5 animate-spin text-brand" aria-hidden="true" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-brand">正在学习</p>
+                    <h3 className="mt-0.5 truncate text-[15px] font-semibold" title={taskStatus.current_course}>
+                      {taskStatus.current_course}
+                    </h3>
+                    {taskStatus.current_chapter && (
+                      <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-body">
+                        <span className="rounded bg-brand-soft px-1.5 py-0.5 text-[11px] font-medium text-brand">章节</span>
+                        <span className="truncate">{taskStatus.current_chapter}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 错误 */}
+              {taskStatus?.error && (
+                <div role="alert" className="mt-5 flex items-start gap-2.5 rounded-lg bg-danger/5 px-4 py-3 animate-fade-in">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden="true" />
+                  <div>
+                    <p className="text-[13px] font-semibold text-danger">错误信息</p>
+                    <p className="mt-0.5 text-[13px] leading-relaxed text-danger/90">{taskStatus.error}</p>
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {/* 视频播放进度 */}
+            {activeJobs.length > 0 && (
+              <section className="rounded-xl border border-line bg-white p-5 shadow-card animate-stagger-up" style={{ animationDelay: '180ms' }}>
+                <h2 className="mb-4 flex items-center gap-2 text-[15px] font-semibold">
+                  <MonitorPlay className="h-4 w-4 text-brand" aria-hidden="true" />
+                  正在播放视频
+                  <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-medium text-brand tnum">
+                    {activeJobs.length}
+                  </span>
+                </h2>
+                <div className="space-y-3">
+                  {activeJobs.map((job, index) => (
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-500 ease-out"
-                      style={{ width: `${Math.min(progress, 100)}%` }}
-                    />
-                  </div>
+                      key={index}
+                      className="rounded-lg border border-line p-4 transition-shadow duration-200 hover:shadow-card"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-sm font-medium" title={job.job_name}>
+                            {job.job_name || '未知任务'}
+                          </h3>
+                          <p className="mt-0.5 truncate text-xs text-faint" title={job.course_name}>
+                            {job.course_name}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-[15px] font-semibold text-brand tnum">
+                          {Math.round(job.progress)}%
+                        </span>
+                      </div>
+                      <div className="mt-2.5">
+                        <div className="mb-1 flex items-center justify-between font-mono text-[11px] text-faint tnum">
+                          <span>{formatTime(job.current_time)}</span>
+                          <span>{formatTime(job.duration)}</span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-soft">
+                          <div
+                            className="h-full rounded-full bg-brand transition-[width] duration-700 ease-out"
+                            style={{ width: `${Math.min(job.progress, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-
-                {taskStatus?.current_course && (
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <BookOpen className="w-24 h-24 text-blue-500" />
-                    </div>
-                    <div className="flex items-start relative z-10">
-                      <div className="p-2 bg-white rounded-lg shadow-sm mr-4">
-                        <Loader2 className="h-6 w-6 text-blue-600 animate-spin" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-blue-600 font-medium mb-1">正在学习</p>
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">{taskStatus.current_course}</h3>
-                        {taskStatus.current_chapter && (
-                          <div className="flex items-center text-sm text-gray-600">
-                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs mr-2">章节</span>
-                            {taskStatus.current_chapter}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 视频播放进度 - 美化版 */}
-                {taskDetails?.active_jobs && Object.keys(taskDetails.active_jobs).length > 0 && (
-                  <div className="space-y-4 mt-6 pt-6 border-t border-gray-100">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <MonitorPlay className="h-5 w-5 text-indigo-600" />
-                      <h3 className="font-semibold text-gray-900">正在播放视频 ({Object.keys(taskDetails.active_jobs).length})</h3>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                      {Object.values(taskDetails.active_jobs).map((job, index) => (
-                        <div key={index} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
-                          <div className="flex justify-between items-start mb-3">
-                            <div className="flex items-start space-x-3 overflow-hidden">
-                              <div className="p-2 bg-indigo-50 rounded-lg flex-shrink-0">
-                                <Film className="h-5 w-5 text-indigo-500" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <h4 className="font-medium text-gray-900 truncate" title={job.job_name}>
-                                  {job.job_name || '未知任务'}
-                                </h4>
-                                <p className="text-xs text-gray-500 truncate mt-0.5 flex items-center" title={job.course_name}>
-                                  <BookOpen className="h-3 w-3 mr-1" />
-                                  {job.course_name}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right flex-shrink-0 ml-4">
-                              <span className="text-lg font-bold text-indigo-600">
-                                {Math.round(job.progress)}%
-                              </span>
-                            </div>
-                          </div>
-                          
-                          <div className="relative pt-1">
-                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1 font-mono">
-                              <span>{formatTime(job.current_time)}</span>
-                              <span>{formatTime(job.duration)}</span>
-                            </div>
-                            <div className="overflow-hidden h-2 text-xs flex rounded-full bg-gray-100">
-                              <div
-                                style={{ width: `${Math.min(job.progress, 100)}%` }}
-                                className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500 transition-all duration-500 ease-out"
-                              >
-                                <div className="w-full h-full opacity-30 bg-[length:10px_10px] bg-[linear-gradient(45deg,rgba(255,255,255,0.15)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.15)_50%,rgba(255,255,255,0.15)_75%,transparent_75%,transparent)] animate-[progress-stripes_1s_linear_infinite]" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {taskStatus?.error && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg animate-pulse">
-                    <div className="flex items-start">
-                      <AlertCircle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm text-red-600 font-semibold mb-1">错误信息</p>
-                        <p className="text-sm text-red-700">{taskStatus.error}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Course Details */}
-            {taskDetails && taskDetails.courses && taskDetails.courses.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <BookOpen className="mr-2 h-5 w-5" />
-                    课程明细
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {taskDetails.courses.map((course) => (
-                      <div key={course.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                        <div
-                          className="p-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between"
-                          onClick={() => toggleCourse(course.id)}
-                        >
-                          <div className="flex items-center flex-1">
-                            {getCourseStatusIcon(course.status)}
-                            <span className="ml-3 font-medium text-gray-900">{course.title}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {course.chapters && course.chapters.length > 0 && (
-                              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                                {course.chapters.filter(c => c.has_finished).length} / {course.chapters.length} 章节
-                              </span>
-                            )}
-                            {expandedCourses.has(course.id) ? (
-                              <ChevronDown className="h-4 w-4 text-gray-500" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-gray-500" />
-                            )}
-                          </div>
-                        </div>
-                        
-                        {expandedCourses.has(course.id) && course.chapters && course.chapters.length > 0 && (
-                          <div className="p-3 bg-white border-t border-gray-200">
-                            <div className="space-y-1">
-                              {course.chapters.map((chapter, idx) => (
-                                <div key={chapter.id} className="flex items-center text-sm py-2 px-3 hover:bg-gray-50 rounded">
-                                  <span className="text-gray-400 mr-3 w-6">{idx + 1}.</span>
-                                  <span className="flex-1 text-gray-700">{chapter.title}</span>
-                                  {chapter.has_finished && (
-                                    <CheckCircle2 className="h-4 w-4 text-green-500 ml-2" />
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              </section>
             )}
 
-            {/* Execution Logs */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="mr-2 h-5 w-5" />
-                  执行日志
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-900 rounded-lg p-4 h-[400px] overflow-y-auto font-mono text-xs">
+            {/* 课程明细 */}
+            {taskDetails?.courses?.length > 0 && (
+              <section className="rounded-xl border border-line bg-white shadow-card animate-stagger-up" style={{ animationDelay: '240ms' }}>
+                <div className="flex items-center gap-2 border-b border-line px-5 py-3.5">
+                  <BookOpen className="h-4 w-4 text-brand" aria-hidden="true" />
+                  <h2 className="text-[15px] font-semibold">课程明细</h2>
+                </div>
+                <div className="divide-y divide-line px-2.5 py-2">
+                  {taskDetails.courses.map((course) => {
+                    const open = expandedCourses.has(course.id);
+                    const done = course.chapters ? course.chapters.filter((c) => c.has_finished).length : 0;
+                    const total = course.chapters?.length || 0;
+                    return (
+                      <div key={course.id}>
+                        <button
+                          type="button"
+                          onClick={() => toggleCourse(course.id)}
+                          aria-expanded={open}
+                          className="flex w-full items-center gap-3 rounded-lg px-2.5 py-3 text-left transition-colors duration-150 hover:bg-soft focus-visible:bg-soft focus-visible:outline-none"
+                        >
+                          {getCourseStatusIcon(course.status)}
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium">{course.title}</span>
+                          {total > 0 && (
+                            <span className="shrink-0 rounded-full bg-soft px-2 py-0.5 text-xs text-faint tnum">
+                              {done} / {total} 章节
+                            </span>
+                          )}
+                          {open ? (
+                            <ChevronDown className="h-4 w-4 shrink-0 text-faint" aria-hidden="true" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 shrink-0 text-faint transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
+                          )}
+                        </button>
+                        {open && total > 0 && (
+                          <ol className="mb-2 space-y-0.5 rounded-lg bg-soft/50 px-2.5 py-2">
+                            {course.chapters.map((chapter, idx) => (
+                              <li key={chapter.id} className="flex items-center gap-3 rounded px-2 py-1.5 text-[13px] hover:bg-white">
+                                <span className="w-5 shrink-0 font-mono text-[11px] text-faint tnum">{idx + 1}.</span>
+                                <span className="flex-1 min-w-0 truncate text-body">{chapter.title}</span>
+                                {chapter.has_finished && (
+                                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" aria-label="已完成" />
+                                )}
+                              </li>
+                            ))}
+                          </ol>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* 执行日志 */}
+            <section className="rounded-xl border border-line bg-white shadow-card animate-stagger-up" style={{ animationDelay: '300ms' }}>
+              <div className="flex items-center gap-2 border-b border-line px-5 py-3.5">
+                <FileText className="h-4 w-4 text-brand" aria-hidden="true" />
+                <h2 className="text-[15px] font-semibold">执行日志</h2>
+              </div>
+              <div className="p-4">
+                <div className="h-[360px] overflow-y-auto rounded-lg bg-gray-900 p-4 font-mono text-xs leading-relaxed scroll-brutal">
                   {logs.length === 0 ? (
-                    <p className="text-gray-400">等待日志输出...</p>
+                    <p className="text-gray-500">等待日志输出...</p>
                   ) : (
                     logs.map((log, index) => (
-                      <div key={index} className={`mb-1 ${getLogLevelColor(log.level || 'info')}`}>
-                        <span className="text-gray-500 mr-2">
+                      <div key={index} className="mb-0.5">
+                        <span className="mr-2 text-gray-500 tnum">
                           [{new Date(log.timestamp * 1000).toLocaleTimeString('zh-CN')}]
                         </span>
-                        {log.message || log}
+                        <span className={getLogLevelColor(log.level || 'info')}>{log.message || log}</span>
                       </div>
                     ))
                   )}
                   <div ref={logsEndRef} />
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>任务信息</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* 侧栏 */}
+          <aside className="space-y-6 lg:sticky lg:top-24 animate-stagger-up" style={{ animationDelay: '200ms' }}>
+            {/* 任务信息 */}
+            <section className="rounded-xl border border-line bg-white shadow-card">
+              <div className="border-b border-line px-5 py-3.5">
+                <h2 className="text-[15px] font-semibold">任务信息</h2>
+              </div>
+              <dl className="space-y-4 p-5">
                 <div>
-                  <p className="text-sm text-muted-foreground">任务ID</p>
-                  <p className="font-mono text-xs bg-gray-100 p-2 rounded mt-1 break-all">
+                  <dt className="text-xs text-faint">任务 ID</dt>
+                  <dd className="mt-1 break-all rounded-lg bg-soft px-2.5 py-2 font-mono text-xs">
                     {taskId}
-                  </p>
+                  </dd>
                 </div>
-                
                 <div>
-                  <p className="text-sm text-muted-foreground">开始时间</p>
-                  <p className="text-sm font-semibold mt-1">
+                  <dt className="text-xs text-faint">开始时间</dt>
+                  <dd className="mt-1 text-sm font-medium tnum">
                     {taskStatus?.start_time
                       ? new Date(taskStatus.start_time * 1000).toLocaleString('zh-CN')
                       : '-'}
-                  </p>
+                  </dd>
                 </div>
+              </dl>
+            </section>
 
-                {taskStatus?.status === 'completed' && (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm font-semibold text-green-700 flex items-center">
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      所有任务已完成！
-                    </p>
-                  </div>
-                )}
+            {finished && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-success/25 bg-success/5 p-4 animate-fade-in" role="status">
+                <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 shrink-0 text-success" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-semibold text-success">所有任务已完成</p>
+                  <p className="mt-0.5 text-xs text-body">全部课程已按配置学习完毕</p>
+                </div>
+              </div>
+            )}
 
-                {taskStatus?.status === 'error' && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm font-semibold text-red-700 flex items-center">
-                      <AlertCircle className="mr-2 h-4 w-4" />
-                      任务执行失败
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {errored && (
+              <div className="flex items-start gap-2.5 rounded-xl border border-danger/25 bg-danger/5 p-4 animate-fade-in" role="status">
+                <AlertCircle className="mt-0.5 h-4.5 w-4.5 shrink-0 text-danger" aria-hidden="true" />
+                <div>
+                  <p className="text-sm font-semibold text-danger">任务执行失败</p>
+                  <p className="mt-0.5 text-xs text-body">请查看错误信息或日志排查原因</p>
+                </div>
+              </div>
+            )}
 
             {taskStatus?.stats && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>详细统计</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">总章节数</span>
-                    <span className="font-semibold text-gray-900">{taskStatus.stats.total_chapters || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">已完成章节</span>
-                    <span className="font-semibold text-green-600">{taskStatus.stats.completed_chapters || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">总任务数</span>
-                    <span className="font-semibold text-gray-900">{taskStatus.stats.total_tasks || 0}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">已完成任务</span>
-                    <span className="font-semibold text-green-600">{taskStatus.stats.completed_tasks || 0}</span>
-                  </div>
-                  {taskStatus.stats.failed_tasks > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">失败任务</span>
-                      <span className="font-semibold text-red-600">{taskStatus.stats.failed_tasks}</span>
+              <section className="rounded-xl border border-line bg-white shadow-card">
+                <div className="border-b border-line px-5 py-3.5">
+                  <h2 className="text-[15px] font-semibold">详细统计</h2>
+                </div>
+                <dl className="divide-y divide-line px-5">
+                  {[
+                    ['总章节数', taskStatus.stats.total_chapters || 0, ''],
+                    ['已完成章节', taskStatus.stats.completed_chapters || 0, 'text-success'],
+                    ['总任务数', taskStatus.stats.total_tasks || 0, ''],
+                    ['已完成任务', taskStatus.stats.completed_tasks || 0, 'text-success'],
+                    ...(taskStatus.stats.failed_tasks > 0
+                      ? [['失败任务', taskStatus.stats.failed_tasks, 'text-danger']]
+                      : []),
+                    ...(taskStatus.stats.skipped_tasks > 0
+                      ? [['跳过任务', taskStatus.stats.skipped_tasks, 'text-warning']]
+                      : []),
+                  ].map(([label, value, color]) => (
+                    <div key={label} className="flex items-center justify-between py-3">
+                      <dt className="text-[13px] text-faint">{label}</dt>
+                      <dd className={`text-sm font-semibold tnum ${color}`}>
+                        <CountUp value={value} />
+                      </dd>
                     </div>
-                  )}
-                  {taskStatus.stats.skipped_tasks > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">跳过任务</span>
-                      <span className="font-semibold text-yellow-600">{taskStatus.stats.skipped_tasks}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  ))}
+                </dl>
+              </section>
             )}
-          </div>
+
+            <Button variant="outline" className="w-full" onClick={onBack}>
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              返回课程选择
+            </Button>
+          </aside>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

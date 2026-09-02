@@ -8,6 +8,8 @@ function App() {
   const [step, setStep] = useState('login');
   const [userInfo, setUserInfo] = useState(null);
   const [taskId, setTaskId] = useState(null);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState('');
 
   const handleLoginSuccess = (info) => {
     setUserInfo(info);
@@ -15,6 +17,9 @@ function App() {
   };
 
   const handleStartStudy = async (settings) => {
+    if (starting) return;
+    setStarting(true);
+    setStartError('');
     try {
       const response = await api.post('/start', {
         username: userInfo.username,
@@ -25,10 +30,15 @@ function App() {
       if (response.data.status) {
         setTaskId(response.data.data.task_id);
         setStep('progress');
+      } else {
+        setStarting(false);
+        setStartError(response.data.msg || '启动学习任务失败,请检查配置后重试');
       }
     } catch (err) {
       console.error('启动学习任务失败:', err);
-      alert('启动学习任务失败，请重试');
+      setStartError(err.response?.data?.msg || '启动学习任务失败,请检查配置后重试');
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -51,6 +61,8 @@ function App() {
           userInfo={userInfo}
           onStartStudy={handleStartStudy}
           onLogout={handleLogout}
+          starting={starting}
+          startError={startError}
         />
       )}
       {step === 'progress' && taskId && (

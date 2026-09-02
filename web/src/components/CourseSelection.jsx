@@ -1,22 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/Card';
+import React, { useState, useEffect, useMemo } from 'react';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Label from './ui/Label';
-import { Play, Loader2, BookOpen, Settings, LogOut } from 'lucide-react';
-import api from '../api/axios';
 import AdvancedSettings from './AdvancedSettings';
+import {
+  BookOpen, SlidersHorizontal, LogOut, Play, Save, Loader2,
+  Check, Search, GraduationCap, AlertCircle, BookX,
+} from 'lucide-react';
+import api from '../api/axios';
 
-const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
+const selectCls =
+  'h-10 w-full cursor-pointer rounded-lg border border-line bg-white px-3 text-sm text-ink ' +
+  'transition-shadow focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15';
+
+const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startError }) => {
   const [courses, setCourses] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState('');
+  const [query, setQuery] = useState('');
   const [settings, setSettings] = useState({
     speed: 1.0,
-    jobs: 4,
+    jobs: 1,
     notopen_action: 'retry',
     tiku_config: {},
     notification_config: {},
@@ -26,6 +32,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
   useEffect(() => {
     fetchConfig();
     fetchCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchConfig = async () => {
@@ -34,10 +41,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
       if (response.data.status && response.data.data) {
         const cfg = response.data.data;
         if (cfg.settings) {
-          setSettings((prev) => ({
-            ...prev,
-            ...cfg.settings,
-          }));
+          setSettings((prev) => ({ ...prev, ...cfg.settings }));
         }
         if (Array.isArray(cfg.selectedCourses)) {
           setSelectedCourses(cfg.selectedCourses);
@@ -73,10 +77,21 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
     );
   };
 
+  const filteredCourses = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return courses;
+    return courses.filter(
+      (c) => c.title?.toLowerCase().includes(q) || String(c.courseId).includes(q)
+    );
+  }, [courses, query]);
+
+  const selectedCount = selectedCourses.length;
+  const effectiveCount = selectedCount > 0 ? selectedCount : courses.length;
+
   const handleStartStudy = () => {
     onStartStudy({
       ...settings,
-      course_list: selectedCourses.length > 0 ? selectedCourses : courses.map(c => c.courseId),
+      course_list: selectedCount > 0 ? selectedCourses : courses.map((c) => c.courseId),
     });
   };
 
@@ -84,16 +99,13 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
     try {
       setSaving(true);
       setSaveStatus('');
-      const payload = {
-        settings,
-        selectedCourses,
-      };
+      const payload = { settings, selectedCourses };
       const response = await api.post('/config', payload);
       if (!response.data.status) {
         console.error('保存配置失败:', response.data.msg);
-        setSaveStatus(response.data.msg || '保存失败');
+        setSaveStatus(response.data.msg || '保存失败,请重试');
       } else {
-        setSaveStatus('保存成功');
+        setSaveStatus('配置已保存');
       }
     } catch (err) {
       console.error('保存配置请求失败:', err);
@@ -103,103 +115,171 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
     }
   };
 
+  /* ---------- 载入态 ---------- */
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">加载课程列表中...</p>
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <Loader2 className="h-7 w-7 animate-spin text-brand" aria-hidden="true" />
+        <p className="text-sm text-faint">正在获取课程列表</p>
       </div>
     );
   }
 
+  /* ---------- 主视图 ---------- */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">课程管理</h1>
-            <p className="text-muted-foreground mt-1">选择要学习的课程并配置学习参数</p>
+    <div className="min-h-screen bg-canvas">
+      {/* 顶栏 */}
+      <header className="sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
+              <GraduationCap className="h-5 w-5 text-white" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold leading-tight">超星学习通</p>
+              <p className="text-xs leading-tight text-faint">课程管理</p>
+            </div>
           </div>
-          <Button variant="outline" onClick={onLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            退出登录
-          </Button>
+          <div className="flex items-center gap-3">
+            {userInfo?.username && (
+              <span className="hidden font-mono text-xs text-faint sm:inline tnum">
+                {userInfo.username}
+              </span>
+            )}
+            <Button variant="ghost" size="sm" onClick={onLogout}>
+              <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+              退出登录
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
+        {/* 页首 */}
+        <div className="mb-7 animate-stagger-up">
+          <h1 className="text-2xl font-semibold tracking-tight">选择课程并配置学习参数</h1>
+          <p className="mt-1.5 text-sm text-faint">
+            未选择任何课程时,默认学习全部 {courses.length} 门课程
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BookOpen className="mr-2 h-5 w-5" />
-                  课程列表
-                </CardTitle>
-                <CardDescription>
-                  选择要自动学习的课程（不选择将学习所有课程）
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 max-h-[500px] overflow-y-auto">
-                  {courses.map((course) => (
-                    <div
-                      key={course.courseId}
-                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        selectedCourses.includes(course.courseId)
-                          ? 'border-primary bg-primary/5'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => toggleCourse(course.courseId)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900">{course.title}</h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            课程ID: {course.courseId}
-                          </p>
-                        </div>
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedCourses.includes(course.courseId)
-                            ? 'border-primary bg-primary'
-                            : 'border-gray-300'
-                        }`}>
-                          {selectedCourses.includes(course.courseId) && (
-                            <div className="w-2 h-2 bg-white rounded-full" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+          {/* 左:课程列表 */}
+          <section
+            aria-label="课程列表"
+            className="rounded-xl border border-line bg-white shadow-card animate-stagger-up"
+            style={{ animationDelay: '80ms' }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
+              <h2 className="flex items-center gap-2 text-[15px] font-semibold">
+                <BookOpen className="h-4.5 w-4.5 text-brand" aria-hidden="true" />
+                课程列表
+                <span className="ml-1 rounded-full bg-soft px-2 py-0.5 text-xs text-faint tnum">
+                  已选 {selectedCount > 0 ? selectedCount : '全部'} / 共 {courses.length}
+                </span>
+              </h2>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-faint" aria-hidden="true" />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="搜索课程"
+                  aria-label="搜索课程"
+                  className="h-8 w-44 rounded-lg border border-line bg-white pl-8 pr-3 text-[13px] placeholder:text-faint/70 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15"
+                />
+              </div>
+            </div>
 
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="mr-2 h-5 w-5" />
-                  学习配置
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="speed">播放倍速</Label>
-                  <Input
+            {courses.length === 0 ? (
+              <div className="px-8 py-16 text-center">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-soft">
+                  <BookX className="h-5 w-5 text-faint" aria-hidden="true" />
+                </div>
+                <p className="mt-4 text-[15px] font-medium">暂无课程</p>
+                <p className="mt-1 text-[13px] text-faint">
+                  未能从学习通获取课程,请确认账号后再试
+                </p>
+              </div>
+            ) : (
+              <ul className="max-h-[520px] divide-y divide-line overflow-y-auto scroll-brutal px-2 py-1.5">
+                {filteredCourses.map((course) => {
+                  const selected = selectedCourses.includes(course.courseId);
+                  return (
+                    <li key={course.courseId}>
+                      <button
+                        type="button"
+                        onClick={() => toggleCourse(course.courseId)}
+                        aria-pressed={selected}
+                        className={`group flex w-full items-center gap-3.5 rounded-lg px-3 py-3 text-left transition-colors duration-150 hover:bg-soft focus-visible:bg-soft focus-visible:outline-none ${
+                          selected ? 'bg-brand-soft/60' : ''
+                        }`}
+                      >
+                        <span
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150 ${
+                            selected
+                              ? 'border-brand bg-brand text-white'
+                              : 'border-faint/40 text-transparent group-hover:border-faint'
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {selected && <Check className="h-3 w-3" strokeWidth={3.5} />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-ink">
+                            {course.title}
+                          </span>
+                          <span className="mt-0.5 block font-mono text-xs text-faint tnum">
+                            ID: {course.courseId}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+                {filteredCourses.length === 0 && (
+                  <li className="py-10 text-center text-[13px] text-faint">
+                    未找到与「{query}」匹配的课程
+                  </li>
+                )}
+              </ul>
+            )}
+          </section>
+
+          {/* 右:配置面板 */}
+          <aside
+            aria-label="学习配置"
+            className="space-y-4 animate-stagger-up lg:sticky lg:top-24"
+            style={{ animationDelay: '160ms' }}
+          >
+            <div className="rounded-xl border border-line bg-white shadow-card">
+              <div className="flex items-center gap-2 border-b border-line px-5 py-3.5">
+                <SlidersHorizontal className="h-4 w-4 text-brand" aria-hidden="true" />
+                <h2 className="text-[15px] font-semibold">学习配置</h2>
+              </div>
+
+              <div className="space-y-5 p-5">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="speed">播放倍速</Label>
+                    <span className="font-mono text-xs font-medium text-brand tnum">
+                      {Number(settings.speed).toFixed(1)}x
+                    </span>
+                  </div>
+                  <input
                     id="speed"
-                    type="number"
+                    type="range"
                     min="1"
                     max="2"
                     step="0.1"
                     value={settings.speed}
                     onChange={(e) => setSettings({ ...settings, speed: parseFloat(e.target.value) })}
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-line accent-brand focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/15"
                   />
-                  <p className="text-xs text-muted-foreground">范围: 1.0 - 2.0</p>
+                  <p className="text-xs text-faint">范围 1.0 - 2.0</p>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="jobs">并发章节数</Label>
                   <Input
                     id="jobs"
@@ -207,18 +287,18 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
                     min="1"
                     max="10"
                     value={settings.jobs}
-                    onChange={(e) => setSettings({ ...settings, jobs: parseInt(e.target.value) })}
+                    onChange={(e) => setSettings({ ...settings, jobs: parseInt(e.target.value) || 1 })}
                   />
-                  <p className="text-xs text-muted-foreground">同时处理的章节数量</p>
+                  <p className="text-xs text-faint">同时处理的章节数量,默认 1</p>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label htmlFor="notopen">未开放章节处理</Label>
                   <select
                     id="notopen"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     value={settings.notopen_action}
                     onChange={(e) => setSettings({ ...settings, notopen_action: e.target.value })}
+                    className={selectCls}
                   >
                     <option value="retry">重试</option>
                     <option value="ask">询问</option>
@@ -226,51 +306,57 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout }) => {
                   </select>
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="border-t border-line pt-5">
                   <AdvancedSettings settings={settings} onChange={setSettings} />
                 </div>
-              </CardContent>
-              <CardFooter className="flex flex-col space-y-2">
-                <Button className="w-full" onClick={handleStartStudy}>
-                  <Play className="mr-2 h-4 w-4" />
-                  开始学习
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full text-xs"
-                  onClick={handleSaveConfig}
-                  disabled={saving}
-                >
-                  {saving ? '保存中...' : '保存当前配置'}
-                </Button>
-                {saveStatus && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    {saveStatus}
-                  </p>
-                )}
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="mt-4">
-              <CardContent className="pt-6">
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">总课程数:</span>
-                    <span className="font-semibold">{courses.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">已选择:</span>
-                    <span className="font-semibold">
-                      {selectedCourses.length > 0 ? selectedCourses.length : '全部'}
-                    </span>
-                  </div>
+            <div className="space-y-2.5 rounded-xl border border-line bg-white p-5 shadow-card">
+              <Button className="w-full" size="lg" onClick={handleStartStudy} disabled={starting}>
+                {starting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    任务启动中
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" aria-hidden="true" />
+                    开始学习
+                  </>
+                )}
+              </Button>
+              <Button variant="outline" className="w-full" size="sm" onClick={handleSaveConfig} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    保存中
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-3.5 w-3.5" aria-hidden="true" />
+                    保存当前配置
+                  </>
+                )}
+              </Button>
+              {startError && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-lg bg-danger/5 px-3 py-2.5 text-xs leading-relaxed text-danger animate-fade-in"
+                >
+                  <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span>{startError}</span>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
+              {saveStatus && (
+                <p className="text-center text-xs text-success animate-fade-in" role="status">
+                  {saveStatus}
+                </p>
+              )}
+            </div>
+          </aside>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

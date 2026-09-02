@@ -4,16 +4,20 @@
 
 @layer base {
   :root {
-    /* 亮面瑞士 · 新粗野主义 */
-    --paper: 45 33% 95%;      /* #F5F2EC 暖白 */
-    --ink: 0 0% 7%;           /* #121212 近黑 */
-    --accent: 17 100% 50%;    /* #FF4D00 强调橙 */
-    --line: 0 0% 7%;          /* 描边 = ink */
-    --soft: 42 24% 90%;       /* #EBE6DC 次级面 */
-    --faint: 30 10% 42%;      /* 次级文字 */
-    --success: 145 70% 30%;
-    --danger: 0 80% 44%;
-    --warning: 38 95% 44%;
+    /* 现代工具风 · 石墨蓝灰 */
+    --ink: 220 25% 12%;        /* 主文字 #171C26 */
+    --body: 220 14% 34%;       /* 正文 */
+    --faint: 220 10% 48%;      /* 次级文字 */
+    --canvas: 220 20% 98%;     /* 页面底 #F7F8FA */
+    --surface: 0 0% 100%;      /* 卡片面 */
+    --soft: 220 16% 96%;       /* 次级面/悬停面 */
+    --line: 220 14% 90%;       /* 分隔线 #E2E5EA */
+    --brand: 221 78% 48%;      /* 品牌蓝 */
+    --brand-dark: 221 78% 40%;
+    --brand-soft: 221 80% 96%;
+    --success: 152 58% 36%;
+    --danger: 0 68% 48%;
+    --warning: 36 80% 44%;
   }
 
   * {
@@ -27,57 +31,29 @@
   }
 
   body {
-    @apply bg-paper text-ink font-sans;
-    background-image:
-      radial-gradient(hsl(var(--ink) / 0.05) 1px, transparent 1px),
-      linear-gradient(hsl(var(--ink) / 0.028) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--ink) / 0.028) 1px, transparent 1px);
-    background-size: 4px 4px, 48px 48px, 48px 48px;
-    overflow-x: hidden;
+    @apply bg-canvas text-ink font-sans;
   }
 
   ::selection {
-    background: hsl(var(--accent));
-    color: hsl(var(--paper));
+    background: hsl(var(--brand) / 0.2);
+  }
+
+  /* 数字对齐 */
+  .tnum {
+    font-variant-numeric: tabular-nums;
   }
 }
 
 @layer components {
-  /* 大标题字距收紧 */
-  .hero-tight {
-    letter-spacing: -0.03em;
-  }
-
-  /* 文本描边（骨架字） */
-  .text-outline {
-    color: transparent;
-    -webkit-text-stroke: 1.5px hsl(var(--ink));
-  }
-  .text-outline-accent {
-    color: transparent;
-    -webkit-text-stroke: 1.5px hsl(var(--accent));
-  }
-
-  /* 硬阴影卡片基础 */
-  .card-brutal {
-    @apply border-2 border-ink bg-white shadow-b;
-  }
-
-  /* 滚动条 */
-  .scroll-brutal::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  .scroll-brutal::-webkit-scrollbar-track {
-    background: hsl(var(--soft));
-    border-left: 2px solid hsl(var(--ink));
-  }
-  .scroll-brutal::-webkit-scrollbar-thumb {
-    background: hsl(var(--ink));
-  }
-
-  /* 视图切换编排动画 */
-  .view-enter {
-    animation: stagger-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* 无动效降级 */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
