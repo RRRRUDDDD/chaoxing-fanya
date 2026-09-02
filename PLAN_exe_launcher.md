@@ -27,6 +27,11 @@ chaoxing_portable/
 ### 1. `launcher.py`（约 130 行，无第三方依赖，仅用标准库）
 
 职责：
+
+
+
+
+
 1. 定位 `os.path.dirname(sys.executable)`（冻结后）或脚本目录（开发时）作为根目录
 2. 拼接 `python/pythonw.exe`（优先，无窗口）或 `python/python.exe`，以及 `app.py`
 3. 设置环境变量 `CHAOXING_ENABLE_OCR=1`、`PYTHONIOENCODING=utf-8`

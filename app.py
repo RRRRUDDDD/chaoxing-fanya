@@ -7,6 +7,8 @@ import queue
 import time
 import json
 from typing import Dict, List
+import webbrowser
+import socket
 
 # 确定静态文件目录（支持便携版）
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +21,16 @@ from api.answer import Tiku
 from api.exceptions import LoginError
 from api.logger import logger
 import main as main_module
+
+# === 托盘图标相关导入 ===
+try:
+    from pystray import Icon, Menu, MenuItem
+    from PIL import Image, ImageDraw
+    TRAY_AVAILABLE = True
+except ImportError:
+    TRAY_AVAILABLE = False
+    logger.warning("pystray 未安装，托盘图标功能不可用")
+
 
 # 如果存在构建好的前端，则使用静态文件服务
 if os.path.exists(STATIC_DIR):
@@ -540,14 +552,119 @@ def serve_static(path):
     return jsonify({'status': False, 'msg': '前端未构建'}), 404
 
 
+
+def is_port_in_use(port: int) -> bool:
+    """检查端口是否已被占用"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
+
+
+def wait_for_server_ready(url: str, timeout: int = 60) -> bool:
+    """等待服务器就绪"""
+    import urllib.request
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            urllib.request.urlopen(url, timeout=1)
+            return True
+        except:
+            time.sleep(0.5)
+    return False
+
+
+def create_tray_icon():
+    """创建托盘图标（从 fav.jpg 加载）"""
+    icon_path = os.path.join(os.path.dirname(__file__), "fav.jpg")
+    if getattr(sys, 'frozen', False):
+        # 打包态：从 _MEIPASS 临时解包目录读取
+        icon_path = os.path.join(sys._MEIPASS, "fav.jpg")
+
+    if os.path.exists(icon_path):
+        return Image.open(icon_path)
+    else:
+        # 兜底：纯色圆形图标
+        logger.warning(f"未找到图标文件 {icon_path}，使用默认图标")
+        img = Image.new('RGB', (64, 64), color=(33, 150, 243))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([4, 4, 60, 60], fill=(33, 150, 243), outline=(255, 255, 255), width=2)
+        return img
+
+
+def open_browser():
+    """打开浏览器"""
+    webbrowser.open("http://localhost:5000")
+
+
+def setup_tray_icon():
+    """设置托盘图标"""
+    if not TRAY_AVAILABLE:
+        return None
+
+    menu = Menu(
+        MenuItem("打开控制台", lambda: open_browser()),
+        MenuItem("退出", lambda icon, item: (icon.stop(), os._exit(0)))
+    )
+
+    icon = Icon("chaoxing-fanya", create_tray_icon(), "超星泛雅刷课助手", menu)
+    return icon
+
+
 if __name__ == "__main__":
+    # === 打包态特殊处理：无窗口模式下重定向输出 ===
+    if getattr(sys, 'frozen', False):
+        # PyInstaller 冻结态
+        if sys.stdout is None or sys.stderr is None:
+            # console=False 时 stdout/stderr 为 None，重定向到 devnull 防止 loguru/tqdm 崩溃
+            sys.stdout = open(os.devnull, 'w', encoding='utf-8')
+            sys.stderr = open(os.devnull, 'w', encoding='utf-8')
+
+        # 检查端口是否已占用（实例复用逻辑）
+        if is_port_in_use(5000):
+            logger.info("检测到已有实例运行，直接打开浏览器")
+            open_browser()
+            sys.exit(0)
+
+        # 修复 web_config.json 路径：冻结态下写到 exe 同目录，而非临时解包目录
+        base_path = os.path.dirname(sys.executable)
+        os.chdir(base_path)
+
     # 检测是否存在前端构建
     if os.path.exists(STATIC_DIR):
         logger.info(f"检测到前端构建，将提供静态文件服务: {STATIC_DIR}")
-        logger.info("请在浏览器中打开: http://localhost:5000")
     else:
         logger.info("未检测到前端构建，仅提供 API 服务")
-        logger.info("前端开发模式请访问: http://localhost:5173")
-    
-    # use_reloader=False 避免热重载导致后台线程 ThreadPoolExecutor 崩溃
-    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+
+    # 启动托盘图标（仅打包态 + pystray 可用时）
+    tray_icon = None
+    if getattr(sys, 'frozen', False) and TRAY_AVAILABLE:
+        tray_icon = setup_tray_icon()
+        threading.Thread(target=tray_icon.run, daemon=True).start()
+        logger.info("托盘图标已启动，右键可退出")
+
+    # 后台启动 Flask
+    flask_thread = threading.Thread(
+        target=lambda: app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False),
+        daemon=True
+    )
+    flask_thread.start()
+
+    # 等待服务器就绪后打开浏览器（仅打包态）
+    if getattr(sys, 'frozen', False):
+        if wait_for_server_ready("http://localhost:5000/api/health", timeout=60):
+            logger.info("服务器就绪，正在打开浏览器...")
+            open_browser()
+        else:
+            logger.error("服务器启动超时")
+    else:
+        # 开发模式：直接提示 URL，不自动开浏览器
+        logger.info("开发模式：请手动访问 http://localhost:5000")
+
+    # 主线程保持运行（托盘图标需要主线程存活）
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        logger.info("接收到退出信号")
+        if tray_icon:
+            tray_icon.stop()
+
