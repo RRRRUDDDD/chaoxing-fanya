@@ -132,6 +132,7 @@ dmypy.json
 logs/
 saves/
 build/
+!desktop/build/
 dist/
 *.spec
 !chaoxing.spec

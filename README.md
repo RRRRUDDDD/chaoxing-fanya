@@ -38,6 +38,21 @@ start.bat  # Windows 双击或命令行运行
 
 ### 其他运行方式
 
+**Electron 桌面版（推荐）**
+```bash
+build_desktop.bat
+```
+生成独立桌面应用（无需浏览器），输出 `desktop/release/chaoxing-fanya-desktop-*.exe`：
+- **NSIS 安装包**：一键安装，开始菜单 + 桌面快捷方式
+- **便携版**：解压即用，绿色免安装
+
+**特性**：
+- ✓ 原生窗口，无需跳转浏览器
+- ✓ 单实例运行，防止多开
+- ✓ 配置持久化到 `%APPDATA%`
+- ✓ 自动分配端口，无冲突
+- 详见 [`desktop/README.md`](desktop/README.md)
+
 **手动启动（前后端分开）**
 ```bash
 # 后端
@@ -62,7 +77,7 @@ docker run -it -v /本地路径/config.ini:/config/config.ini chaoxing
 ```
 - 首次运行会将 `config_template.ini` 复制到 `/config/config.ini`，可自行覆盖挂载。
 
-**便携打包**
+**便携打包（Python 嵌入式）**
 ```bash
 clean_and_build_portable.bat
 ```
