@@ -49,9 +49,8 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.datas,
     [],
+    exclude_binaries=True,  # onedir 模式：二进制文件由 COLLECT 处理
     name="chaoxing-backend",
     debug=False,
     bootloader_ignore_signals=False,
@@ -64,4 +63,14 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon="fav.jpg",
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.datas,
+    strip=False,
+    upx=False,
+    upx_exclude=[],
+    name="chaoxing-backend",
 )

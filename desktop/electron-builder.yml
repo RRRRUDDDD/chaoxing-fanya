@@ -6,7 +6,7 @@ files:
   - main.js
   - package.json
 extraResources:
-  - from: backend
+  - from: backend/chaoxing-backend
     to: backend
 win:
   target:
@@ -15,5 +15,7 @@ win:
   icon: build/icon.png
 nsis:
   oneClick: true
-  artifactName: chaoxing-fanya-desktop-${version}.${ext}
+  artifactName: chaoxing-fanya-desktop-setup-${version}.${ext}
   deleteAppDataOnUninstall: false
+portable:
+  artifactName: chaoxing-fanya-desktop-portable-${version}.${ext}

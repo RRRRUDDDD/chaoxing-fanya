@@ -35,7 +35,19 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: |
+            web/package-lock.json
+            desktop/package-lock.json
+
+      - name: Cache Electron binaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\electron\Cache
+            ~\AppData\Local\electron-builder\Cache
+          key: ${{ runner.os }}-electron-${{ hashFiles('desktop/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-
 
       - name: Build frontend
         working-directory: web
@@ -92,6 +104,48 @@ jobs:
           Copy-Item README.md release\README.md
           Compress-Archive -Path "release\*" -DestinationPath "release\chaoxing-fanya-windows-x64.zip" -Force
 
+      - name: Build desktop backend executable
+        run: pyinstaller --clean --noconfirm chaoxing-backend.spec
+
+      - name: Smoke test desktop backend (headless)
+        shell: pwsh
+        run: |
+          $env:CHAOXING_HEADLESS = "1"
+          $env:CHAOXING_PORT = "5123"
+          $process = Start-Process -FilePath "dist\chaoxing-backend\chaoxing-backend.exe" -PassThru
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 60; $attempt++) {
+              Start-Sleep -Seconds 1
+              try {
+                $response = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:5123/api/health" -TimeoutSec 2
+                if ($response.StatusCode -eq 200) {
+                  $ready = $true
+                  break
+                }
+              } catch {
+                # The backend needs a few seconds to boot.
+              }
+            }
+            if (-not $ready) {
+              throw "Headless backend did not serve http://127.0.0.1:5123/api/health"
+            }
+          } finally {
+            if (-not $process.HasExited) {
+              Stop-Process -Id $process.Id -Force
+            }
+          }
+
+      - name: Build Electron desktop app
+        working-directory: desktop
+        shell: pwsh
+        run: |
+          if (Test-Path backend) { Remove-Item -Recurse -Force backend }
+          New-Item -ItemType Directory -Force backend | Out-Null
+          Copy-Item -Recurse -Force "..\dist\chaoxing-backend" "backend\chaoxing-backend"
+          npm ci
+          npx electron-builder --win --publish never
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -99,8 +153,17 @@ jobs:
           path: release\chaoxing-fanya-windows-x64.zip
           if-no-files-found: error
 
+      - name: Upload desktop artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chaoxing-fanya-desktop
+          path: desktop\release\*.exe
+          if-no-files-found: error
+
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: release/chaoxing-fanya-windows-x64.zip
+          files: |
+            release/chaoxing-fanya-windows-x64.zip
+            desktop/release/*.exe

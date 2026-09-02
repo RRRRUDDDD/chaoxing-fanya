@@ -2,6 +2,7 @@
   "name": "chaoxing-desktop",
   "version": "1.0.0",
   "description": "超星泛雅刷课助手桌面版",
+  "author": "chaoxing-fanya",
   "main": "main.js",
   "private": true,
   "scripts": {

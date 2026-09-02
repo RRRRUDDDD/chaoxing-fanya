@@ -41,12 +41,14 @@ else:
 CORS(app)
 
 # === 环境变量：支持 Electron 无头模式 ===
-HEADLESS = os.environ.get("CHAOXING_HEADLESS") == "1"
+HEADLESS = os.environ.get("CHAOXING_HEADLESS") == "1" or os.environ.get("CHAOXING_ELECTRON") == "1"
 PORT = int(os.environ.get("CHAOXING_PORT", "5000"))
 HOST = "127.0.0.1" if HEADLESS else "0.0.0.0"
+# 数据目录：Electron 传入 %APPDATA%/<app>；未设置时沿用脚本目录（独立 exe / 开发模式行为不变）
+DATA_DIR = os.environ.get("CHAOXING_DATA_DIR") or os.path.dirname(__file__)
 
 # Web 配置文件路径
-CONFIG_FILE = os.path.join(os.path.dirname(__file__), "web_config.json")
+CONFIG_FILE = os.path.join(DATA_DIR, "web_config.json")
 
 
 def load_web_config() -> Dict:
@@ -644,11 +646,14 @@ if __name__ == "__main__":
         # 修复 web_config.json 路径：冻结态下写到 exe 同目录，而非临时解包目录
         base_path = os.path.dirname(sys.executable)
         os.chdir(base_path)
-    elif HEADLESS and getattr(sys, 'frozen', False):
-        # Electron 无头模式：chdir 到 exe 目录（配置文件写入位置）
-        base_path = os.path.dirname(sys.executable)
-        os.chdir(base_path)
-        logger.info(f"Electron 无头模式启动，工作目录: {base_path}")
+    elif HEADLESS:
+        # Electron 无头模式：cookies.txt / chaoxing.log 等运行时文件写入数据目录
+        try:
+            os.makedirs(DATA_DIR, exist_ok=True)
+            os.chdir(DATA_DIR)
+        except Exception as e:
+            logger.warning(f"切换数据目录失败，沿用当前目录: {e}")
+        logger.info(f"Electron 无头模式启动，工作目录: {os.getcwd()}")
 
     # 检测是否存在前端构建
     if os.path.exists(STATIC_DIR):
