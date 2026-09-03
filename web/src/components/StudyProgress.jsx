@@ -240,12 +240,6 @@ const StudyProgress = ({ taskId, onBack, preview = false }) => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {(finished || errored) && (
-              <Button onClick={onBack} size="sm">
-                <Home className="h-3.5 w-3.5" aria-hidden="true" />
-                返回首页
-              </Button>
-            )}
             <a
               href="https://github.com/RRRRUDDDD/chaoxing-gui"
               target="_blank"
@@ -256,6 +250,12 @@ const StudyProgress = ({ taskId, onBack, preview = false }) => {
             >
               <Github className="h-4 w-4" aria-hidden="true" />
             </a>
+            {(finished || errored) && (
+              <Button onClick={onBack} size="sm">
+                <Home className="h-3.5 w-3.5" aria-hidden="true" />
+                返回首页
+              </Button>
+            )}
           </div>
         </div>
       </header>
