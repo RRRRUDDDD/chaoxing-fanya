@@ -4,19 +4,57 @@ import CountUp from './CountUp';
 import {
   Loader2, ArrowLeft, CheckCircle2, XCircle, AlertCircle,
   Play, Clock, ChevronDown, ChevronRight, BookOpen, MonitorPlay,
-  FileText, Home,
+  FileText, Home, Github,
 } from 'lucide-react';
 import api from '../api/axios';
 
-const StudyProgress = ({ taskId, onBack }) => {
-  const [taskStatus, setTaskStatus] = useState(null);
-  const [taskDetails, setTaskDetails] = useState(null);
-  const [logs, setLogs] = useState([]);
+const StudyProgress = ({ taskId, onBack, preview = false }) => {
+  const [taskStatus, setTaskStatus] = useState(preview ? {
+    status: 'completed',
+    progress: 3,
+    total: 3,
+    stats: {
+      completed_chapters: 12,
+      total_chapters: 12,
+      completed_tasks: 12,
+      total_tasks: 12,
+      failed_tasks: 0,
+      skipped_tasks: 0,
+    },
+    start_time: Date.now() / 1000 - 372,
+  } : null);
+  const [taskDetails, setTaskDetails] = useState(preview ? {
+    courses: [
+      {
+        id: 'preview-001',
+        title: '大学英语（演示课程）',
+        status: 'completed',
+        chapters: [
+          { id: 'chapter-1', title: '第一章：课程导学', has_finished: true },
+          { id: 'chapter-2', title: '第二章：基础内容', has_finished: true },
+        ],
+      },
+      {
+        id: 'preview-002',
+        title: '高等数学（演示课程）',
+        status: 'completed',
+        chapters: [
+          { id: 'chapter-3', title: '第一章：函数与极限', has_finished: true },
+          { id: 'chapter-4', title: '第二章：导数与微分', has_finished: true },
+        ],
+      },
+    ],
+  } : null);
+  const [logs, setLogs] = useState(preview ? [
+    { timestamp: Date.now() / 1000 - 60, level: 'success', message: '演示任务已完成' },
+    { timestamp: Date.now() / 1000 - 30, level: 'info', message: '所有课程均已处理完毕' },
+  ] : []);
   const [expandedCourses, setExpandedCourses] = useState(new Set());
   const logsEndRef = useRef(null);
   const intervalRef = useRef(null);
 
   useEffect(() => {
+    if (preview) return undefined;
     fetchTaskStatus();
     fetchTaskDetails();
     fetchLogs();
@@ -33,7 +71,7 @@ const StudyProgress = ({ taskId, onBack }) => {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskId]);
+  }, [taskId, preview]);
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -201,12 +239,24 @@ const StudyProgress = ({ taskId, onBack }) => {
               <p className="text-xs leading-tight text-faint">实时跟踪任务执行详情</p>
             </div>
           </div>
-          {(finished || errored) && (
-            <Button onClick={onBack} size="sm">
-              <Home className="h-3.5 w-3.5" aria-hidden="true" />
-              返回首页
-            </Button>
-          )}
+          <div className="flex items-center gap-3">
+            {(finished || errored) && (
+              <Button onClick={onBack} size="sm">
+                <Home className="h-3.5 w-3.5" aria-hidden="true" />
+                返回首页
+              </Button>
+            )}
+            <a
+              href="https://github.com/RRRRUDDDD/chaoxing-gui"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="在 GitHub 上查看项目"
+              title="在 GitHub 上查看项目"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors duration-150 hover:bg-soft hover:text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+            >
+              <Github className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </header>
 

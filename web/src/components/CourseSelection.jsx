@@ -5,7 +5,7 @@ import Label from './ui/Label';
 import AdvancedSettings from './AdvancedSettings';
 import {
   BookOpen, SlidersHorizontal, LogOut, Play, Save, Loader2,
-  Check, Search, GraduationCap, AlertCircle, BookX,
+  Check, Search, GraduationCap, AlertCircle, BookX, Github,
 } from 'lucide-react';
 import api from '../api/axios';
 
@@ -13,7 +13,7 @@ const selectCls =
   'h-10 w-full cursor-pointer rounded-lg border border-line bg-white px-3 text-sm text-ink ' +
   'transition-shadow focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15';
 
-const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startError }) => {
+const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startError, preview = false }) => {
   const [courses, setCourses] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +30,20 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
   });
 
   useEffect(() => {
+    if (preview) {
+      setCourses([
+        { courseId: 'preview-001', title: '大学英语（演示课程）' },
+        { courseId: 'preview-002', title: '高等数学（演示课程）' },
+        { courseId: 'preview-003', title: '计算机基础（演示课程）' },
+      ]);
+      setSelectedCourses(['preview-001']);
+      setLoading(false);
+      return;
+    }
     fetchConfig();
     fetchCourses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [preview]);
 
   const fetchConfig = async () => {
     try {
@@ -152,6 +162,16 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/RRRRUDDDD/chaoxing-gui"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="在 GitHub 上查看项目"
+              title="在 GitHub 上查看项目"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors duration-150 hover:bg-soft hover:text-ink focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20"
+            >
+              <Github className="h-4 w-4" aria-hidden="true" />
+            </a>
             {userInfo?.username && (
               <span className="hidden font-mono text-xs text-faint sm:inline tnum">
                 {userInfo.username}

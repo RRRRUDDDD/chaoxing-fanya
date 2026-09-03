@@ -5,9 +5,15 @@ import StudyProgress from './components/StudyProgress';
 import api from './api/axios';
 
 function App() {
-  const [step, setStep] = useState('login');
-  const [userInfo, setUserInfo] = useState(null);
-  const [taskId, setTaskId] = useState(null);
+  const previewMode = new URLSearchParams(window.location.search).get('preview');
+  const isPreview = previewMode === 'courses' || previewMode === 'progress';
+  const [step, setStep] = useState(
+    previewMode === 'progress' ? 'progress' : previewMode === 'courses' ? 'courses' : 'login'
+  );
+  const [userInfo, setUserInfo] = useState(
+    isPreview ? { username: '138****0000', password: '' } : null
+  );
+  const [taskId, setTaskId] = useState(isPreview ? 'preview-task' : null);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState('');
 
@@ -18,6 +24,11 @@ function App() {
 
   const handleStartStudy = async (settings) => {
     if (starting) return;
+    if (isPreview) {
+      setTaskId('preview-task');
+      setStep('progress');
+      return;
+    }
     setStarting(true);
     setStartError('');
     try {
@@ -69,10 +80,11 @@ function App() {
           onLogout={handleLogout}
           starting={starting}
           startError={startError}
+          preview={previewMode === 'courses'}
         />
       )}
       {step === 'progress' && taskId && (
-        <StudyProgress taskId={taskId} onBack={handleBackToHome} />
+        <StudyProgress taskId={taskId} onBack={handleBackToHome} preview={previewMode === 'progress' || isPreview} />
       )}
     </div>
   );
