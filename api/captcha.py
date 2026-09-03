@@ -7,11 +7,11 @@ Captcha API for Chaoxing
 Author: skreon
 Email: 1340554713@qq.com
 Date: 2025-06-05
-Version: 1.0.0
+Version: 1.1.0
 """
 
 __author__ = "skreon 1340554713@qq.com"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 from random import randint
 from typing import Optional

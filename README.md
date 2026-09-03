@@ -43,6 +43,8 @@ desktop/release/chaoxing-gui-desktop-Setup-*.exe
 
 安装后通过开始菜单或桌面快捷方式启动。
 
+Windows 发布包可从 [GitHub Releases](https://github.com/RRRRUDDDD/chaoxing-fanya/releases/latest) 直接下载。
+
 ### 方式三：命令行模式
 
 ```bash
