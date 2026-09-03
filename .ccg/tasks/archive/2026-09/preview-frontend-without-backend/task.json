@@ -1,0 +1,12 @@
+{
+  "id": "preview-frontend-without-backend",
+  "title": "添加无后端前端预览入口",
+  "status": "completed",
+  "complexity": "S",
+  "risk": "low",
+  "domain": "frontend",
+  "currentPhase": "completed",
+  "nextAction": "归档任务",
+  "createdAt": "2026-09-03T00:00:00Z",
+  "branch": "main"
+}
