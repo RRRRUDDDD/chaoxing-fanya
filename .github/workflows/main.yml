@@ -72,7 +72,7 @@ jobs:
       - name: Smoke test executable
         shell: pwsh
         run: |
-          $process = Start-Process -FilePath "dist\chaoxing-fanya.exe" -PassThru
+          $process = Start-Process -FilePath "dist\chaoxing-gui.exe" -PassThru
           try {
             $ready = $false
             for ($attempt = 0; $attempt -lt 30; $attempt++) {
@@ -100,9 +100,9 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force release | Out-Null
-          Copy-Item "dist\chaoxing-fanya.exe" "release\chaoxing-fanya.exe"
+          Copy-Item "dist\chaoxing-gui.exe" "release\chaoxing-gui.exe"
           Copy-Item README.md release\README.md
-          Compress-Archive -Path "release\*" -DestinationPath "release\chaoxing-fanya-windows-x64.zip" -Force
+          Compress-Archive -Path "release\*" -DestinationPath "release\chaoxing-gui-windows-x64.zip" -Force
 
       - name: Build desktop backend executable
         run: pyinstaller --clean --noconfirm chaoxing-backend.spec
@@ -149,14 +149,14 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: chaoxing-fanya-windows-x64
-          path: release\chaoxing-fanya-windows-x64.zip
+          name: chaoxing-gui-windows-x64
+          path: release\chaoxing-gui-windows-x64.zip
           if-no-files-found: error
 
       - name: Upload desktop artifact
         uses: actions/upload-artifact@v4
         with:
-          name: chaoxing-fanya-desktop
+          name: chaoxing-gui-desktop
           path: desktop\release\*.exe
           if-no-files-found: error
 
@@ -165,5 +165,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/chaoxing-fanya-windows-x64.zip
+            release/chaoxing-gui-windows-x64.zip
             desktop/release/*.exe

@@ -1,5 +1,5 @@
-appId: com.chaoxing.fanya
-productName: 超星泛雅刷课助手
+appId: com.chaoxing.gui
+productName: 超星学习通 · 自动化学习助手
 directories:
   output: release
 files:
@@ -13,9 +13,11 @@ win:
     - target: nsis
     - target: portable
   icon: build/icon.png
+  executableName: chaoxing-gui
 nsis:
-  oneClick: true
-  artifactName: chaoxing-fanya-desktop-setup-${version}.${ext}
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: chaoxing-gui-desktop-setup-${version}.${ext}
   deleteAppDataOnUninstall: false
 portable:
-  artifactName: chaoxing-fanya-desktop-portable-${version}.${ext}
+  artifactName: chaoxing-gui-desktop-portable-${version}.${ext}

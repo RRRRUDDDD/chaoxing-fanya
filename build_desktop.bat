@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 
 echo ========================================
-echo   Chaoxing Fanya Desktop Build
+echo   Chaoxing GUI Desktop Build
 echo ========================================
 echo.
 

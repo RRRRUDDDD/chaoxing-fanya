@@ -617,7 +617,7 @@ def setup_tray_icon():
         MenuItem("退出", lambda icon, item: (icon.stop(), os._exit(0)))
     )
 
-    icon = Icon("chaoxing-fanya", create_tray_icon(), "超星泛雅刷课助手", menu)
+    icon = Icon("chaoxing-gui", create_tray_icon(), "超星学习通 · 自动化学习助手", menu)
     return icon
 
 

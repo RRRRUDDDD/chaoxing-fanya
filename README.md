@@ -42,7 +42,7 @@ start.bat  # Windows 双击或命令行运行
 ```bash
 build_desktop.bat
 ```
-生成独立桌面应用（无需浏览器），输出 `desktop/release/chaoxing-fanya-desktop-*.exe`：
+生成独立桌面应用（无需浏览器），输出 `desktop/release/chaoxing-gui-desktop-*.exe`：
 - **NSIS 安装包**：一键安装，开始菜单 + 桌面快捷方式
 - **便携版**：解压即用，绿色免安装
 

@@ -2,9 +2,9 @@
 
 ## 概述
 
-超星泛雅刷课助手现在支持三种发行形态：
+超星学习通 · 自动化学习助手现在支持三种发行形态：
 
-1. **独立 exe**（原有）：`chaoxing.spec` → `dist/chaoxing-fanya.exe`，带托盘图标，自动打开系统浏览器
+1. **独立 exe**（原有）：`chaoxing.spec` → `dist/chaoxing-gui.exe`，带托盘图标，自动打开系统浏览器
 2. **便携版**（原有）：`build_portable.bat` → 嵌入式 Python + 启动脚本
 3. **Electron 桌面版**（新增）：`desktop/` → 独立窗口，无需浏览器
 
@@ -58,8 +58,8 @@ build_desktop.bat
 ```
 
 **输出**：
-- `desktop/release/chaoxing-fanya-desktop-*.exe`（NSIS 安装包）
-- `desktop/release/chaoxing-fanya-desktop-*-portable.exe`（绿色便携版）
+- `desktop/release/chaoxing-gui-desktop-*.exe`（NSIS 安装包）
+- `desktop/release/chaoxing-gui-desktop-*-portable.exe`（绿色便携版）
 
 ### 分步构建
 
@@ -132,10 +132,10 @@ app.py                         # 新增 HEADLESS 模式支持（43-46, 617-627, 
 ### Q4: 如何调试后端日志？
 
 **开发模式**：直接查看终端输出
-**生产模式**：日志写入 `%APPDATA%\chaoxing-fanya\backend.log`
+**生产模式**：日志写入 `%APPDATA%\chaoxing-desktop\backend.log`
 
 ```powershell
-Get-Content $env:APPDATA\chaoxing-fanya\backend.log -Tail 50 -Wait
+Get-Content $env:APPDATA\chaoxing-desktop\backend.log -Tail 50 -Wait
 ```
 
 ### Q5: 端口冲突怎么办？
@@ -151,7 +151,7 @@ Electron 自动分配空闲端口，不会冲突。原有独立 exe 仍使用 50
 - [ ] 功能：登录 → 选课 → 开始学习，后台正常运行
 - [ ] 关闭窗口：进程全部退出（Task Manager 检查无残留）
 - [ ] 重复启动：二次启动聚焦第一个窗口，不创建新实例
-- [ ] 配置持久化：`%APPDATA%\chaoxing-fanya\web_config.json` 保存用户配置
+- [ ] 配置持久化：`%APPDATA%\chaoxing-desktop\web_config.json` 保存用户配置
 - [ ] 卸载：开始菜单卸载，程序文件和数据目录被清理
 
 ## 许可证

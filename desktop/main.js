@@ -144,7 +144,7 @@ function waitForBackend(timeoutMs = 120000) {
 
 function htmlPage(body) {
   const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
-<title>超星泛雅刷课助手</title><style>
+<title>超星学习通 · 自动化学习助手</title><style>
 html,body{height:100%;margin:0}
 body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
 font-family:"Microsoft YaHei",system-ui,sans-serif;background:#0f172a;color:#e2e8f0;padding:32px;
@@ -175,7 +175,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: '超星泛雅刷课助手',
+    title: '超星学习通 · 自动化学习助手',
     autoHideMenuBar: true,
     backgroundColor: '#0f172a',
     webPreferences: {
