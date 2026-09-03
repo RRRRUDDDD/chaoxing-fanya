@@ -1,0 +1,12 @@
+{
+  "id": "push-to-chaoxing-gui",
+  "title": "将当前前端改动推送到 chaoxing-gui 仓库",
+  "status": "completed",
+  "complexity": "S",
+  "risk": "medium",
+  "domain": "release",
+  "currentPhase": "completed",
+  "nextAction": "归档任务",
+  "createdAt": "2026-09-03T00:00:00Z",
+  "branch": "main"
+}
