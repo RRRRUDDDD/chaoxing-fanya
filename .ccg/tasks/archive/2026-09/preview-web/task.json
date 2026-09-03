@@ -1,0 +1,12 @@
+{
+  "id": "preview-web",
+  "title": "启动 Web 开发预览",
+  "status": "completed",
+  "complexity": "S",
+  "risk": "low",
+  "domain": "frontend",
+  "currentPhase": "completed",
+  "nextAction": "归档任务",
+  "createdAt": "2026-09-03T00:00:00Z",
+  "branch": "main"
+}
