@@ -29,9 +29,9 @@ from api.live import Live
 from api.live_process import LiveProcessor
 
 class ChapterResult(enum.Enum):
-    SUCCESS=0,
-    ERROR=1,
-    NOT_OPEN=2,
+    SUCCESS=0
+    ERROR=1
+    NOT_OPEN=2
     PENDING=3
 
 
@@ -245,22 +245,15 @@ def process_job(chaoxing: Chaoxing, course: dict, job: dict, job_info: dict, spe
                 "clazzId": course.get("clazzId"),
                 "knowledgeid": job_info.get("knowledgeid")
             }
-            
-            # 创建直播对象
+
             live = Live(
                 attachment=job,
                 defaults=defaults,
                 course_id=course.get("courseId")
             )
-            
-            # 启动直播处理线程
-            thread = threading.Thread(
-                target=LiveProcessor.run_live,
-                args=(live, speed),
-                daemon=True
-            )
-            thread.start()
-            thread.join()  # 等待直播处理完成
+
+            # 直播刷取是同步循环, 直接在当前线程等待完成
+            LiveProcessor.run_live(live, speed)
             return StudyResult.SUCCESS
         except Exception as e:
             logger.error(f"处理直播任务时出错: {str(e)}")
@@ -318,8 +311,12 @@ class JobProcessor:
                 logger.info("Queue shut down")
                 return
 
-            # 处理单个章节，并在需要时通过 config 中的回调上报章节完成进度
-            task.result = process_chapter(self.chaoxing, self.course, task.point, self.speed, self.config)
+            # 章节处理异常不能让线程死亡, 否则该任务永远没有 task_done(), 队列 join 将永久阻塞
+            try:
+                task.result = process_chapter(self.chaoxing, self.course, task.point, self.speed, self.config)
+            except BaseException as e:
+                logger.error("章节处理异常, 按失败重试: {} -> {}", task.point.get("title"), e)
+                task.result = ChapterResult.ERROR
 
             match task.result:
                 case ChapterResult.SUCCESS:
@@ -337,12 +334,11 @@ class JobProcessor:
                     if task.tries >= self.max_tries:
                         logger.error(
                             "章节未开启: {} 可能由于上一章节的章节检测未完成, 也可能由于该章节因为时效已关闭，"
-                            "请手动检查完成并提交再重试。或者在配置中配置(自动跳过关闭章节/开启题库并启用提交)"
-                        , task.point["title"])
+                            "请手动检查完成并提交再重试。或者在配置中配置(自动跳过关闭章节/开启题库并启用提交)",
+                            task.point["title"])
                         self.task_queue.task_done()
                         continue
 
-                    # self.wait_queue.put(task)
                     self.retry_queue.put(task)
 
                 case ChapterResult.ERROR:
@@ -405,11 +401,7 @@ def process_chapter(chaoxing: Chaoxing, course:dict[str, Any], point:dict[str, A
     if job_info.get("notOpen", False):
         return ChapterResult.NOT_OPEN
 
-    # 已经默认处理空任务，此处不需要判断
-    if not jobs:
-        pass
-
-    # TODO: 个别章节很恶心，多到5个点，可以并行处理，将来会让不同课程不同章节的所有任务点共享一个队列，从而实现全局并行
+    # 空任务列表由 get_job_list 内部的 study_emptypage 处理, 此处无需额外逻辑
     job_results:list[StudyResult]=[]
     video_progress_callback = config.get("video_progress_callback") if config else None
     with ThreadPoolExecutor(max_workers=5) as executor:
@@ -449,7 +441,6 @@ def process_course(chaoxing: Chaoxing, course:dict[str, Any], config: dict):
     tqdm.set_lock(RLock())
 
     tasks=[]
-
     for i, point in enumerate(point_list["points"]):
         task = ChapterTask(point=point, index=i)
         tasks.append(task)
@@ -458,23 +449,6 @@ def process_course(chaoxing: Chaoxing, course:dict[str, Any], config: dict):
 
 
     tqdm.format_sizeof = _old_format_sizeof
-
-    """
-    while __point_index < len(point_list["points"]):
-        point = point_list["points"][__point_index]
-        logger.debug(f"当前章节 __point_index: {__point_index}")
-        
-        result, auto_skip_notopen = process_chapter(
-            chaoxing, course, point, RB, notopen_action, speed, auto_skip_notopen
-        )
-        
-        if result == -1:  # 退出当前课程
-            break
-        elif result == 0:  # 重试前一章节
-            __point_index -= 1  # 默认第一个任务总是开放的
-        else:  # 继续下一章节
-            __point_index += 1
-    """
 
 
 

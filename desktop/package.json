@@ -1,6 +1,6 @@
 {
   "name": "chaoxing-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "超星学习通 · 自动化学习助手桌面版",
   "author": "chaoxing-gui",
   "main": "main.js",

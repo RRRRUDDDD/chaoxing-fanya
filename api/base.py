@@ -395,8 +395,8 @@ class Chaoxing:
             return False, 403
 
         logger.error(f"未知错误: {resp.status_code}")
-        logger.error("请求url:", resp.url)
-        logger.error("请求头：", dict(_session.headers) | headers)
+        logger.error("请求url: {}", resp.url)
+        logger.error("请求头：{}", dict(_session.headers) | headers)
         return False, resp.status_code
 
 
@@ -414,7 +414,7 @@ class Chaoxing:
             return None
 
         if resp.status_code != 200:
-            logger.debug("刷新视频状态返回码异常: {}"% resp.status_code)
+            logger.debug("刷新视频状态返回码异常: {}", resp.status_code)
             logger.debug(resp.text)
             return None
 
@@ -434,14 +434,6 @@ class Chaoxing:
         refreshed = self._refresh_video_status(session, job, _type)
         if refreshed:
             return refreshed
-
-        # FIXME: Temporarily disabled for multithreading support
-        if False and self.account and self.account.username and self.account.password:
-            login_result = self.login(login_with_cookies=False)
-            if login_result.get("status"):
-                SessionManager.update_cookies()
-                return self._refresh_video_status(session, job, _type)
-            logger.warning("账号密码登录失败: {}", login_result.get("msg"))
 
         return None
 
@@ -591,11 +583,11 @@ class Chaoxing:
 
     def study_work(self, _course, _job, _job_info) -> StudyResult:
         # FIXME: 这一块可以单独搞一个类出来了，方法里面又套方法，每一次调用都会创建新的方法，十分浪费
-        if self.tiku.DISABLE or not self.tiku:
+        if not self.tiku or self.tiku.DISABLE:
             return StudyResult.SUCCESS
         _ORIGIN_HTML_CONTENT = ""  # 用于配合输出网页源码, 帮助修复#391错误
 
-        def random_answer(options: str) -> str:
+        def random_answer(q: dict, options: str) -> str:
             answer = ""
             if not options:
                 return answer
@@ -667,31 +659,8 @@ class Chaoxing:
             注意:
             如果无法从网页中提取题目信息,将记录警告日志并返回None
             """
-            # cut_char = [',','，','|','\n','\r','\t','#','*','-','_','+','@','~','/','\\','.','&',' ']    # 多选答案切割符
-            # ',' 在常规被正确划分的, 选项中出现, 导致 multi_cut 无法正确划分选项 #391
-            # IndexError: Cannot choose from an empty sequence #391
-            # 同时为了避免没有考虑到的 case, 应该先按照 '\n' 匹配, 匹配不到再按照其他字符匹配
-            cut_char = [
-                "\n",
-                ",",
-                "，",
-                "|",
-                "\r",
-                "\t",
-                "#",
-                "*",
-                "-",
-                "_",
-                "+",
-                "@",
-                "~",
-                "/",
-                "\\",
-                ".",
-                "&",
-                " ",
-                "、",
-            ]  # 多选答案切割符
+            # ',' 在常规被正确划分的选项中出现, 导致无法正确划分选项 (#391),
+            # 因此先由 cut() 按 '\n' 匹配, 匹配不到再按照其他字符匹配
             res = cut(answer)
             if res is None:
                 logger.warning(
@@ -801,7 +770,7 @@ class Chaoxing:
             answer = ""
             if not res:
                 # 随机答题
-                answer = random_answer(q["options"])
+                answer = random_answer(q, q["options"])
                 q[f'answerSource{q["id"]}'] = "random"
             else:
                 # 根据响应结果选择答案
@@ -867,7 +836,7 @@ class Chaoxing:
 
                 if not answer:  # 检查 answer 是否为空
                     logger.warning(f"找到答案但答案未能匹配 -> {res}\t随机选择答案")
-                    answer = random_answer(q["options"])  # 如果为空，则随机选择答案
+                    answer = random_answer(q, q["options"])  # 如果为空，则随机选择答案
                     q[f'answerSource{q["id"]}'] = "random"
                 else:
                     logger.info(f"成功获取到答案：{answer}")
@@ -896,9 +865,6 @@ class Chaoxing:
             with ThreadPoolExecutor(max_workers=ai_concurrency) as executor:
                 for q in questions["questions"]:
                     executor.submit(_handle_question, q, inc_found_concurrent)
-
-            # 等待线程池中的任务全部结束
-            executor.shutdown(wait=True)
         else:
             def inc_found_seq():
                 nonlocal found_answers

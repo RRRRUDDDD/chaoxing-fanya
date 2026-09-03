@@ -110,24 +110,42 @@ class CacheDAO:
     @Reference: https://github.com/SocialSisterYi/xuexiaoyi-to-xuexitong-tampermonkey-proxy
     """
     DEFAULT_CACHE_FILE = "cache.json"
+    _shared_instance: Optional["CacheDAO"] = None
+    _shared_lock = threading.Lock()
 
     def __init__(self, file: str = DEFAULT_CACHE_FILE):
         self.cache_file = Path(file)
         self._lock = threading.RLock()
+        self._memory_cache: Optional[dict] = None  # 进程内缓存, 避免每题全量读写文件
         if not self.cache_file.is_file():
             self._write_cache({})
 
+    @classmethod
+    def get_shared(cls, file: str = DEFAULT_CACHE_FILE) -> "CacheDAO":
+        """获取进程级单例, 保证多线程共享同一把锁与内存缓存"""
+        with cls._shared_lock:
+            if cls._shared_instance is None:
+                cls._shared_instance = cls(file)
+            return cls._shared_instance
+
     def _read_cache(self) -> dict:
+        # 命中内存缓存时直接返回, 不再读文件
+        if self._memory_cache is not None:
+            return self._memory_cache
         # 新增缓存文件读取的异常处理
         try:
             with self._lock:
+                if self._memory_cache is not None:
+                    return self._memory_cache
                 if not self.cache_file.is_file():
-                    return {}
+                    self._memory_cache = {}
+                    return self._memory_cache
                 try:
                     with self.cache_file.open("r", encoding="utf8") as fp:
-                        return json.load(fp)
-                except json.JSONDecodeError as e:
-                    logger.error(f"缓存文件 JSON 解析失败: {e}, 尝试恢复...")
+                        data = json.load(fp)
+                except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                    logger.error(f"缓存文件读取失败: {e}, 尝试恢复...")
+                    data = None
                     # 尝试从原始二进制中以 utf-8 忽略错误地恢复有效 JSON 段
                     try:
                         raw = self.cache_file.read_bytes()
@@ -136,50 +154,36 @@ class CacheDAO:
                         end = text.rfind('}')
                         if start != -1 and end != -1 and start < end:
                             try:
-                                return json.loads(text[start:end+1])
+                                data = json.loads(text[start:end+1])
                             except Exception:
-                                pass
+                                data = None
                     except Exception:
                         pass
                     # 若无法恢复，备份损坏文件并返回空缓存
-                    try:
-                        bak_name = f"{self.cache_file.name}.bak.{int(time.time())}"
-                        bak_path = self.cache_file.with_name(bak_name)
-                        shutil.copy2(self.cache_file, bak_path)
-                        logger.error(f"缓存文件已损坏，已备份为: {bak_path}，将使用空缓存继续运行")
-                    except Exception as ex:
-                        logger.error(f"备份损坏缓存失败: {ex}")
-                    return {}
-                except UnicodeDecodeError as e:
-                    logger.error(f"缓存文件编码读取失败: {e}, 采用恢复策略...")
-                    try:
-                        raw = self.cache_file.read_bytes()
-                        text = raw.decode("utf-8", errors="ignore")
-                        start = text.find('{')
-                        end = text.rfind('}')
-                        if start != -1 and end != -1 and start < end:
-                            try:
-                                return json.loads(text[start:end+1])
-                            except Exception:
-                                pass
-                    except Exception:
-                        pass
-                    try:
-                        bak_name = f"{self.cache_file.name}.bak.{int(time.time())}"
-                        bak_path = self.cache_file.with_name(bak_name)
-                        shutil.copy2(self.cache_file, bak_path)
-                        logger.error(f"缓存文件编码错误，已备份为: {bak_path}，将使用空缓存继续运行")
-                    except Exception as ex:
-                        logger.error(f"备份损坏缓存失败: {ex}")
-                    return {}
+                    if data is None:
+                        try:
+                            bak_name = f"{self.cache_file.name}.bak.{int(time.time())}"
+                            bak_path = self.cache_file.with_name(bak_name)
+                            shutil.copy2(self.cache_file, bak_path)
+                            logger.error(f"缓存文件已损坏，已备份为: {bak_path}，将使用空缓存继续运行")
+                        except Exception as ex:
+                            logger.error(f"备份损坏缓存失败: {ex}")
+                        data = {}
         except Exception as e:
             logger.error(f"读取缓存异常: {e}")
-            return {}
+            data = {}
+        self._memory_cache = data
+        return data
+
+    def _read_cache_locked(self) -> dict:
+        """在已持有实例锁的前提下读取缓存(跳过内存缓存直读文件仅用于写入前同步)"""
+        return self._read_cache()
 
     def _write_cache(self, data: dict) -> None:
         # 为缓存写入加锁，防止并发写入损坏文件
         try:
             with self._lock:
+                self._memory_cache = data  # 同步内存缓存
                 parent = self.cache_file.parent
                 if not parent.exists():
                     parent.mkdir(parents=True, exist_ok=True)
@@ -207,7 +211,7 @@ class CacheDAO:
         return data.get(question)
 
     def add_cache(self, question: str, answer: str) -> None:
-        # 为缓存写入加锁，防止并发写入损坏文件
+        # 在同一把锁下完成读-改-写, 防止并发更新互相覆盖
         with self._lock:
             data = self._read_cache()
             data[question] = answer
@@ -325,7 +329,7 @@ class Tiku:
         logger.debug(f"处理后标题：{q_info['title']}")
 
         # 先过缓存
-        cache_dao = CacheDAO()
+        cache_dao = CacheDAO.get_shared()
         answer = cache_dao.get_cache(q_info['title'])
         if answer:
             logger.info(f"从缓存中获取答案：{q_info['title']} -> {answer}")
@@ -433,7 +437,8 @@ class TikuYanxi(Tiku):
                 # 'type':q_info['type'], #修复478题目类型与答案类型不符（不想写后处理了）
                 # 没用，就算有type和options，言溪题库还是可能返回类型不符，问了客服，type仅用于收集
             },
-            verify=False
+            verify=False,
+            timeout=30
         )
         if res.status_code == 200:
             res_json = res.json()
@@ -780,12 +785,15 @@ class TikuLike(Tiku):
             logger.warning(f'{self.name}未加载任何有效的Token')
 
     def load_config(self) -> None:
-        # 从配置中获取参数，提供默认值
-        self._search = self._conf.get('likeapi_search', False)
-        self._model = self._conf.get('likeapi_model', None)
-        self._vision = self._conf.get('likeapi_vision', True)
-        self._retry = self._conf.get("likeapi_retry", True)
-        self._retry_times = self._conf.get("likeapi_retry_times", 3)
+        # 从配置中获取参数，提供默认值(config.ini 读到的均为字符串, 需做类型转换)
+        self._search = str(self._conf.get('likeapi_search', False)).strip().lower() in {'1', 'true', 'yes', 'y', 'on'}
+        self._model = self._conf.get('likeapi_model') or None
+        self._vision = str(self._conf.get('likeapi_vision', True)).strip().lower() in {'1', 'true', 'yes', 'y', 'on'}
+        self._retry = str(self._conf.get("likeapi_retry", True)).strip().lower() in {'1', 'true', 'yes', 'y', 'on'}
+        try:
+            self._retry_times = int(self._conf.get("likeapi_retry_times", 3))
+        except (TypeError, ValueError):
+            self._retry_times = 3
 
     def _init_tiku(self) -> None:
         self.load_config()
@@ -824,7 +832,8 @@ class TikuAdapter(Tiku):
                 'options': [sub(r'^[A-Za-z]\.?、?\s?', '', option) for option in options.split('\n')],
                 'type': type
             },
-            verify=False
+            verify=False,
+            timeout=30
         )
         if res.status_code == 200:
             res_json = res.json()

@@ -6,7 +6,7 @@ import threading
 import queue
 import time
 import json
-from typing import Dict, List
+from typing import Dict
 import webbrowser
 import socket
 
@@ -38,12 +38,13 @@ if os.path.exists(STATIC_DIR):
 else:
     app = Flask(__name__)
 
-CORS(app)
-
 # === 环境变量：支持 Electron 无头模式 ===
 HEADLESS = os.environ.get("CHAOXING_HEADLESS") == "1" or os.environ.get("CHAOXING_ELECTRON") == "1"
 PORT = int(os.environ.get("CHAOXING_PORT", "5000"))
-HOST = "127.0.0.1" if HEADLESS else "0.0.0.0"
+# 仅限本机访问时也绑定回环地址, 避免局域网内其他设备访问控制台/配置接口
+HOST = "127.0.0.1"
+# CORS 限定为本机来源, 防止用户浏览器中打开的任意网页跨域读取配置接口
+CORS(app, origins=[f"http://localhost:{PORT}", f"http://127.0.0.1:{PORT}"])
 # 数据目录：Electron 传入 %APPDATA%/<app>；未设置时沿用脚本目录（独立 exe / 开发模式行为不变）
 DATA_DIR = os.environ.get("CHAOXING_DATA_DIR") or os.path.dirname(__file__)
 
@@ -84,19 +85,14 @@ log_queue = queue.Queue()
 task_details: Dict[str, dict] = {}
 
 class LogCapture:
-    """捕获日志输出"""
+    """捕获日志输出, 推送到 log_queue 供前端拉取(不额外留存副本, 避免长任务内存泄漏)"""
     def __init__(self, task_id: str):
         self.task_id = task_id
-        self.logs = []
-    
+
     def write(self, message):
         # loguru 传入的是 Message 对象，这里统一转成字符串再处理
         text = str(message).strip()
         if text:
-            self.logs.append({
-                'time': time.time(),
-                'message': text
-            })
             log_queue.put({
                 'task_id': self.task_id,
                 'message': text
@@ -222,7 +218,6 @@ def start_study():
             'current_course': '',
             'current_chapter': '',
             'current_task': '',
-            'logs': [],
             'start_time': time.time(),
             'stats': {
                 'total_chapters': 0,
@@ -435,7 +430,7 @@ def start_study():
                     task_status[task_id]['progress'] = idx + 1
                 
                 task_status[task_id]['status'] = 'completed'
-                
+
                 # 发送完成通知
                 if notification:
                     notification.send("超星学习通: 所有课程学习任务已完成")
@@ -457,6 +452,12 @@ def start_study():
                     logger.remove(log_sink_id)
                 except Exception:
                     pass
+                # 任务结束后延迟清理状态缓存, 防止 task_status/task_details 无限增长
+                def _cleanup_task_state():
+                    time.sleep(3600)
+                    task_status.pop(task_id, None)
+                    task_details.pop(task_id, None)
+                threading.Thread(target=_cleanup_task_state, daemon=True).start()
         
         thread = threading.Thread(target=run_task, daemon=True)
         thread.start()
@@ -498,8 +499,15 @@ def get_task_details(task_id):
 def get_logs(task_id):
     """获取任务日志"""
     logs = []
-    while not log_queue.empty():
-        log_entry = log_queue.get()
+    skipped = []
+    # 只消费进入时已存在的条目数量, 避免与生产者竞争造成无限循环;
+    # 属于其他任务的条目暂存后统一放回, 保证多任务日志互不丢弃
+    count = log_queue.qsize()
+    for _ in range(count):
+        try:
+            log_entry = log_queue.get_nowait()
+        except queue.Empty:
+            break
         if log_entry['task_id'] == task_id:
             # 分析日志级别
             message = log_entry['message']
@@ -510,15 +518,21 @@ def get_logs(task_id):
                 level = 'warning'
             elif 'SUCCESS' in message.upper() or '成功' in message or '完成' in message:
                 level = 'success'
-            elif '开始' in message or '正在' in message:
-                level = 'info'
-            
+
             logs.append({
                 'message': message,
                 'level': level,
                 'timestamp': time.time()
             })
-    
+        else:
+            skipped.append(log_entry)
+
+    for entry in skipped:
+        try:
+            log_queue.put_nowait(entry)
+        except queue.Full:
+            break
+
     return jsonify({
         'status': True,
         'data': logs

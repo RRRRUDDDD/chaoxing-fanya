@@ -7,8 +7,6 @@ const selectCls =
   'h-10 w-full cursor-pointer rounded-lg border border-line bg-white px-3 text-sm text-ink ' +
   'transition-shadow focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/15';
 
-const inputCls = '';
-
 const AdvancedSettings = ({ settings, onChange }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 

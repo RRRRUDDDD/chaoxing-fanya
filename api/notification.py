@@ -92,34 +92,6 @@ class NotificationService(ABC):
             self._send(message)
 
 
-class NotificationFactory:
-    """
-    通知服务工厂类，用于创建和获取通知服务实例
-    """
-
-    @staticmethod
-    def create_service(config: Optional[Dict[str, str]] = None) -> NotificationService:
-        """
-        根据配置创建通知服务实例
-        
-        Args:
-            config: 通知服务的配置，如果为None则从配置文件加载
-            
-        Returns:
-            通知服务实例
-        """
-        service = DefaultNotification()
-
-        if config:
-            service.config_set(config)
-
-        # 尝试获取具体的通知服务
-        service = service.get_notification_from_config()
-        service.init_notification()
-
-        return service
-
-
 class DefaultNotification(NotificationService):
     """
     默认通知服务，当未配置任何通知服务时使用
