@@ -76,8 +76,8 @@ const Login = ({ onLoginSuccess }) => {
   const errId = 'login-error';
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-4 py-10">
-      <div className="w-full max-w-[400px] animate-pop-in">
+    <div className="flex min-h-screen items-center justify-center bg-canvas px-[clamp(1rem,4vw,4rem)] py-[clamp(2.5rem,7vh,5rem)]">
+      <div className="w-full max-w-[clamp(400px,32vw,520px)] animate-pop-in">
         {/* 品牌区 */}
         <div className="mb-8 flex flex-col items-center text-center">
           <img
@@ -90,7 +90,7 @@ const Login = ({ onLoginSuccess }) => {
         </div>
 
         {/* 登录卡片 */}
-        <div className="rounded-2xl border border-line bg-white p-6 shadow-lift sm:p-7">
+        <div className="rounded-2xl border border-line bg-white p-[clamp(1.5rem,2vw,2.25rem)] shadow-lift">
           <form onSubmit={handleLogin} aria-describedby={error ? errId : undefined} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="username">手机号</Label>

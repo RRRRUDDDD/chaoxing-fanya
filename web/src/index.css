@@ -25,6 +25,8 @@
   }
 
   html {
+    min-width: 320px;
+    font-size: clamp(15px, calc(14.25px + 0.1vw), 17px);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
@@ -32,6 +34,14 @@
 
   body {
     @apply bg-canvas text-ink font-sans;
+    min-width: 320px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #root,
+  .App {
+    min-height: 100vh;
   }
 
   ::selection {
@@ -45,6 +55,13 @@
 }
 
 @layer components {
+  /* 页面内容随视口扩展，仅保留随窗口变化的安全边距 */
+  .page-shell {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 4rem);
+  }
+
   /* 无动效降级 */
   @media (prefers-reduced-motion: reduce) {
     *,

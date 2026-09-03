@@ -191,7 +191,7 @@ const StudyProgress = ({ taskId, onBack }) => {
     <div className="min-h-screen bg-canvas">
       {/* 顶栏 */}
       <header className="sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+        <div className="page-shell flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
               <MonitorPlay className="h-5 w-5 text-white" aria-hidden="true" />
@@ -210,7 +210,7 @@ const StudyProgress = ({ taskId, onBack }) => {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8">
+      <main className="page-shell py-[clamp(1.5rem,2.5vw,3rem)]">
         {/* 统计卡片 */}
         <section
           aria-label="任务统计"
@@ -240,9 +240,9 @@ const StudyProgress = ({ taskId, onBack }) => {
           })}
         </section>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_clamp(20rem,24vw,28rem)] lg:items-start 2xl:gap-8">
           {/* 主栏 */}
-          <div className="space-y-6 lg:col-span-2 min-w-0">
+          <div className="min-w-0 space-y-6">
             {/* 当前进度 */}
             <section className="rounded-xl border border-line bg-white p-5 shadow-card animate-stagger-up" style={{ animationDelay: '120ms' }}>
               <div className="mb-4 flex items-baseline justify-between">
@@ -404,7 +404,7 @@ const StudyProgress = ({ taskId, onBack }) => {
                 <h2 className="text-[15px] font-semibold">执行日志</h2>
               </div>
               <div className="p-4">
-                <div className="h-[360px] overflow-y-auto rounded-lg bg-gray-900 p-4 font-mono text-xs leading-relaxed scroll-brutal">
+                <div className="h-[clamp(22.5rem,48vh,42rem)] overflow-y-auto rounded-lg bg-gray-900 p-4 font-mono text-xs leading-relaxed scroll-brutal">
                   {logs.length === 0 ? (
                     <p className="text-gray-500">等待日志输出...</p>
                   ) : (

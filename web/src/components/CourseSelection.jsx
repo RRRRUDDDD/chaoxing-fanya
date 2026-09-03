@@ -141,7 +141,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
     <div className="min-h-screen bg-canvas">
       {/* 顶栏 */}
       <header className="sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
+        <div className="page-shell flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand">
               <GraduationCap className="h-5 w-5 text-white" aria-hidden="true" />
@@ -165,7 +165,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
+      <main className="page-shell py-[clamp(1.5rem,2.5vw,3rem)]">
         {/* 页首 */}
         <div className="mb-7 animate-stagger-up">
           <h1 className="text-2xl font-semibold tracking-tight">选择课程并配置学习参数</h1>
@@ -174,7 +174,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_clamp(21.25rem,24vw,30rem)] lg:items-start 2xl:gap-8">
           {/* 左:课程列表 */}
           <section
             aria-label="课程列表"
@@ -213,7 +213,7 @@ const CourseSelection = ({ userInfo, onStartStudy, onLogout, starting, startErro
                 </p>
               </div>
             ) : (
-              <ul className="max-h-[520px] divide-y divide-line overflow-y-auto scroll-brutal px-2 py-1.5">
+              <ul className="max-h-[clamp(32.5rem,65vh,52rem)] divide-y divide-line overflow-y-auto scroll-brutal px-2 py-1.5">
                 {filteredCourses.map((course) => {
                   const selected = selectedCourses.includes(course.courseId);
                   return (
