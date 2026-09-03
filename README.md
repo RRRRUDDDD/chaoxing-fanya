@@ -98,6 +98,26 @@ python main.py -u 手机号 -p 密码 -l 课程ID --speed 1.5
 
 ---
 
+## 同类工具对比
+
+| 特性 | 本项目 | 命令行工具 | 浏览器扩展 |
+|------|--------|-----------|-----------|
+| **上手难度** | ⭐⭐ 一键启动 | ⭐⭐⭐⭐ 需配置环境 | ⭐ 最简单 |
+| **界面** | Web + 桌面应用 | 纯命令行 | 浏览器内 |
+| **后台运行** | ✅ 可关闭浏览器 | ✅ 支持 | ❌ 需保持浏览器打开 |
+| **题库生态** | 5 种可选 | 需自行集成 | 通常单一 |
+| **自动推送** | 内置 4 种渠道 | 需自己实现 | 有限 |
+| **定制性** | ⭐⭐⭐⭐⭐ 开源可改 | ⭐⭐⭐⭐⭐ 开源可改 | ⭐⭐ 扩展限制 |
+| **稳定性** | 独立程序，稳定 | 独立程序，稳定 | 依赖浏览器更新 |
+| **适用场景** | 长期使用、批量任务 | 自动化、定时任务 | 临时使用、轻量需求 |
+
+**选择建议**：
+- 新手 / 临时使用 → **浏览器扩展**（最快）
+- 普通用户 / 长期使用 → **本项目**（功能完整）
+- 技术用户 / 自动化 → **命令行工具**或本项目 CLI 模式
+
+---
+
 ## 常见问题
 
 ### 端口被占用
@@ -109,17 +129,6 @@ netstat -ano | findstr :3000
 
 # 结束进程
 taskkill /F /PID <进程ID>
-```
-
-### 依赖安装失败
-
-```bash
-# 清理缓存
-pip cache purge
-pip install -r requirements.txt --force-reinstall
-
-# 使用国内镜像
-pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
 ### 题库无响应
@@ -134,69 +143,6 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 - 检查账号密码是否正确
 - Cookie 可能已过期，重新获取
 - 部分账号触发验证码（暂不支持）
-
-更多问题见 [GitHub Issues](https://github.com/RRRRUDDDD/chaoxing-gui/issues)
-
----
-
-## 配置示例
-
-`config.ini` 基本配置：
-
-```ini
-[account]
-username = 13800138000
-password = your_password
-
-[study]
-speed = 1.5           # 播放倍速
-max_workers = 3       # 并发章节数
-notopen_action = retry  # 未开放章节：retry/continue/ask
-
-[tiku]
-provider = Yanxi      # 题库：Yanxi/Like/AI/SiliconFlow/TikuAdapter
-yanxi_token = your_token
-cover_rate = 0.8      # 覆盖率：0.0-1.0
-submit = true         # 自动提交答案
-
-[notify]
-provider = ServerChan  # 通知：ServerChan/Telegram/Bark/Qmsg
-serverchan_key = SCT123456789ABCDEF
-```
-
-完整配置见 `config_template.ini`
-
----
-
-## 部署方式
-
-| 方式 | 适用场景 | 特点 |
-|-----|---------|-----|
-| **一键启动** | 临时使用 | 最快上手，每次启动 |
-| **桌面应用** | 长期使用 | 独立窗口，后台运行 |
-| **Docker** | 服务器部署 | 环境隔离，易迁移 |
-| **便携包** | 分发给他人 | 免安装，解压即用 |
-| **命令行** | 定时任务 | 脚本化，自动化 |
-
-### Docker 部署
-
-```bash
-docker build -t chaoxing-gui .
-
-# 使用默认配置
-docker run -it chaoxing-gui
-
-# 挂载自定义配置
-docker run -it -v $(pwd)/config.ini:/config/config.ini chaoxing-gui
-```
-
-### 便携打包
-
-```bash
-clean_and_build_portable.bat  # 生成 chaoxing_portable 目录
-```
-
-复制整个目录到任意位置，双击 `start.bat` 即可使用。
 
 ---
 
@@ -230,9 +176,3 @@ GPL-3.0 许可证 — 允许自由使用和修改，但衍生项目必须开源
 如果有帮助，欢迎 Star ⭐
 
 ---
-
-<div align="center">
-
-**Made with ❤️ by the Open Source Community**
-
-</div>
