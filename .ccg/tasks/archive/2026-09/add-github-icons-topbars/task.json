@@ -1,0 +1,12 @@
+{
+  "id": "add-github-icons-topbars",
+  "title": "在课程管理和学习进度监控顶栏添加 GitHub 图标",
+  "status": "completed",
+  "complexity": "S",
+  "risk": "low",
+  "domain": "frontend",
+  "currentPhase": "completed",
+  "nextAction": "归档任务",
+  "createdAt": "2026-09-03T00:00:00Z",
+  "branch": "main"
+}
